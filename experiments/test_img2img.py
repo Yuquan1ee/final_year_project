@@ -1,4 +1,5 @@
 """
+
 Test script for image-to-image editing models using HuggingFace.
 Covers: image editing, background replacement, object modification.
 
@@ -8,10 +9,8 @@ Usage:
 
 import os
 import argparse
-import requests
 from pathlib import Path
 from dotenv import load_dotenv
-import base64
 from PIL import Image
 import io
 
@@ -31,13 +30,10 @@ IMG2IMG_MODELS = {
     # Specialized editing
     "controlnet-canny": "lllyasviel/sd-controlnet-canny",
     "controlnet-depth": "lllyasviel/control_v11f1p_sd15_depth",
+
+    # FLUX Kontext for image editing (recommended for API)
+    "flux-kontext": "black-forest-labs/FLUX.1-Kontext-dev",
 }
-
-
-def image_to_base64(image_path: str) -> str:
-    """Convert image file to base64 string."""
-    with open(image_path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
 
 
 def edit_with_instruct_pix2pix_api(
@@ -47,7 +43,7 @@ def edit_with_instruct_pix2pix_api(
     guidance_scale: float = 7.5,
 ) -> Image.Image:
     """
-    Edit image using InstructPix2Pix via API.
+    Edit image using InstructPix2Pix via HuggingFace Inference API.
     This model understands natural language editing instructions.
 
     Args:
@@ -56,32 +52,41 @@ def edit_with_instruct_pix2pix_api(
         image_guidance_scale: How much to follow the original image (higher = more similar)
         guidance_scale: How much to follow the instruction
     """
+    try:
+        from huggingface_hub import InferenceClient
+    except ImportError:
+        raise ImportError("Install huggingface_hub: pip install huggingface_hub")
+
     if not HF_API_TOKEN:
         raise ValueError("HF_API_TOKEN not set. Add it to .env file.")
 
-    api_url = f"https://api-inference.huggingface.co/models/{IMG2IMG_MODELS['instruct-pix2pix']}"
-    headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
+    client = InferenceClient(token=HF_API_TOKEN)
 
-    image_b64 = image_to_base64(image_path)
-
-    payload = {
-        "inputs": instruction,
-        "parameters": {
-            "image": image_b64,
-            "guidance_scale": guidance_scale,
-            "image_guidance_scale": image_guidance_scale,
-        }
-    }
+    # Load image
+    image = Image.open(image_path).convert("RGB")
 
     print(f"Editing with instruction: '{instruction}'...")
-    response = requests.post(api_url, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        print(f"Error: {response.status_code}")
-        print(response.text)
-        return None
-
-    return Image.open(io.BytesIO(response.content))
+    try:
+        result = client.image_to_image(
+            image=image,
+            prompt=instruction,
+            model=IMG2IMG_MODELS["instruct-pix2pix"],
+            guidance_scale=guidance_scale,
+        )
+        return result
+    except Exception as e:
+        print(f"Error with InstructPix2Pix: {e}")
+        print("Trying FLUX Kontext model instead...")
+        try:
+            result = client.image_to_image(
+                image=image,
+                prompt=instruction,
+                model=IMG2IMG_MODELS["flux-kontext"],
+            )
+            return result
+        except Exception as e2:
+            print(f"Error with FLUX Kontext: {e2}")
+            return None
 
 
 def edit_with_instruct_pix2pix_local(

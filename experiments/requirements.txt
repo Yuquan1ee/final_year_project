@@ -2,6 +2,7 @@
 requests>=2.31.0
 python-dotenv>=1.0.0
 Pillow>=10.0.0
+huggingface_hub>=0.20.0
 
 # For local GPU inference (optional, use on HPC)
 # torch>=2.0.0

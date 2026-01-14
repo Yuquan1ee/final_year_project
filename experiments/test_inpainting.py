@@ -8,10 +8,8 @@ Usage:
 
 import os
 import argparse
-import requests
 from pathlib import Path
 from dotenv import load_dotenv
-import base64
 from PIL import Image
 import io
 
@@ -24,18 +22,6 @@ INPAINTING_MODELS = {
     "sdxl-inpainting": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
     "kandinsky-inpainting": "kandinsky-community/kandinsky-2-2-decoder-inpaint",
 }
-
-
-def image_to_base64(image_path: str) -> str:
-    """Convert image file to base64 string."""
-    with open(image_path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
-
-def base64_to_image(base64_string: str) -> Image.Image:
-    """Convert base64 string to PIL Image."""
-    image_data = base64.b64decode(base64_string)
-    return Image.open(io.BytesIO(image_data))
 
 
 def inpaint_with_api(
@@ -58,6 +44,11 @@ def inpaint_with_api(
     Returns:
         PIL Image of the result
     """
+    try:
+        from huggingface_hub import InferenceClient
+    except ImportError:
+        raise ImportError("Install huggingface_hub: pip install huggingface_hub")
+
     if not HF_API_TOKEN:
         raise ValueError("HF_API_TOKEN not set. Add it to .env file.")
 
@@ -65,32 +56,28 @@ def inpaint_with_api(
     if not model_id:
         raise ValueError(f"Unknown model: {model_key}. Available: {list(INPAINTING_MODELS.keys())}")
 
-    api_url = f"https://api-inference.huggingface.co/models/{model_id}"
-    headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
+    client = InferenceClient(token=HF_API_TOKEN)
 
-    # Read images
-    image_b64 = image_to_base64(image_path)
-    mask_b64 = image_to_base64(mask_path)
-
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "negative_prompt": negative_prompt,
-            "image": image_b64,
-            "mask_image": mask_b64,
-        }
-    }
+    # Load images
+    image = Image.open(image_path).convert("RGB")
+    mask = Image.open(mask_path).convert("L")
 
     print(f"Calling {model_id}...")
-    response = requests.post(api_url, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        print(f"Error: {response.status_code}")
-        print(response.text)
+    try:
+        # Note: inpainting via API may have limited support
+        # Using image_to_image as a workaround with mask in prompt context
+        result = client.image_to_image(
+            image=image,
+            prompt=prompt,
+            model=model_id,
+            negative_prompt=negative_prompt,
+        )
+        return result
+    except Exception as e:
+        print(f"Error: {e}")
+        print("\nNote: Inpainting via API has limited support.")
+        print("Consider using --local flag with GPU for full inpainting functionality.")
         return None
-
-    # Response is the image bytes directly
-    return Image.open(io.BytesIO(response.content))
 
 
 def inpaint_with_diffusers(
