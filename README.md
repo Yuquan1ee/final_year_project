@@ -79,3 +79,9 @@ npm run dev
 - FastAPI + HuggingFace Inference API
 - React + TypeScript + Vite
 - Stable Diffusion, InstructPix2Pix, ControlNet
+
+
+
+
+## ssh instruction to ntu hpc
+ssh -l ylee136  10.96.189.11
