@@ -1,0 +1,23 @@
+# Requirements for running diffusion model experiments on NTU HPC
+# Install with: pip install -r requirements_hpc.txt
+#
+# NOTE: PyTorch should be installed via conda first:
+#   conda install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia
+
+# Core ML libraries
+diffusers>=0.25.0
+transformers>=4.36.0
+accelerate>=0.25.0
+safetensors
+xformers
+
+# HuggingFace Hub
+huggingface_hub>=0.20.0
+
+# Image processing
+Pillow>=10.0.0
+opencv-python-headless>=4.8.0  # headless version for servers
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm
