@@ -49,10 +49,18 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 │       ├── components/        # UI components
 │       ├── services/          # API client
 │       └── types/             # TypeScript types
-├── experiments/               # Model testing scripts
-│   ├── test_inpainting.py
-│   ├── test_img2img.py
-│   └── test_style_transfer.py
+├── experiments/               # Model experiments (HPC cluster)
+│   ├── run_all_experiments.py # Consolidated experiment script
+│   ├── run_experiments_hpc.sh # SLURM job submission script
+│   ├── setup_hpc_env.sh       # Conda environment setup
+│   ├── create_mask.py         # Utility to generate inpainting masks
+│   ├── requirements_hpc.txt   # HPC dependencies
+│   ├── README_HPC.md          # HPC documentation
+│   └── test_images/           # Test images directory
+│       ├── content/           # Images for img2img & style transfer
+│       ├── inpainting/        # Images and masks for inpainting
+│       └── style_refs/        # Reference images for IP-Adapter
+├── hpc_instruction/           # NTU HPC cluster documentation
 ├── literature_review/         # Reference papers
 └── reference_fyp_report/      # Reference FYP reports
 ```
@@ -74,16 +82,36 @@ npm install
 npm run dev
 ```
 
-### Testing Models
+### Running Experiments (NTU HPC Cluster)
+
+Experiments run on the NTU CCDS GPU Cluster (TC1) with Tesla V100 GPUs.
+
 ```bash
-cd experiments
-pip install -r requirements.txt
-cp .env.example .env  # Add your HF_API_TOKEN
-python test_img2img.py --image photo.jpg --prompt "make it winter"
+# 1. SSH to HPC (requires NTU VPN if off-campus)
+ssh <username>@10.96.189.11
+
+# 2. One-time setup
+cd ~/school_work/fyp/experiments
+bash setup_hpc_env.sh
+
+# 3. Add test images to test_images/content/ and test_images/inpainting/
+
+# 4. Submit job
+sbatch run_experiments_hpc.sh           # All experiments
+sbatch run_experiments_hpc.sh img2img   # Only img2img
+sbatch run_experiments_hpc.sh inpainting # Only inpainting
+sbatch run_experiments_hpc.sh style     # Only style transfer
+
+# 5. Monitor
+squeue -u $USER
+tail -f logs/output_diffusion_exp_*.out
 ```
+
+See `experiments/README_HPC.md` for detailed documentation.
 
 ## Tech Stack
 
 - **Backend:** FastAPI, HuggingFace Inference API
 - **Frontend:** React, TypeScript, Vite
-- **Models:** Stable Diffusion, InstructPix2Pix, ControlNet
+- **Experiments:** PyTorch, Diffusers, ControlNet (GPU inference on HPC)
+- **Models:** Stable Diffusion, InstructPix2Pix, ControlNet, IP-Adapter
