@@ -81,7 +81,9 @@ npm run dev
 - Stable Diffusion, InstructPix2Pix, ControlNet
 
 
+## vpn instruction to ntu 
 
-
+- gpclient --fix-openssl connect vpngate.ntu.edu.sg
 ## ssh instruction to ntu hpc
-ssh -l ylee136  10.96.189.11
+
+- ssh -l ylee136  10.96.189.11
