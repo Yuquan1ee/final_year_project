@@ -83,7 +83,7 @@ npm run dev
 
 ## vpn instruction to ntu 
 
-- gpclient --fix-openssl connect vpngate.ntu.edu.sg
+- gpclient --fix-openssl connect vpngate-student.ntu.edu.sg
 ## ssh instruction to ntu hpc
 
 - ssh -l ylee136  10.96.189.11
