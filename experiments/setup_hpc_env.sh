@@ -20,6 +20,11 @@ echo "=============================================="
 # Load anaconda module
 module load anaconda
 
+# Clean corrupted cache first
+echo ""
+echo "Cleaning conda cache..."
+conda clean --all -y
+
 # Check if environment already exists
 if conda env list | grep -q "^${ENV_NAME} "; then
     echo "Environment '$ENV_NAME' already exists."
@@ -30,6 +35,7 @@ if conda env list | grep -q "^${ENV_NAME} "; then
         conda env remove -n $ENV_NAME -y
     else
         echo "Keeping existing environment."
+        echo "To activate: conda activate $ENV_NAME"
         exit 0
     fi
 fi
@@ -42,14 +48,12 @@ conda create -n $ENV_NAME python=3.10 -y
 # Activate environment
 source activate $ENV_NAME
 
-# Install PyTorch with CUDA support
-# Using CUDA 11.8 for compatibility (matches CZ4042_v6)
+# Install PyTorch via pip (cleaner, avoids conda conflicts)
 echo ""
-echo "Installing PyTorch with CUDA support..."
-conda install pytorch torchvision pytorch-cuda=11.8 -c pytorch -c nvidia -y
+echo "Installing PyTorch with CUDA support via pip..."
+pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # Install diffusers and related packages via pip
-# (these are not available via conda)
 echo ""
 echo "Installing diffusers and ML packages..."
 pip install --no-cache-dir \
@@ -57,8 +61,12 @@ pip install --no-cache-dir \
     transformers>=4.36.0 \
     accelerate>=0.25.0 \
     safetensors \
-    xformers \
     huggingface_hub>=0.20.0
+
+# Install xformers for memory efficient attention (optional, may fail on some systems)
+echo ""
+echo "Installing xformers (optional)..."
+pip install --no-cache-dir xformers || echo "xformers installation failed, continuing without it"
 
 # Install image processing
 echo ""
@@ -83,7 +91,12 @@ python -c "
 import torch
 print(f'PyTorch version: {torch.__version__}')
 print(f'CUDA available: {torch.cuda.is_available()}')
-print(f'CUDA version: {torch.version.cuda}')
+if torch.cuda.is_available():
+    print(f'CUDA version: {torch.version.cuda}')
+    print(f'GPU: {torch.cuda.get_device_name(0)}')
+else:
+    print('WARNING: CUDA not available on head node (this is normal)')
+    print('CUDA will be available when running jobs on GPU nodes')
 
 from diffusers import __version__ as diffusers_version
 print(f'Diffusers version: {diffusers_version}')

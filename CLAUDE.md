@@ -53,7 +53,7 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 │   ├── run_all_experiments.py # Consolidated experiment script
 │   ├── run_experiments_hpc.sh # SLURM job submission script
 │   ├── setup_hpc_env.sh       # Conda environment setup
-│   ├── create_mask.py         # Utility to generate inpainting masks
+│   ├── interactive_mask.py    # Interactive tool to create inpainting masks
 │   ├── requirements_hpc.txt   # HPC dependencies
 │   ├── README_HPC.md          # HPC documentation
 │   └── test_images/           # Test images directory

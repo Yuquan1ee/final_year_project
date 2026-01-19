@@ -16,27 +16,7 @@ FYP Project (CCDS25-0278) - NTU AY 2025/2026
 - Node.js 18+
 - HuggingFace API Token ([Get one here](https://huggingface.co/settings/tokens))
 
-### 1. Test Models First (Recommended)
-
-```bash
-# Set up experiments environment
-cd experiments
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env and add your HF_API_TOKEN
-
-# Test image editing
-python test_img2img.py --image your_photo.jpg --prompt "make it sunset"
-
-# Test inpainting
-python test_inpainting.py --image photo.jpg --create-mask  # Create a mask first
-python test_inpainting.py --image photo.jpg --mask photo_mask.png --prompt "a cat"
-
-# Test style transfer
-python test_style_transfer.py --image photo.jpg --style anime
-```
-
-### 2. Run the Full Application
+### Run the Full Application
 
 **Backend:**
 ```bash
@@ -81,9 +61,6 @@ npm run dev
 - Stable Diffusion, InstructPix2Pix, ControlNet
 
 
-## vpn instruction to ntu 
+## Running Experiments on HPC
 
-- gpclient --fix-openssl connect vpngate-student.ntu.edu.sg
-## ssh instruction to ntu hpc
-
-- ssh -l ylee136  10.96.189.11
+For VPN connection, SSH access, file transfer, and running experiments on the NTU HPC cluster, see [experiments/README_HPC.md](experiments/README_HPC.md).

@@ -85,11 +85,7 @@ STYLE_PRESETS = {
 }
 
 EDIT_INSTRUCTIONS = [
-    "make it winter with snow",
-    "make it sunset",
-    "turn it into a painting",
-    "add dramatic lighting",
-    "make it look vintage",
+    "make it snow",
 ]
 
 
@@ -344,11 +340,7 @@ def run_inpainting_experiments(
     models = models or ["sd-inpainting"]
 
     inpaint_prompts = [
-        "a beautiful garden with flowers",
-        "a calm lake with mountains",
-        "a cozy fireplace",
-        "a cute cat sitting",
-        "blue sky with white clouds",
+        "remove the shadow",
     ]
 
     results = []

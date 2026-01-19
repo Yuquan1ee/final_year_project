@@ -2,11 +2,45 @@
 
 This guide explains how to run the consolidated diffusion model experiments on the NTU CCDS GPU Cluster (TC1).
 
+## VPN Connection (Required if Off-Campus)
+
+Connect to NTU VPN before accessing the HPC cluster:
+
+```bash
+# Using GlobalProtect client
+sudo gpclient --fix-openssl connect vpngate-student.ntu.edu.sg
+```
+
+You'll be prompted for your NTU credentials.
+
+## SSH Connection
+
+```bash
+# Connect to HPC cluster
+ssh <username>@10.96.189.11
+
+# Example:
+ssh ylee136@10.96.189.11
+```
+
+## Transfer Files to HPC
+
+```bash
+# Transfer entire experiments directory to HPC
+scp -r /path/to/local/experiments/ <username>@10.96.189.11:~/school_work/fyp/
+
+# Example:
+scp -r ~/school_work/fyp/experiments/ ylee136@10.96.189.11:~/school_work/fyp/
+
+# Transfer specific test images
+scp -r ./test_images/ <username>@10.96.189.11:~/school_work/fyp/experiments/
+```
+
 ## Quick Start
 
 ```bash
-# 1. SSH to HPC
-ssh <username>@10.96.189.11  # Requires NTU VPN if off-campus
+# 1. SSH to HPC (after VPN connection)
+ssh <username>@10.96.189.11
 
 # 2. Setup environment (one-time)
 cd ~/school_work/fyp/experiments

@@ -44,7 +44,7 @@ mkdir -p logs
 
 # Load required modules
 module load anaconda
-module load cuda/12.4
+module load cuda/12.1
 
 # Activate conda environment
 # Option 1: Use shared environment (if diffusers is installed)
