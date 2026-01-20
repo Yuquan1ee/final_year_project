@@ -57,11 +57,11 @@ pip install --no-cache-dir torch torchvision torchaudio --index-url https://down
 echo ""
 echo "Installing diffusers and ML packages..."
 pip install --no-cache-dir \
-    diffusers>=0.25.0 \
-    transformers>=4.36.0 \
-    accelerate>=0.25.0 \
-    safetensors \
-    huggingface_hub>=0.20.0
+    "diffusers>=0.25.0" \
+    "transformers>=4.36.0" \
+    "accelerate>=0.25.0" \
+    "safetensors" \
+    "huggingface_hub>=0.20.0"
 
 # Install xformers for memory efficient attention (optional, may fail on some systems)
 echo ""
@@ -72,15 +72,15 @@ pip install --no-cache-dir xformers || echo "xformers installation failed, conti
 echo ""
 echo "Installing image processing packages..."
 pip install --no-cache-dir \
-    Pillow>=10.0.0 \
-    opencv-python-headless>=4.8.0
+    "Pillow>=10.0.0" \
+    "opencv-python-headless>=4.8.0"
 
 # Install utilities
 echo ""
 echo "Installing utilities..."
 pip install --no-cache-dir \
-    python-dotenv>=1.0.0 \
-    tqdm
+    "python-dotenv>=1.0.0" \
+    "tqdm"
 
 # Verify installation
 echo ""

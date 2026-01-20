@@ -44,7 +44,7 @@ mkdir -p logs
 
 # Load required modules
 module load anaconda
-module load cuda/12.1
+# Note: CUDA is bundled with PyTorch, no separate module needed
 
 # Activate conda environment
 # Option 1: Use shared environment (if diffusers is installed)
@@ -77,7 +77,7 @@ echo "=============================================="
 echo "Starting experiments..."
 echo "=============================================="
 
-cd /home/yuquan/school_work/fyp/experiments
+cd ~/school_work/fyp/experiments
 
 if [ "$EXPERIMENT_TYPE" == "all" ]; then
     python run_all_experiments.py \
