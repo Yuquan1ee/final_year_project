@@ -1,73 +1,83 @@
-# React + TypeScript + Vite
+# Frontend - Diffusion Image Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React web application for the Diffusion Models FYP project.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first styling
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+# Install dependencies
+npm install
 
-## Expanding the ESLint configuration
+# Start development server
+npm run dev
+# Opens at http://localhost:5173
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Build for production
+npm run build
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Preview production build
+npm run preview
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run linter
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/              # React components
+│   ├── HomeTab.tsx          # Welcome page with project info
+│   ├── InpaintingTab.tsx    # Inpainting feature
+│   ├── StyleTransferTab.tsx # Style transfer feature
+│   └── RestorationTab.tsx   # Photo restoration feature
+├── App.tsx                  # Main app with tab navigation
+├── main.tsx                 # React entry point
+└── index.css                # Tailwind CSS import
+```
+
+## Features
+
+| Tab | Description |
+|-----|-------------|
+| Home | Project overview, feature descriptions, tech stack info |
+| Inpainting | Remove objects or fill masked regions using AI |
+| Style Transfer | Apply artistic styles (anime, oil painting, etc.) |
+| Restoration | Restore old/damaged photos, enhance quality |
+
+## Environment Variables
+
+Create a `.env` file (optional):
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+If not set, defaults to `http://localhost:8000`.
+
+## Adding New Components
+
+1. Create component in `src/components/`
+2. Use TypeScript for type safety
+3. Use Tailwind classes for styling
+4. Import and use in `App.tsx`
+
+## Tailwind CSS
+
+Tailwind is configured via the Vite plugin. All utility classes are available:
+
+```tsx
+// Example usage
+<div className="bg-slate-800 p-4 rounded-lg">
+  <h1 className="text-xl font-bold text-white">Title</h1>
+</div>
+```
+
+Reference: [Tailwind CSS Documentation](https://tailwindcss.com/docs)

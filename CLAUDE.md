@@ -40,15 +40,24 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 ├── backend/                    # FastAPI backend server
 │   ├── app/
 │   │   ├── main.py            # FastAPI app entry point
-│   │   ├── routers/           # API endpoints (inpainting, editing, style)
+│   │   ├── routers/           # API endpoints (inpainting, style, restoration)
 │   │   ├── services/          # HuggingFace API integration
 │   │   └── schemas/           # Pydantic models
 │   └── requirements.txt
-├── frontend/                   # React frontend (Vite + TypeScript)
-│   └── src/
-│       ├── components/        # UI components
-│       ├── services/          # API client
-│       └── types/             # TypeScript types
+├── frontend/                   # React frontend (Vite + TypeScript + Tailwind)
+│   ├── src/
+│   │   ├── components/        # Tab components
+│   │   │   ├── HomeTab.tsx    # Project info and welcome page
+│   │   │   ├── InpaintingTab.tsx    # Inpainting feature
+│   │   │   ├── StyleTransferTab.tsx # Style transfer feature
+│   │   │   └── RestorationTab.tsx   # Photo restoration feature
+│   │   ├── App.tsx            # Main app with tab navigation
+│   │   ├── main.tsx           # React entry point
+│   │   └── index.css          # Tailwind CSS import
+│   ├── index.html             # HTML entry point
+│   ├── package.json           # Dependencies
+│   ├── vite.config.ts         # Vite + Tailwind configuration
+│   └── tsconfig.json          # TypeScript configuration
 ├── experiments/               # Model experiments (HPC cluster)
 │   ├── run_all_experiments.py # Consolidated experiment script
 │   ├── run_experiments_hpc.sh # SLURM job submission script
@@ -73,6 +82,7 @@ cd backend
 pip install -r requirements.txt
 cp .env.example .env  # Add your HF_API_TOKEN
 uvicorn app.main:app --reload
+# API runs at http://localhost:8000
 ```
 
 ### Frontend
@@ -80,6 +90,14 @@ uvicorn app.main:app --reload
 cd frontend
 npm install
 npm run dev
+# UI runs at http://localhost:5173
+```
+
+### Build Frontend for Production
+```bash
+cd frontend
+npm run build    # Outputs to dist/
+npm run preview  # Preview production build
 ```
 
 ### Running Experiments (NTU HPC Cluster)
@@ -112,6 +130,17 @@ See `experiments/README_HPC.md` for detailed documentation.
 ## Tech Stack
 
 - **Backend:** FastAPI, HuggingFace Inference API
-- **Frontend:** React, TypeScript, Vite
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS
 - **Experiments:** PyTorch, Diffusers, ControlNet (GPU inference on HPC)
-- **Models:** Stable Diffusion, InstructPix2Pix, ControlNet, IP-Adapter
+- **Models:** Stable Diffusion, ControlNet, IP-Adapter
+
+## Frontend Architecture
+
+The frontend uses a tab-based navigation with four main sections:
+
+| Tab | Component | Purpose |
+|-----|-----------|---------|
+| Home | `HomeTab.tsx` | Project info, feature overview, diffusion model explanation |
+| Inpainting | `InpaintingTab.tsx` | Remove objects or fill regions with AI |
+| Style Transfer | `StyleTransferTab.tsx` | Apply artistic styles to images |
+| Restoration | `RestorationTab.tsx` | Restore and enhance old/damaged photos |
