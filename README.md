@@ -8,7 +8,7 @@ This project leverages state-of-the-art diffusion models for intelligent image e
 
 - **Inpainting**: Remove unwanted objects or fill regions intelligently
 - **Style Transfer**: Apply artistic styles (anime, oil painting, watercolor, etc.)
-- **Restoration**: Restore old or damaged photos, enhance quality, remove artifacts
+- **Restoration**: Restore old or damaged photos, enhance faces, upscale images
 
 ## Quick Start
 
@@ -16,18 +16,20 @@ This project leverages state-of-the-art diffusion models for intelligent image e
 
 - Python 3.10+
 - Node.js 18+
-- HuggingFace API Token ([Get one here](https://huggingface.co/settings/tokens))
+- CUDA-capable GPU with 8GB+ VRAM (for backend)
 
-### Backend
+### Backend (requires GPU)
+
+The backend runs diffusion models locally using PyTorch and Diffusers. It's designed to run on cloud GPU instances (Google Colab, AWS, etc.).
 
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env and add your HF_API_TOKEN
 
-uvicorn app.main:app --reload
+# Start the server
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 # API runs at http://localhost:8000
+# API docs at http://localhost:8000/docs
 ```
 
 ### Frontend
@@ -35,83 +37,61 @@ uvicorn app.main:app --reload
 ```bash
 cd frontend
 npm install
+
+# Configure backend URL (optional, defaults to localhost:8000)
+echo "VITE_API_URL=http://localhost:8000" > .env
+
 npm run dev
 # UI runs at http://localhost:5173
 ```
 
-## State-of-the-Art Open Source Models
+### For Google Colab Deployment
 
-### Inpainting Models
+1. Run the backend on Colab with GPU runtime
+2. Use ngrok to expose the server: `ngrok http 8000`
+3. Update frontend `.env` with the ngrok URL
+4. Rebuild frontend: `npm run build`
 
-| Model | Source | HuggingFace | VRAM (FP16) | Description |
-|-------|--------|-------------|-------------|-------------|
-| **FLUX.1 Fill [dev]** ⭐ | Black Forest Labs | [black-forest-labs/FLUX.1-Fill-dev](https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev) | 22-24 GB | **Current SOTA** - 12B parameter official inpainting/outpainting model |
-| **FLUX.1 Controlnet Inpainting** | Alimama Creative | [alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta](https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta) | 24+ GB | ControlNet-based inpainting for FLUX, 1024x1024 support |
-| **BrushNet** | TencentARC (ECCV 2024) | [TencentARC/BrushNet](https://huggingface.co/TencentARC/BrushNet) | 6-8 GB | Plug-and-play inpainting with decomposed dual-branch diffusion |
-| **Stable Diffusion XL Inpainting** | Stability AI | [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1) | 10-12 GB | High-resolution inpainting based on SDXL |
-| **Stable Diffusion Inpainting** | Stability AI | [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting) | 5-7 GB | Classic SD 1.5 based inpainting, fast inference |
-| **Kandinsky 2.2 Inpainting** | Sber AI | [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint) | 6-8 GB | High-quality multilingual inpainting |
-| **LaMa** | Samsung AI | [smartywu/big-lama](https://huggingface.co/smartywu/big-lama) | 2-4 GB | Large Mask Inpainting with Fourier Convolutions |
+## Features
 
-### Style Transfer Models
+### Inpainting
+- Upload image and draw mask over areas to edit
+- Enter a prompt describing what to generate
+- Supports: SD Inpainting, SDXL Inpainting, Kandinsky, FLUX.1 Fill
 
-| Model | Source | HuggingFace | VRAM (FP16) | Description |
-|-------|--------|-------------|-------------|-------------|
-| **IP-Adapter** ⭐ | Tencent AI Lab | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter) | 8-12 GB (SD1.5) | **Recommended** - Image prompt adapter for style/content transfer |
-| **IP-Adapter FaceID** | Tencent AI Lab | [h94/IP-Adapter-FaceID](https://huggingface.co/h94/IP-Adapter-FaceID) | 8-12 GB | Face-consistent style transfer with identity preservation |
-| **FLUX.1 IP-Adapter** | InstantX | [InstantX/FLUX.1-dev-IP-Adapter](https://huggingface.co/InstantX/FLUX.1-dev-IP-Adapter) | 24+ GB | IP-Adapter for FLUX models, 128 image tokens |
-| **Stable Diffusion XL** | Stability AI | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | 8-12 GB | Base model for img2img style transfer |
-| **SDXL-Lightning** | ByteDance | [ByteDance/SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning) | 8-10 GB | Fast (<1s) style transfer at 1024x1024 |
+### Style Transfer
+- Upload image and select a style preset or enter custom description
+- Adjust style strength (30-90%)
+- Presets: Anime, Oil Painting, Watercolor, Sketch, Cyberpunk, Ghibli, etc.
 
-### Control Models (ControlNet / ControlLoRA)
-
-| Model | Source | HuggingFace | VRAM (FP16) | Description |
-|-------|--------|-------------|-------------|-------------|
-| **FLUX.1 Depth [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Depth-dev](https://huggingface.co/black-forest-labs/FLUX.1-Depth-dev) | 22-24 GB | Depth-guided generation for FLUX |
-| **FLUX.1 Canny [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Canny-dev](https://huggingface.co/black-forest-labs/FLUX.1-Canny-dev) | 22-24 GB | Edge-guided generation for FLUX |
-| **ControlNet (SD/SDXL)** | Lvmin Zhang | [lllyasviel/ControlNet](https://huggingface.co/lllyasviel/ControlNet) | 8-12 GB | Structure-preserving control (depth, canny, pose, etc.) |
-| **ControlLoRA** | Community | [diffusers ControlLoRA](https://github.com/huggingface/diffusers) | 6-8 GB | Lightweight alternative to ControlNet (~7M params vs 4.7GB) |
-| **InstantX ControlNet** | InstantX | [InstantX/FLUX.1-dev-Controlnet-Union](https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union) | 24+ GB | Multi-condition ControlNet for FLUX |
-
-### Restoration Models
-
-| Model | Source | HuggingFace | VRAM (FP16) | Description |
-|-------|--------|-------------|-------------|-------------|
-| **CodeFormer** ⭐ | NTU S-Lab (NeurIPS 2022) | [sczhou/CodeFormer](https://huggingface.co/spaces/sczhou/CodeFormer) | 2-4 GB | **Recommended** - Blind face restoration with learned discrete codebook |
-| **GFPGAN** | TencentARC | [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) | 2-4 GB | GAN-based face restoration built on StyleGAN2 |
-| **Real-ESRGAN** ⭐ | Xintao Wang | [ai-forever/Real-ESRGAN](https://huggingface.co/ai-forever/Real-ESRGAN) | 2-6 GB* | **Recommended** - Real-world image super-resolution |
-| **RestoreFormer++** | Microsoft | [sczhou/RestoreFormer](https://huggingface.co/sczhou/RestoreFormer) | 2-4 GB | Face restoration with multi-head cross-attention |
-| **SwinIR** | ETH Zurich | [caidas/swinIR](https://huggingface.co/caidas/swinIR) | 2-4 GB | Image restoration using Swin Transformer |
-| **Retinexformer** | ICCV 2023 | [papers/Retinexformer](https://huggingface.co/papers/2303.06705) | 2-4 GB | Low-light image enhancement |
-
-*Real-ESRGAN VRAM scales with input image resolution. Use `--tile` option for large images.
-
-### Model Selection Guide
-
-| Task | Recommended Model | Why |
-|------|-------------------|-----|
-| **General Inpainting** | FLUX.1 Fill [dev] | Current SOTA, best quality |
-| **Fast Inpainting** | SD Inpainting | Faster inference, good quality |
-| **Large Area Removal** | LaMa | Specialized for large masks |
-| **Style Transfer** | IP-Adapter + SDXL | Best style consistency |
-| **Face Styling** | IP-Adapter FaceID | Preserves identity |
-| **Structure Control** | FLUX Depth/Canny | Preserves composition |
-| **Lightweight Control** | ControlLoRA | 600x smaller than ControlNet |
-| **Face Restoration** | CodeFormer | Best for old/damaged photos |
-| **Super Resolution** | Real-ESRGAN | Best general upscaling |
-| **Low-light Enhancement** | Retinexformer | SOTA for dark images |
+### Restoration
+- Upload old/damaged photo
+- Options: Face enhancement (CodeFormer/GFPGAN), Upscaling (2x/4x), Scratch removal
+- Automatic processing based on selected options
 
 ## Project Structure
 
 ```
 .
-├── backend/              # FastAPI backend
-├── frontend/             # React + TypeScript + Tailwind CSS
-│   └── src/
-│       ├── components/   # Tab components (Home, Inpainting, StyleTransfer, Restoration)
-│       └── App.tsx       # Main app with navigation
+├── backend/              # FastAPI backend with GPU inference
+│   ├── app/
+│   │   ├── main.py       # FastAPI app
+│   │   ├── routers/      # API endpoints
+│   │   ├── services/     # ML model inference
+│   │   └── schemas/      # Pydantic models
+│   ├── requirements.txt
+│   └── README.md
+├── frontend/             # React + TypeScript + Tailwind
+│   ├── src/
+│   │   ├── api/          # API client
+│   │   ├── components/   # Tab components
+│   │   └── App.tsx
+│   ├── package.json
+│   └── README.md
 ├── literature_review/    # Research papers
-└── reference_fyp_report/ # Reference reports
+├── reference_fyp_report/ # Reference reports
+├── CLAUDE.md            # Development guide
+└── README.md            # This file
 ```
 
 ## Tech Stack
@@ -119,40 +99,55 @@ npm run dev
 | Layer | Technologies |
 |-------|--------------|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS |
-| Backend | FastAPI, HuggingFace Diffusers, PyTorch |
-| AI Models | FLUX.1 Fill, IP-Adapter, ControlNet, CodeFormer, Real-ESRGAN |
+| Backend | FastAPI, PyTorch, Diffusers, Transformers |
+| Inpainting | SD Inpainting, SDXL Inpainting, Kandinsky, FLUX.1 Fill |
+| Style Transfer | SDXL img2img |
+| Restoration | CodeFormer, GFPGAN, Real-ESRGAN |
 
 ## API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/inpainting/` | POST | Inpaint masked regions |
+| `/api/inpainting/models` | GET | List available inpainting models |
 | `/api/style/` | POST | Apply style transfer |
+| `/api/style/presets` | GET | List style presets |
 | `/api/restoration/` | POST | Restore/enhance images |
-| `/api/health` | GET | Health check |
+| `/api/restoration/models` | GET | List restoration models |
+| `/api/health` | GET | Health check with GPU info |
+
+## VRAM Requirements
+
+| Model | VRAM (FP16) | Notes |
+|-------|-------------|-------|
+| SD Inpainting | 5-7 GB | Fast, good quality |
+| SDXL Inpainting | 10-12 GB | Higher quality |
+| Kandinsky Inpainting | 6-8 GB | Alternative aesthetic |
+| FLUX.1 Fill | 22-24 GB | State-of-the-art |
+| CodeFormer | 2-4 GB | Face restoration |
+| GFPGAN | 2-4 GB | Face restoration |
+| Real-ESRGAN | 2-6 GB | Upscaling |
+
+## Model Selection Guide
+
+| Task | Recommended Model | Why |
+|------|-------------------|-----|
+| General Inpainting | SD Inpainting | Good balance of speed and quality |
+| High Quality Inpainting | SDXL Inpainting | Better details |
+| Best Quality (if VRAM allows) | FLUX.1 Fill | Current SOTA |
+| Face Restoration | CodeFormer | Best for old/damaged photos |
+| Super Resolution | Real-ESRGAN | Best general upscaling |
 
 ## References
 
 ### Inpainting
 - [FLUX.1 Fill Documentation](https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev)
-- [FLUX Tools Announcement](https://bfl.ai/announcements/24-11-21-tools)
-- [BrushNet Paper (ECCV 2024)](https://huggingface.co/papers/2403.06976)
-- [IOPaint - Open Source Inpainting Tool](https://github.com/Sanster/IOPaint)
-
-### Style Transfer
-- [IP-Adapter Diffusers Guide](https://huggingface.co/docs/diffusers/en/using-diffusers/ip_adapter)
-- [InstantStyle for Style Control](https://huggingface.co/docs/diffusers/en/using-diffusers/ip_adapter#style-and-layout-control)
-- [Tencent AI Lab IP-Adapter](https://github.com/tencent-ailab/IP-Adapter)
-
-### Control Models
-- [FLUX ControlNet Guide](https://flux-kontext.io/posts/flux-controlnet)
-- [ControlLoRA GitHub](https://github.com/HighCWu/ControlLoRA)
-- [FLUX Depth/Canny Models](https://huggingface.co/black-forest-labs)
+- [Stable Diffusion Inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting)
 
 ### Restoration
-- [CodeFormer Demo](https://huggingface.co/spaces/sczhou/CodeFormer)
-- [Open Image Restoration Toolkit](https://github.com/titsitits/open-image-restoration)
-- [Awesome Diffusion for Image Processing](https://github.com/lixinustc/Awesome-diffusion-model-for-image-processing)
+- [CodeFormer](https://github.com/sczhou/CodeFormer)
+- [GFPGAN](https://github.com/TencentARC/GFPGAN)
+- [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)
 
 ## Project Info
 
@@ -163,3 +158,7 @@ npm run dev
 | Supervisor | Prof Zhang Hanwang |
 | Lab | Multimedia and Interacting Computing Lab (MICL) |
 | Institution | Nanyang Technological University |
+
+## License
+
+MIT License

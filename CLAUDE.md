@@ -13,7 +13,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Project Summary
 
-This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Imagen, or DALLE-2) for image editing, inpainting, and style transfer. The model will enable context-aware modifications, such as object removal, background replacement, and style transformation, by learning to reconstruct and modify images while preserving realism. Applications include photo restoration, creative design, and AI-assisted content generation.
+This project focuses on leveraging diffusion models (e.g., Stable Diffusion, FLUX.1) for image editing, inpainting, and style transfer. The web application provides three main features:
+
+1. **Inpainting** - Remove objects or fill regions using AI (SD, SDXL, Kandinsky, FLUX.1 Fill)
+2. **Style Transfer** - Apply artistic styles (anime, oil painting, watercolor, etc.)
+3. **Restoration** - Enhance faces (CodeFormer/GFPGAN), upscale (Real-ESRGAN), remove scratches
 
 ### Literature Review Papers
 - Denoising Diffusion Probabilistic Models (DDPM)
@@ -21,6 +25,27 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 - Latent Diffusion Models (Stable Diffusion)
 - ControlNet (conditional control for diffusion models)
 - LoRA (Low-Rank Adaptation for efficient fine-tuning)
+
+## Current Status
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Frontend UI | ✅ Complete | React + TypeScript + Tailwind |
+| Frontend ↔ Backend API | ✅ Connected | All 3 tabs connected |
+| Backend API Structure | ✅ Complete | FastAPI with 3 endpoints |
+| Inpainting Service | ✅ Ready | Needs GPU to run |
+| Style Transfer Service | ✅ Ready | Needs GPU to run |
+| Restoration Service | ✅ Ready | CodeFormer, GFPGAN, Real-ESRGAN |
+| Colorization | ⚠️ Placeholder | Not yet implemented |
+
+## Next Task
+
+**Test the backend on Google Colab:**
+1. Create a Colab notebook that clones the repo and installs dependencies
+2. Use ngrok to expose the FastAPI server publicly
+3. Configure the frontend to point to the ngrok URL
+4. Test all three features (inpainting, style transfer, restoration)
+5. Document any issues or required fixes
 
 ## FYP Timeline (AY 2025/2026)
 
@@ -37,41 +62,51 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 
 ```
 .
-├── backend/                    # FastAPI backend server
+├── backend/                    # FastAPI backend (runs on GPU)
 │   ├── app/
 │   │   ├── main.py            # FastAPI app entry point
-│   │   ├── routers/           # API endpoints (inpainting, style, restoration)
-│   │   ├── services/          # HuggingFace API integration
-│   │   └── schemas/           # Pydantic models
-│   └── requirements.txt
-├── frontend/                   # React frontend (Vite + TypeScript + Tailwind)
+│   │   ├── routers/           # API endpoints
+│   │   │   ├── inpainting.py  # /api/inpainting/
+│   │   │   ├── style_transfer.py  # /api/style/
+│   │   │   └── restoration.py # /api/restoration/
+│   │   ├── services/          # ML model inference
+│   │   │   ├── diffusion.py   # Diffusers-based inference
+│   │   │   └── restoration.py # CodeFormer, GFPGAN, Real-ESRGAN
+│   │   └── schemas/           # Pydantic request/response models
+│   ├── requirements.txt
+│   └── README.md
+├── frontend/                   # React frontend
 │   ├── src/
+│   │   ├── api/               # API client for backend
+│   │   │   ├── config.ts      # API URL configuration
+│   │   │   ├── imageApi.ts    # API functions
+│   │   │   └── index.ts
 │   │   ├── components/        # Tab components
-│   │   │   ├── HomeTab.tsx    # Project info and welcome page
-│   │   │   ├── InpaintingTab.tsx    # Inpainting feature
-│   │   │   ├── StyleTransferTab.tsx # Style transfer feature
-│   │   │   └── RestorationTab.tsx   # Photo restoration feature
+│   │   │   ├── HomeTab.tsx
+│   │   │   ├── InpaintingTab.tsx
+│   │   │   ├── StyleTransferTab.tsx
+│   │   │   └── RestorationTab.tsx
 │   │   ├── App.tsx            # Main app with tab navigation
-│   │   ├── main.tsx           # React entry point
-│   │   └── index.css          # Tailwind CSS import
-│   ├── index.html             # HTML entry point
-│   ├── package.json           # Dependencies
-│   ├── vite.config.ts         # Vite + Tailwind configuration
-│   └── tsconfig.json          # TypeScript configuration
+│   │   └── main.tsx
+│   ├── .env.example           # Environment variable template
+│   ├── package.json
+│   └── README.md
 ├── hpc_instructions/          # NTU HPC cluster documentation
 ├── literature_review/         # Reference papers
-└── reference_fyp_report/      # Reference FYP reports
+├── reference_fyp_report/      # Reference FYP reports
+├── CLAUDE.md                  # This file
+└── README.md                  # Project overview
 ```
 
 ## Development Commands
 
-### Backend
+### Backend (requires GPU)
 ```bash
 cd backend
 pip install -r requirements.txt
-cp .env.example .env  # Add your HF_API_TOKEN
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 # API runs at http://localhost:8000
+# API docs at http://localhost:8000/docs
 ```
 
 ### Frontend
@@ -80,6 +115,15 @@ cd frontend
 npm install
 npm run dev
 # UI runs at http://localhost:5173
+```
+
+### Configure Frontend API URL
+```bash
+# Create frontend/.env file
+echo "VITE_API_URL=http://localhost:8000" > frontend/.env
+
+# For Colab, use ngrok URL:
+echo "VITE_API_URL=https://xxxx.ngrok-free.app" > frontend/.env
 ```
 
 ### Build Frontend for Production
@@ -91,17 +135,43 @@ npm run preview  # Preview production build
 
 ## Tech Stack
 
-- **Backend:** FastAPI, HuggingFace Inference API
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS
-- **Models:** FLUX.1 Fill, Stable Diffusion, ControlNet, IP-Adapter, CodeFormer, Real-ESRGAN
+| Layer | Technologies |
+|-------|--------------|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
+| Backend | FastAPI, PyTorch, Diffusers, Transformers |
+| Inpainting | SD Inpainting, SDXL Inpainting, Kandinsky, FLUX.1 Fill |
+| Style Transfer | SDXL img2img with style prompts |
+| Restoration | CodeFormer, GFPGAN, Real-ESRGAN |
 
-## Frontend Architecture
+## API Endpoints
 
-The frontend uses a tab-based navigation with four main sections:
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/inpainting/` | POST | Inpaint masked regions |
+| `/api/inpainting/models` | GET | List available models |
+| `/api/style/` | POST | Apply style transfer |
+| `/api/style/presets` | GET | List style presets |
+| `/api/restoration/` | POST | Restore/enhance images |
+| `/api/restoration/models` | GET | List restoration models |
+| `/api/health` | GET | Health check with GPU info |
 
-| Tab | Component | Purpose |
-|-----|-----------|---------|
-| Home | `HomeTab.tsx` | Project info, feature overview, diffusion model explanation |
-| Inpainting | `InpaintingTab.tsx` | Remove objects or fill regions with AI |
-| Style Transfer | `StyleTransferTab.tsx` | Apply artistic styles to images |
-| Restoration | `RestorationTab.tsx` | Restore and enhance old/damaged photos |
+## VRAM Requirements
+
+| Model | VRAM (FP16) |
+|-------|-------------|
+| SD Inpainting | 5-7 GB |
+| SDXL Inpainting | 10-12 GB |
+| Kandinsky Inpainting | 6-8 GB |
+| FLUX.1 Fill | 22-24 GB |
+| CodeFormer | 2-4 GB |
+| GFPGAN | 2-4 GB |
+| Real-ESRGAN | 2-6 GB |
+
+## Key Files to Know
+
+| File | Purpose |
+|------|---------|
+| `backend/app/services/diffusion.py` | Main diffusion model inference |
+| `backend/app/services/restoration.py` | Face/upscale restoration |
+| `frontend/src/api/imageApi.ts` | Frontend API client |
+| `frontend/src/api/config.ts` | API URL configuration |
