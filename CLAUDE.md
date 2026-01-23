@@ -58,18 +58,7 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, Ima
 │   ├── package.json           # Dependencies
 │   ├── vite.config.ts         # Vite + Tailwind configuration
 │   └── tsconfig.json          # TypeScript configuration
-├── experiments/               # Model experiments (HPC cluster)
-│   ├── run_all_experiments.py # Consolidated experiment script
-│   ├── run_experiments_hpc.sh # SLURM job submission script
-│   ├── setup_hpc_env.sh       # Conda environment setup
-│   ├── interactive_mask.py    # Interactive tool to create inpainting masks
-│   ├── requirements_hpc.txt   # HPC dependencies
-│   ├── README_HPC.md          # HPC documentation
-│   └── test_images/           # Test images directory
-│       ├── content/           # Images for img2img & style transfer
-│       ├── inpainting/        # Images and masks for inpainting
-│       └── style_refs/        # Reference images for IP-Adapter
-├── hpc_instruction/           # NTU HPC cluster documentation
+├── hpc_instructions/          # NTU HPC cluster documentation
 ├── literature_review/         # Reference papers
 └── reference_fyp_report/      # Reference FYP reports
 ```
@@ -100,39 +89,11 @@ npm run build    # Outputs to dist/
 npm run preview  # Preview production build
 ```
 
-### Running Experiments (NTU HPC Cluster)
-
-Experiments run on the NTU CCDS GPU Cluster (TC1) with Tesla V100 GPUs.
-
-```bash
-# 1. SSH to HPC (requires NTU VPN if off-campus)
-ssh <username>@10.96.189.11
-
-# 2. One-time setup
-cd ~/school_work/fyp/experiments
-bash setup_hpc_env.sh
-
-# 3. Add test images to test_images/content/ and test_images/inpainting/
-
-# 4. Submit job
-sbatch run_experiments_hpc.sh           # All experiments
-sbatch run_experiments_hpc.sh img2img   # Only img2img
-sbatch run_experiments_hpc.sh inpainting # Only inpainting
-sbatch run_experiments_hpc.sh style     # Only style transfer
-
-# 5. Monitor
-squeue -u $USER
-tail -f logs/output_diffusion_exp_*.out
-```
-
-See `experiments/README_HPC.md` for detailed documentation.
-
 ## Tech Stack
 
 - **Backend:** FastAPI, HuggingFace Inference API
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS
-- **Experiments:** PyTorch, Diffusers, ControlNet (GPU inference on HPC)
-- **Models:** Stable Diffusion, ControlNet, IP-Adapter
+- **Models:** FLUX.1 Fill, Stable Diffusion, ControlNet, IP-Adapter, CodeFormer, Real-ESRGAN
 
 ## Frontend Architecture
 

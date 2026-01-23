@@ -43,46 +43,48 @@ npm run dev
 
 ### Inpainting Models
 
-| Model | Source | HuggingFace | Description |
-|-------|--------|-------------|-------------|
-| **FLUX.1 Fill [dev]** ⭐ | Black Forest Labs | [black-forest-labs/FLUX.1-Fill-dev](https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev) | **Current SOTA** - 12B parameter official inpainting/outpainting model, outperforms all competitors |
-| **FLUX.1 Controlnet Inpainting** | Alimama Creative | [alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta](https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta) | ControlNet-based inpainting for FLUX, 1024x1024 support |
-| **BrushNet** | TencentARC (ECCV 2024) | [TencentARC/BrushNet](https://huggingface.co/TencentARC/BrushNet) | Plug-and-play inpainting with decomposed dual-branch diffusion |
-| **Stable Diffusion XL Inpainting** | Stability AI | [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1) | High-resolution inpainting based on SDXL |
-| **Stable Diffusion Inpainting** | Stability AI | [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting) | Classic SD 1.5 based inpainting, fast inference |
-| **Kandinsky 2.2 Inpainting** | Sber AI | [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint) | High-quality multilingual inpainting |
-| **LaMa** | Samsung AI | [smartywu/big-lama](https://huggingface.co/smartywu/big-lama) | Large Mask Inpainting with Fourier Convolutions |
+| Model | Source | HuggingFace | VRAM (FP16) | Description |
+|-------|--------|-------------|-------------|-------------|
+| **FLUX.1 Fill [dev]** ⭐ | Black Forest Labs | [black-forest-labs/FLUX.1-Fill-dev](https://huggingface.co/black-forest-labs/FLUX.1-Fill-dev) | 22-24 GB | **Current SOTA** - 12B parameter official inpainting/outpainting model |
+| **FLUX.1 Controlnet Inpainting** | Alimama Creative | [alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta](https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Beta) | 24+ GB | ControlNet-based inpainting for FLUX, 1024x1024 support |
+| **BrushNet** | TencentARC (ECCV 2024) | [TencentARC/BrushNet](https://huggingface.co/TencentARC/BrushNet) | 6-8 GB | Plug-and-play inpainting with decomposed dual-branch diffusion |
+| **Stable Diffusion XL Inpainting** | Stability AI | [diffusers/stable-diffusion-xl-1.0-inpainting-0.1](https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1) | 10-12 GB | High-resolution inpainting based on SDXL |
+| **Stable Diffusion Inpainting** | Stability AI | [runwayml/stable-diffusion-inpainting](https://huggingface.co/runwayml/stable-diffusion-inpainting) | 5-7 GB | Classic SD 1.5 based inpainting, fast inference |
+| **Kandinsky 2.2 Inpainting** | Sber AI | [kandinsky-community/kandinsky-2-2-decoder-inpaint](https://huggingface.co/kandinsky-community/kandinsky-2-2-decoder-inpaint) | 6-8 GB | High-quality multilingual inpainting |
+| **LaMa** | Samsung AI | [smartywu/big-lama](https://huggingface.co/smartywu/big-lama) | 2-4 GB | Large Mask Inpainting with Fourier Convolutions |
 
 ### Style Transfer Models
 
-| Model | Source | HuggingFace | Description |
-|-------|--------|-------------|-------------|
-| **IP-Adapter** ⭐ | Tencent AI Lab | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter) | **Recommended** - Image prompt adapter for style/content transfer |
-| **IP-Adapter FaceID** | Tencent AI Lab | [h94/IP-Adapter-FaceID](https://huggingface.co/h94/IP-Adapter-FaceID) | Face-consistent style transfer with identity preservation |
-| **FLUX.1 IP-Adapter** | InstantX | [InstantX/FLUX.1-dev-IP-Adapter](https://huggingface.co/InstantX/FLUX.1-dev-IP-Adapter) | IP-Adapter for FLUX models, 128 image tokens |
-| **Stable Diffusion XL** | Stability AI | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | Base model for img2img style transfer |
-| **SDXL-Lightning** | ByteDance | [ByteDance/SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning) | Fast (<1s) style transfer at 1024x1024 |
+| Model | Source | HuggingFace | VRAM (FP16) | Description |
+|-------|--------|-------------|-------------|-------------|
+| **IP-Adapter** ⭐ | Tencent AI Lab | [h94/IP-Adapter](https://huggingface.co/h94/IP-Adapter) | 8-12 GB (SD1.5) | **Recommended** - Image prompt adapter for style/content transfer |
+| **IP-Adapter FaceID** | Tencent AI Lab | [h94/IP-Adapter-FaceID](https://huggingface.co/h94/IP-Adapter-FaceID) | 8-12 GB | Face-consistent style transfer with identity preservation |
+| **FLUX.1 IP-Adapter** | InstantX | [InstantX/FLUX.1-dev-IP-Adapter](https://huggingface.co/InstantX/FLUX.1-dev-IP-Adapter) | 24+ GB | IP-Adapter for FLUX models, 128 image tokens |
+| **Stable Diffusion XL** | Stability AI | [stabilityai/stable-diffusion-xl-base-1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) | 8-12 GB | Base model for img2img style transfer |
+| **SDXL-Lightning** | ByteDance | [ByteDance/SDXL-Lightning](https://huggingface.co/ByteDance/SDXL-Lightning) | 8-10 GB | Fast (<1s) style transfer at 1024x1024 |
 
 ### Control Models (ControlNet / ControlLoRA)
 
-| Model | Source | HuggingFace | Description |
-|-------|--------|-------------|-------------|
-| **FLUX.1 Depth [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Depth-dev](https://huggingface.co/black-forest-labs/FLUX.1-Depth-dev) | Depth-guided generation for FLUX |
-| **FLUX.1 Canny [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Canny-dev](https://huggingface.co/black-forest-labs/FLUX.1-Canny-dev) | Edge-guided generation for FLUX |
-| **ControlNet (SD/SDXL)** | Lvmin Zhang | [lllyasviel/ControlNet](https://huggingface.co/lllyasviel/ControlNet) | Structure-preserving control (depth, canny, pose, etc.) |
-| **ControlLoRA** | Community | [diffusers ControlLoRA](https://github.com/huggingface/diffusers) | Lightweight alternative to ControlNet (~7M params vs 4.7GB) |
-| **InstantX ControlNet** | InstantX | [InstantX/FLUX.1-dev-Controlnet-Union](https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union) | Multi-condition ControlNet for FLUX |
+| Model | Source | HuggingFace | VRAM (FP16) | Description |
+|-------|--------|-------------|-------------|-------------|
+| **FLUX.1 Depth [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Depth-dev](https://huggingface.co/black-forest-labs/FLUX.1-Depth-dev) | 22-24 GB | Depth-guided generation for FLUX |
+| **FLUX.1 Canny [dev]** | Black Forest Labs | [black-forest-labs/FLUX.1-Canny-dev](https://huggingface.co/black-forest-labs/FLUX.1-Canny-dev) | 22-24 GB | Edge-guided generation for FLUX |
+| **ControlNet (SD/SDXL)** | Lvmin Zhang | [lllyasviel/ControlNet](https://huggingface.co/lllyasviel/ControlNet) | 8-12 GB | Structure-preserving control (depth, canny, pose, etc.) |
+| **ControlLoRA** | Community | [diffusers ControlLoRA](https://github.com/huggingface/diffusers) | 6-8 GB | Lightweight alternative to ControlNet (~7M params vs 4.7GB) |
+| **InstantX ControlNet** | InstantX | [InstantX/FLUX.1-dev-Controlnet-Union](https://huggingface.co/InstantX/FLUX.1-dev-Controlnet-Union) | 24+ GB | Multi-condition ControlNet for FLUX |
 
 ### Restoration Models
 
-| Model | Source | HuggingFace | Description |
-|-------|--------|-------------|-------------|
-| **CodeFormer** ⭐ | NTU S-Lab (NeurIPS 2022) | [sczhou/CodeFormer](https://huggingface.co/spaces/sczhou/CodeFormer) | **Recommended** - Blind face restoration with learned discrete codebook |
-| **GFPGAN** | TencentARC | [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) | GAN-based face restoration built on StyleGAN2 |
-| **Real-ESRGAN** ⭐ | Xintao Wang | [ai-forever/Real-ESRGAN](https://huggingface.co/ai-forever/Real-ESRGAN) | **Recommended** - Real-world image super-resolution |
-| **RestoreFormer++** | Microsoft | [sczhou/RestoreFormer](https://huggingface.co/sczhou/RestoreFormer) | Face restoration with multi-head cross-attention |
-| **SwinIR** | ETH Zurich | [caidas/swinIR](https://huggingface.co/caidas/swinIR) | Image restoration using Swin Transformer |
-| **Retinexformer** | ICCV 2023 | [papers/Retinexformer](https://huggingface.co/papers/2303.06705) | Low-light image enhancement |
+| Model | Source | HuggingFace | VRAM (FP16) | Description |
+|-------|--------|-------------|-------------|-------------|
+| **CodeFormer** ⭐ | NTU S-Lab (NeurIPS 2022) | [sczhou/CodeFormer](https://huggingface.co/spaces/sczhou/CodeFormer) | 2-4 GB | **Recommended** - Blind face restoration with learned discrete codebook |
+| **GFPGAN** | TencentARC | [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) | 2-4 GB | GAN-based face restoration built on StyleGAN2 |
+| **Real-ESRGAN** ⭐ | Xintao Wang | [ai-forever/Real-ESRGAN](https://huggingface.co/ai-forever/Real-ESRGAN) | 2-6 GB* | **Recommended** - Real-world image super-resolution |
+| **RestoreFormer++** | Microsoft | [sczhou/RestoreFormer](https://huggingface.co/sczhou/RestoreFormer) | 2-4 GB | Face restoration with multi-head cross-attention |
+| **SwinIR** | ETH Zurich | [caidas/swinIR](https://huggingface.co/caidas/swinIR) | 2-4 GB | Image restoration using Swin Transformer |
+| **Retinexformer** | ICCV 2023 | [papers/Retinexformer](https://huggingface.co/papers/2303.06705) | 2-4 GB | Low-light image enhancement |
+
+*Real-ESRGAN VRAM scales with input image resolution. Use `--tile` option for large images.
 
 ### Model Selection Guide
 
@@ -108,7 +110,6 @@ npm run dev
 │   └── src/
 │       ├── components/   # Tab components (Home, Inpainting, StyleTransfer, Restoration)
 │       └── App.tsx       # Main app with navigation
-├── experiments/          # Model testing scripts (HPC cluster)
 ├── literature_review/    # Research papers
 └── reference_fyp_report/ # Reference reports
 ```
@@ -120,7 +121,6 @@ npm run dev
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS |
 | Backend | FastAPI, HuggingFace Diffusers, PyTorch |
 | AI Models | FLUX.1 Fill, IP-Adapter, ControlNet, CodeFormer, Real-ESRGAN |
-| Experiments | PyTorch, Diffusers, NTU HPC Cluster (Tesla V100) |
 
 ## API Endpoints
 
@@ -130,10 +130,6 @@ npm run dev
 | `/api/style/` | POST | Apply style transfer |
 | `/api/restoration/` | POST | Restore/enhance images |
 | `/api/health` | GET | Health check |
-
-## Running Experiments on HPC
-
-For VPN connection, SSH access, file transfer, and running experiments on the NTU HPC cluster, see [experiments/README_HPC.md](experiments/README_HPC.md).
 
 ## References
 
