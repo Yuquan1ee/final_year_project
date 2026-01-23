@@ -35,11 +35,12 @@
  * - [x] Download button for result
  * - [x] Loading state during API call
  * - [x] Error handling and user feedback
- * - [ ] Connect to backend API
+ * - [x] Connect to backend API
  */
 
 import { useState } from 'react'
 import ImageUpload from './ImageUpload'
+import { styleTransfer } from '../api'
 
 // Available style presets
 const STYLE_PRESETS = [
@@ -100,12 +101,6 @@ function StyleTransferTab() {
     setUseCustomPrompt(false)
   }
 
-  const getActivePrompt = (): string => {
-    if (useCustomPrompt) return customPrompt
-    const style = STYLE_PRESETS.find(s => s.id === selectedStyle)
-    return style?.prompt || ''
-  }
-
   const canGenerate = sourceImageUrl && (selectedStyle || (useCustomPrompt && customPrompt.trim()))
 
   const handleGenerate = async () => {
@@ -116,20 +111,23 @@ function StyleTransferTab() {
     setResultImageUrl(null)
 
     try {
-      // TODO: Implement actual API call to backend
-      // For now, simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const styleValue = useCustomPrompt ? customPrompt : (selectedStyle || '')
 
-      // Placeholder: In real implementation, this would be the result from the API
-      setResultImageUrl(sourceImageUrl)
-
-      console.log('Style Transfer params:', {
-        model: selectedModel,
-        style: selectedStyle,
-        prompt: getActivePrompt(),
+      const response = await styleTransfer({
+        image: sourceImageFile,
+        style: styleValue,
         strength,
-        hasImage: !!sourceImageFile,
       })
+
+      if (response.success && response.image) {
+        setResultImageUrl(response.image)
+        console.log('Style transfer completed:', {
+          model: response.model_used,
+          processingTime: response.processing_time,
+        })
+      } else {
+        setError(response.error || 'Style transfer failed')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during generation')
     } finally {

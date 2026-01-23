@@ -26,6 +26,7 @@ class InpaintingModel(str, Enum):
     SD_INPAINTING = "sd-inpainting"
     SDXL_INPAINTING = "sdxl-inpainting"
     KANDINSKY = "kandinsky-inpainting"
+    FLUX_FILL = "flux-fill"
 
 
 class InpaintingRequest(BaseModel):
@@ -43,28 +44,6 @@ class InpaintingRequest(BaseModel):
     )
     guidance_scale: float = Field(default=7.5, ge=1.0, le=20.0)
     num_inference_steps: int = Field(default=30, ge=10, le=100)
-
-
-class EditingMode(str, Enum):
-    """Available editing modes."""
-    INSTRUCT = "instruct"  # InstructPix2Pix style
-    IMG2IMG = "img2img"    # Standard img2img
-
-
-class EditingRequest(BaseModel):
-    """Request for image editing operation."""
-    image: str = Field(..., description="Base64 encoded input image")
-    instruction: str = Field(..., description="Editing instruction (e.g., 'make it winter')")
-    mode: EditingMode = Field(default=EditingMode.INSTRUCT)
-    strength: float = Field(
-        default=0.75, ge=0.0, le=1.0,
-        description="Edit strength (0=no change, 1=complete transformation)"
-    )
-    guidance_scale: float = Field(default=7.5, ge=1.0, le=20.0)
-    image_guidance_scale: float = Field(
-        default=1.5, ge=0.0, le=5.0,
-        description="How much to follow original image (InstructPix2Pix only)"
-    )
 
 
 class StylePreset(str, Enum):
@@ -107,4 +86,51 @@ class StyleTransferRequest(BaseModel):
     preserve_structure: bool = Field(
         default=True,
         description="Use ControlNet to preserve image structure"
+    )
+
+
+# =============================================================================
+# Restoration Schemas
+# =============================================================================
+
+
+class FaceModel(str, Enum):
+    """Available face enhancement models."""
+    CODEFORMER = "codeformer"
+    GFPGAN = "gfpgan"
+
+
+class UpscaleOption(str, Enum):
+    """Upscaling options."""
+    NONE = "none"
+    UPSCALE_2X = "2x"
+    UPSCALE_4X = "4x"
+
+
+class RestorationRequest(BaseModel):
+    """Request for image restoration operation."""
+    image: str = Field(..., description="Base64 encoded input image")
+    enable_face_enhance: bool = Field(
+        default=True,
+        description="Enable face enhancement (CodeFormer/GFPGAN)"
+    )
+    face_model: FaceModel = Field(
+        default=FaceModel.CODEFORMER,
+        description="Face enhancement model to use"
+    )
+    fidelity: float = Field(
+        default=0.5, ge=0.0, le=1.0,
+        description="CodeFormer fidelity (0=quality, 1=fidelity to input)"
+    )
+    upscale: UpscaleOption = Field(
+        default=UpscaleOption.UPSCALE_2X,
+        description="Upscaling factor (none, 2x, 4x)"
+    )
+    enable_scratch_removal: bool = Field(
+        default=False,
+        description="Enable scratch and artifact removal"
+    )
+    enable_colorize: bool = Field(
+        default=False,
+        description="Enable colorization for B&W images"
     )

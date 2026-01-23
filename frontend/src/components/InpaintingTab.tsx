@@ -27,18 +27,20 @@
  * - [x] Download button for result
  * - [x] Loading state during API call
  * - [x] Error handling and user feedback
- * - [ ] Connect to backend API
+ * - [x] Connect to backend API
  */
 
 import { useState } from 'react'
 import ImageUpload from './ImageUpload'
 import MaskCanvas from './MaskCanvas'
+import { inpaintImage } from '../api'
 
 // Available inpainting models
 const INPAINTING_MODELS = [
   { id: 'sd-inpainting', name: 'Stable Diffusion Inpainting', vram: '5-7 GB' },
   { id: 'sdxl-inpainting', name: 'SDXL Inpainting', vram: '10-12 GB' },
   { id: 'kandinsky-inpainting', name: 'Kandinsky 2.2 Inpainting', vram: '6-8 GB' },
+  { id: 'flux-fill', name: 'FLUX.1 Fill (SOTA)', vram: '22-24 GB' },
 ] as const
 
 type ModelId = typeof INPAINTING_MODELS[number]['id']
@@ -82,30 +84,30 @@ function InpaintingTab() {
   const canGenerate = sourceImageUrl && maskDataUrl && prompt.trim().length > 0
 
   const handleGenerate = async () => {
-    if (!canGenerate || !sourceImageFile) return
+    if (!canGenerate || !sourceImageFile || !maskDataUrl) return
 
     setIsGenerating(true)
     setError(null)
     setResultImageUrl(null)
 
     try {
-      // TODO: Implement actual API call to backend
-      // For now, simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Placeholder: In real implementation, this would be the result from the API
-      // setResultImageUrl(response.imageUrl)
-
-      // For demo purposes, show original image as "result"
-      setResultImageUrl(sourceImageUrl)
-
-      console.log('Generation params:', {
-        model: selectedModel,
+      const response = await inpaintImage({
+        image: sourceImageFile,
+        mask: maskDataUrl,
         prompt,
-        negativePrompt,
-        hasImage: !!sourceImageFile,
-        hasMask: !!maskDataUrl,
+        negativePrompt: negativePrompt || undefined,
+        model: selectedModel,
       })
+
+      if (response.success && response.image) {
+        setResultImageUrl(response.image)
+        console.log('Inpainting completed:', {
+          model: response.model_used,
+          processingTime: response.processing_time,
+        })
+      } else {
+        setError(response.error || 'Inpainting failed')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during generation')
     } finally {

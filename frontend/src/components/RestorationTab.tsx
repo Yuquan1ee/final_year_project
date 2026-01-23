@@ -34,11 +34,12 @@
  * - [x] Download button for result
  * - [x] Loading state during API call
  * - [x] Error handling and user feedback
- * - [ ] Connect to backend API
+ * - [x] Connect to backend API
  */
 
 import { useState } from 'react'
 import ImageUpload from './ImageUpload'
+import { restoreImage } from '../api'
 
 // Upscale options
 const UPSCALE_OPTIONS = [
@@ -100,15 +101,8 @@ function RestorationTab() {
     setResultImageUrl(null)
 
     try {
-      // TODO: Implement actual API call to backend
-      // For now, simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Placeholder: In real implementation, this would be the result from the API
-      setResultImageUrl(sourceImageUrl)
-
-      console.log('Restoration params:', {
-        hasImage: !!sourceImageFile,
+      const response = await restoreImage({
+        image: sourceImageFile,
         enableFaceEnhance,
         faceModel,
         fidelity,
@@ -116,6 +110,16 @@ function RestorationTab() {
         enableScratchRemoval,
         enableColorize,
       })
+
+      if (response.success && response.image) {
+        setResultImageUrl(response.image)
+        console.log('Restoration completed:', {
+          model: response.model_used,
+          processingTime: response.processing_time,
+        })
+      } else {
+        setError(response.error || 'Restoration failed')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during restoration')
     } finally {

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.routers import inpainting, editing, style_transfer
+from app.routers import inpainting, style_transfer, restoration
 
 
 @asynccontextmanager
@@ -25,10 +25,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware for React frontend
+# CORS middleware - allow all origins for cloud deployment
+# For production, you may want to restrict this to specific domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev servers
+    allow_origins=["*"],  # Allow all origins for cloud deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,8 +37,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(inpainting.router, prefix="/api/inpainting", tags=["Inpainting"])
-app.include_router(editing.router, prefix="/api/editing", tags=["Image Editing"])
 app.include_router(style_transfer.router, prefix="/api/style", tags=["Style Transfer"])
+app.include_router(restoration.router, prefix="/api/restoration", tags=["Restoration"])
 
 
 @app.get("/")
@@ -48,19 +49,22 @@ async def root():
         "message": "Diffusion Image Editor API is running",
         "endpoints": {
             "inpainting": "/api/inpainting",
-            "editing": "/api/editing",
             "style_transfer": "/api/style",
+            "restoration": "/api/restoration",
         }
     }
 
 
 @app.get("/api/health")
 async def health_check():
-    """Detailed health check."""
+    """Detailed health check with GPU info."""
+    from app.services.diffusion import get_diffusion_service
+
+    service = get_diffusion_service()
+    gpu_info = service.get_gpu_info()
+
     return {
         "status": "healthy",
-        "services": {
-            "api": True,
-            "huggingface": True,  # TODO: Add actual HF API check
-        }
+        "gpu": gpu_info,
+        "loaded_pipelines": list(service._pipelines.keys()),
     }

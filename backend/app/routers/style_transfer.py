@@ -3,11 +3,10 @@ Style transfer API endpoints.
 Handles artistic style transfer, preset styles, and custom style prompts.
 """
 
-import time
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.image import StyleTransferRequest, ImageResponse
-from app.services.huggingface import get_hf_service, STYLE_PROMPTS
+from app.services.diffusion import get_diffusion_service, STYLE_PROMPTS
 
 router = APIRouter()
 
@@ -22,31 +21,35 @@ async def apply_style(request: StyleTransferRequest) -> ImageResponse:
     - **strength**: How much to stylize (0.0-1.0)
     - **mode**: 'img2img', 'controlnet', or 'ip-adapter'
     """
-    start_time = time.time()
+    service = get_diffusion_service()
 
-    try:
-        service = get_hf_service()
-        result_b64 = await service.style_transfer(
-            image_b64=request.image,
-            style=request.style,
-            strength=request.strength,
-        )
+    # Map mode to model key
+    model_key = "sdxl-img2img"  # default
+    if request.mode.value == "img2img":
+        model_key = "sdxl-img2img"
+    # TODO: Add controlnet and ip-adapter modes
 
-        processing_time = time.time() - start_time
+    result_b64, error, processing_time = service.style_transfer(
+        image_b64=request.image,
+        style=request.style,
+        model_key=model_key,
+        strength=request.strength,
+    )
 
+    if error:
         return ImageResponse(
-            success=True,
-            image=result_b64,
+            success=False,
+            error=error,
             model_used=f"style-{request.mode.value}",
             processing_time=processing_time,
         )
 
-    except Exception as e:
-        return ImageResponse(
-            success=False,
-            error=str(e),
-            processing_time=time.time() - start_time,
-        )
+    return ImageResponse(
+        success=True,
+        image=result_b64,
+        model_used=f"style-{request.mode.value}",
+        processing_time=processing_time,
+    )
 
 
 @router.get("/presets")
