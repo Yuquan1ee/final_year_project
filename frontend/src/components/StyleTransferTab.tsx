@@ -119,6 +119,7 @@ function StyleTransferTab() {
       const response = await styleTransfer({
         image: sourceImageFile,
         style: styleValue,
+        model: selectedModel,
         strength,
       })
 

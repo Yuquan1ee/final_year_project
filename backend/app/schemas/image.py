@@ -23,10 +23,19 @@ class ImageResponse(BaseModel):
 
 class InpaintingModel(str, Enum):
     """Available inpainting models."""
+    # Standard models
     SD_INPAINTING = "sd-inpainting"
-    SDXL_INPAINTING = "sdxl-inpainting"
     KANDINSKY = "kandinsky-inpainting"
+    # SDXL variants
+    SDXL_INPAINTING = "sdxl-inpainting"
+    SDXL_INPAINTING_8BIT = "sdxl-inpainting-8bit"
+    SDXL_INPAINTING_4BIT = "sdxl-inpainting-4bit"
+    # FLUX.1 Fill variants
     FLUX_FILL = "flux-fill"
+    FLUX_FILL_FP16 = "flux-fill-fp16"
+    FLUX_FILL_8BIT = "flux-fill-8bit"
+    FLUX_FILL_4BIT = "flux-fill-4bit"
+    FLUX_FILL_NF4 = "flux-fill-nf4"
 
 
 class InpaintingRequest(BaseModel):
@@ -60,11 +69,14 @@ class StylePreset(str, Enum):
     CUSTOM = "custom"
 
 
-class StyleTransferMode(str, Enum):
-    """Style transfer methods."""
-    IMG2IMG = "img2img"
-    CONTROLNET = "controlnet"
-    IP_ADAPTER = "ip-adapter"
+class StyleModel(str, Enum):
+    """Available style transfer models."""
+    # SDXL variants
+    SDXL_IMG2IMG = "sdxl-img2img"
+    SDXL_IMG2IMG_8BIT = "sdxl-img2img-8bit"
+    SDXL_IMG2IMG_4BIT = "sdxl-img2img-4bit"
+    # SD 1.5
+    SD_IMG2IMG = "sd-img2img"
 
 
 class StyleTransferRequest(BaseModel):
@@ -74,18 +86,13 @@ class StyleTransferRequest(BaseModel):
         ...,
         description="Style preset name or custom style prompt"
     )
-    style_image: Optional[str] = Field(
-        None,
-        description="Base64 encoded style reference image (for IP-Adapter mode)"
+    model: StyleModel = Field(
+        default=StyleModel.SDXL_IMG2IMG,
+        description="Model to use for style transfer"
     )
-    mode: StyleTransferMode = Field(default=StyleTransferMode.IMG2IMG)
     strength: float = Field(
         default=0.6, ge=0.0, le=1.0,
         description="Style strength (higher = more stylized)"
-    )
-    preserve_structure: bool = Field(
-        default=True,
-        description="Use ControlNet to preserve image structure"
     )
 
 

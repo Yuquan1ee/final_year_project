@@ -18,21 +18,15 @@ async def apply_style(request: StyleTransferRequest) -> ImageResponse:
 
     - **image**: Base64 encoded content image
     - **style**: Style preset name or custom style prompt
+    - **model**: Model to use (sdxl-img2img, sd-img2img, quantized variants)
     - **strength**: How much to stylize (0.0-1.0)
-    - **mode**: 'img2img', 'controlnet', or 'ip-adapter'
     """
     service = get_diffusion_service()
-
-    # Map mode to model key
-    model_key = "sdxl-img2img"  # default
-    if request.mode.value == "img2img":
-        model_key = "sdxl-img2img"
-    # TODO: Add controlnet and ip-adapter modes
 
     result_b64, error, processing_time = service.style_transfer(
         image_b64=request.image,
         style=request.style,
-        model_key=model_key,
+        model_key=request.model.value,
         strength=request.strength,
     )
 
@@ -40,14 +34,14 @@ async def apply_style(request: StyleTransferRequest) -> ImageResponse:
         return ImageResponse(
             success=False,
             error=error,
-            model_used=f"style-{request.mode.value}",
+            model_used=request.model.value,
             processing_time=processing_time,
         )
 
     return ImageResponse(
         success=True,
         image=result_b64,
-        model_used=f"style-{request.mode.value}",
+        model_used=request.model.value,
         processing_time=processing_time,
     )
 

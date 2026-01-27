@@ -31,9 +31,8 @@ export interface InpaintingParams {
 export interface StyleTransferParams {
   image: File;
   style: string;
-  mode?: 'img2img' | 'controlnet' | 'ip-adapter';
+  model?: string;
   strength?: number;
-  preserveStructure?: boolean;
 }
 
 export interface RestorationParams {
@@ -119,9 +118,8 @@ export async function styleTransfer(params: StyleTransferParams): Promise<ImageR
     body: JSON.stringify({
       image: imageBase64,
       style: params.style,
-      mode: params.mode || 'img2img',
+      model: params.model || 'sdxl-img2img',
       strength: params.strength || 0.6,
-      preserve_structure: params.preserveStructure ?? true,
     }),
   });
 
