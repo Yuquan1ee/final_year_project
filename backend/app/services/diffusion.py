@@ -230,7 +230,10 @@ class DiffusionService:
             image = self.base64_to_image(image_b64)
             mask = self.base64_to_mask(mask_b64)
 
-            # Resize to appropriate dimensions
+            # Store original dimensions for rescaling output
+            original_size = image.size  # (width, height)
+
+            # Resize to model's optimal dimensions
             if "sdxl" in model_key or "flux" in model_key:
                 target_size = (1024, 1024)
             else:
@@ -252,6 +255,10 @@ class DiffusionService:
                     guidance_scale=guidance_scale,
                     num_inference_steps=num_inference_steps,
                 ).images[0]
+
+            # Rescale result back to original dimensions
+            if result.size != original_size:
+                result = result.resize(original_size, Image.Resampling.LANCZOS)
 
             # Encode result
             result_b64 = self.image_to_base64(result)
@@ -285,6 +292,9 @@ class DiffusionService:
             # Decode input
             image = self.base64_to_image(image_b64)
 
+            # Store original dimensions for rescaling output
+            original_size = image.size  # (width, height)
+
             # Resize based on model
             if "sdxl" in model_key:
                 target_size = (1024, 1024)
@@ -310,6 +320,10 @@ class DiffusionService:
                     image=image,
                     strength=strength,
                 ).images[0]
+
+            # Rescale result back to original dimensions
+            if result.size != original_size:
+                result = result.resize(original_size, Image.Resampling.LANCZOS)
 
             result_b64 = self.image_to_base64(result)
             processing_time = time.time() - start_time
