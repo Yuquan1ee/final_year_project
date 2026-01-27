@@ -22,21 +22,37 @@ from PIL import Image
 # =============================================================================
 
 INPAINTING_MODELS = {
+    # Standard Stable Diffusion
     "sd-inpainting": {
         "model_id": "runwayml/stable-diffusion-inpainting",
         "pipeline": "StableDiffusionInpaintPipeline",
         "torch_dtype": "float16",
     },
+    # SDXL Inpainting variants
     "sdxl-inpainting": {
         "model_id": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
         "pipeline": "StableDiffusionXLInpaintPipeline",
         "torch_dtype": "float16",
     },
+    "sdxl-inpainting-8bit": {
+        "model_id": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+        "pipeline": "StableDiffusionXLInpaintPipeline",
+        "torch_dtype": "float16",
+        "quantization": "8bit",  # ~6GB VRAM
+    },
+    "sdxl-inpainting-4bit": {
+        "model_id": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+        "pipeline": "StableDiffusionXLInpaintPipeline",
+        "torch_dtype": "float16",
+        "quantization": "4bit",  # ~4GB VRAM
+    },
+    # Kandinsky
     "kandinsky-inpainting": {
         "model_id": "kandinsky-community/kandinsky-2-2-decoder-inpaint",
         "pipeline": "KandinskyV22InpaintPipeline",
         "torch_dtype": "float16",
     },
+    # FLUX.1 Fill variants
     "flux-fill": {
         "model_id": "black-forest-labs/FLUX.1-Fill-dev",
         "pipeline": "FluxFillPipeline",
@@ -49,7 +65,7 @@ INPAINTING_MODELS = {
         "torch_dtype": "float16",
         "use_cpu_offload": True,
     },
-    # Quantized versions using bitsandbytes (official method)
+    # FLUX Quantized versions using bitsandbytes (official method)
     "flux-fill-8bit": {
         "model_id": "black-forest-labs/FLUX.1-Fill-dev",
         "pipeline": "FluxFillPipeline",
@@ -71,11 +87,25 @@ INPAINTING_MODELS = {
 }
 
 STYLE_MODELS = {
+    # SDXL img2img variants
     "sdxl-img2img": {
         "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
         "pipeline": "StableDiffusionXLImg2ImgPipeline",
         "torch_dtype": "float16",
     },
+    "sdxl-img2img-8bit": {
+        "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
+        "pipeline": "StableDiffusionXLImg2ImgPipeline",
+        "torch_dtype": "float16",
+        "quantization": "8bit",  # ~6GB VRAM
+    },
+    "sdxl-img2img-4bit": {
+        "model_id": "stabilityai/stable-diffusion-xl-base-1.0",
+        "pipeline": "StableDiffusionXLImg2ImgPipeline",
+        "torch_dtype": "float16",
+        "quantization": "4bit",  # ~4GB VRAM
+    },
+    # SD 1.5 img2img
     "sd-img2img": {
         "model_id": "runwayml/stable-diffusion-v1-5",
         "pipeline": "StableDiffusionImg2ImgPipeline",

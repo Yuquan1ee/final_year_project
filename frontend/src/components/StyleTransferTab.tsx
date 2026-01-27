@@ -58,9 +58,12 @@ type StyleId = typeof STYLE_PRESETS[number]['id']
 
 // Available style transfer models
 const STYLE_MODELS = [
-  { id: 'sdxl-img2img', name: 'SDXL img2img', vram: '8-12 GB' },
-  { id: 'ip-adapter', name: 'IP-Adapter (SD 1.5)', vram: '8-12 GB' },
-  { id: 'sdxl-lightning', name: 'SDXL Lightning (Fast)', vram: '8-10 GB' },
+  // Standard models
+  { id: 'sdxl-img2img', name: 'SDXL img2img', vram: '10-12 GB' },
+  { id: 'sd-img2img', name: 'SD 1.5 img2img', vram: '5-7 GB' },
+  // Quantized SDXL variants
+  { id: 'sdxl-img2img-8bit', name: 'SDXL img2img (8-bit)', vram: '~6 GB' },
+  { id: 'sdxl-img2img-4bit', name: 'SDXL img2img (4-bit)', vram: '~4 GB' },
 ] as const
 
 type ModelId = typeof STYLE_MODELS[number]['id']

@@ -160,7 +160,13 @@ npm run preview  # Preview production build
 | Model | VRAM | Notes |
 |-------|------|-------|
 | SD Inpainting | 5-7 GB | FP16 |
+| SD img2img | 5-7 GB | FP16 |
 | SDXL Inpainting | 10-12 GB | FP16 |
+| SDXL Inpainting (8-bit) | ~6 GB | bitsandbytes quantized |
+| SDXL Inpainting (4-bit) | ~4 GB | bitsandbytes quantized |
+| SDXL img2img | 10-12 GB | FP16 |
+| SDXL img2img (8-bit) | ~6 GB | bitsandbytes quantized |
+| SDXL img2img (4-bit) | ~4 GB | bitsandbytes quantized |
 | Kandinsky Inpainting | 6-8 GB | FP16 |
 | FLUX.1 Fill (full) | 22-24 GB | BF16, requires CPU offload |
 | FLUX.1 Fill (8-bit) | ~16 GB | bitsandbytes quantized |

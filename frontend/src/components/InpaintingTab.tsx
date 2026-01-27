@@ -37,10 +37,18 @@ import { inpaintImage } from '../api'
 
 // Available inpainting models
 const INPAINTING_MODELS = [
+  // Standard models
   { id: 'sd-inpainting', name: 'Stable Diffusion Inpainting', vram: '5-7 GB' },
-  { id: 'sdxl-inpainting', name: 'SDXL Inpainting', vram: '10-12 GB' },
   { id: 'kandinsky-inpainting', name: 'Kandinsky 2.2 Inpainting', vram: '6-8 GB' },
-  { id: 'flux-fill', name: 'FLUX.1 Fill (SOTA)', vram: '22-24 GB' },
+  // SDXL Inpainting variants
+  { id: 'sdxl-inpainting', name: 'SDXL Inpainting', vram: '10-12 GB' },
+  { id: 'sdxl-inpainting-8bit', name: 'SDXL Inpainting (8-bit)', vram: '~6 GB' },
+  { id: 'sdxl-inpainting-4bit', name: 'SDXL Inpainting (4-bit)', vram: '~4 GB' },
+  // FLUX.1 Fill variants
+  { id: 'flux-fill', name: 'FLUX.1 Fill (Full)', vram: '22-24 GB' },
+  { id: 'flux-fill-8bit', name: 'FLUX.1 Fill (8-bit)', vram: '~16 GB' },
+  { id: 'flux-fill-4bit', name: 'FLUX.1 Fill (4-bit)', vram: '~10 GB' },
+  { id: 'flux-fill-nf4', name: 'FLUX.1 Fill (NF4, Recommended)', vram: '~10 GB' },
 ] as const
 
 type ModelId = typeof INPAINTING_MODELS[number]['id']
