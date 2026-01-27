@@ -43,19 +43,65 @@ class RestorationService:
     # =========================================================================
 
     @staticmethod
-    def image_to_base64(image: Image.Image) -> str:
-        """Convert PIL Image to base64 string."""
+    def image_to_base64(image: Image.Image, format: str = "PNG") -> str:
+        """Convert PIL Image to base64 string with data URL prefix.
+
+        Args:
+            image: PIL Image to convert
+            format: Output format (PNG, JPEG, WEBP). Defaults to PNG.
+
+        Returns:
+            Data URL string (e.g., "data:image/png;base64,...")
+        """
         buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        return base64.b64encode(buffer.getvalue()).decode("utf-8")
+        format_upper = format.upper()
+
+        # JPEG doesn't support alpha channel, ensure RGB mode
+        if format_upper == "JPEG" and image.mode == "RGBA":
+            image = image.convert("RGB")
+
+        image.save(buffer, format=format_upper, quality=95)
+        b64_string = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        # Map format to MIME type
+        mime_types = {
+            "PNG": "image/png",
+            "JPEG": "image/jpeg",
+            "JPG": "image/jpeg",
+            "WEBP": "image/webp",
+        }
+        mime_type = mime_types.get(format_upper, "image/png")
+
+        return f"data:{mime_type};base64,{b64_string}"
 
     @staticmethod
-    def base64_to_image(b64_string: str) -> Image.Image:
-        """Convert base64 string to PIL Image."""
+    def base64_to_image(b64_string: str) -> Tuple[Image.Image, str]:
+        """Convert base64 string to PIL Image.
+
+        Returns:
+            Tuple of (PIL Image, original format string)
+        """
+        original_format = "PNG"  # Default fallback
+
+        # Handle data URL format (e.g., "data:image/png;base64,...")
         if "," in b64_string:
+            header = b64_string.split(",")[0]
+            if "image/jpeg" in header or "image/jpg" in header:
+                original_format = "JPEG"
+            elif "image/png" in header:
+                original_format = "PNG"
+            elif "image/webp" in header:
+                original_format = "WEBP"
             b64_string = b64_string.split(",")[1]
+
         image_data = base64.b64decode(b64_string)
-        return Image.open(io.BytesIO(image_data)).convert("RGB")
+        image = Image.open(io.BytesIO(image_data))
+
+        # Also check PIL's detected format as fallback
+        if image.format:
+            original_format = image.format
+
+        return image.convert("RGB"), original_format
 
     @staticmethod
     def pil_to_cv2(pil_image: Image.Image) -> np.ndarray:
@@ -372,8 +418,8 @@ class RestorationService:
         start_time = time.time()
 
         try:
-            # Decode input
-            image = self.base64_to_image(image_b64)
+            # Decode input (also captures original format)
+            image, original_format = self.base64_to_image(image_b64)
             result = image
 
             # Step 1: Scratch/Artifact Removal (do first to clean image)
@@ -400,7 +446,8 @@ class RestorationService:
                 print(f"Upscaling {scale_factor}x...")
                 result = self.upscale(result, scale_factor)
 
-            result_b64 = self.image_to_base64(result)
+            # Encode result in original format
+            result_b64 = self.image_to_base64(result, original_format)
             processing_time = time.time() - start_time
 
             return result_b64, None, processing_time

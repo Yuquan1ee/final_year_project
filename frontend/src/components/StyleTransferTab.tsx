@@ -138,9 +138,17 @@ function StyleTransferTab() {
   const handleDownload = () => {
     if (!resultImageUrl) return
 
+    // Detect format from data URL
+    let extension = 'png'
+    if (resultImageUrl.includes('image/jpeg') || resultImageUrl.includes('image/jpg')) {
+      extension = 'jpg'
+    } else if (resultImageUrl.includes('image/webp')) {
+      extension = 'webp'
+    }
+
     const link = document.createElement('a')
     link.href = resultImageUrl
-    link.download = `styled-${selectedStyle || 'custom'}-${Date.now()}.png`
+    link.download = `styled-${selectedStyle || 'custom'}-${Date.now()}.${extension}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
