@@ -41,6 +41,32 @@ INPAINTING_MODELS = {
         "model_id": "black-forest-labs/FLUX.1-Fill-dev",
         "pipeline": "FluxFillPipeline",
         "torch_dtype": "bfloat16",
+        "use_cpu_offload": True,  # Required for lower VRAM GPUs
+    },
+    "flux-fill-fp16": {
+        "model_id": "black-forest-labs/FLUX.1-Fill-dev",
+        "pipeline": "FluxFillPipeline",
+        "torch_dtype": "float16",
+        "use_cpu_offload": True,
+    },
+    # Quantized versions using bitsandbytes (official method)
+    "flux-fill-8bit": {
+        "model_id": "black-forest-labs/FLUX.1-Fill-dev",
+        "pipeline": "FluxFillPipeline",
+        "torch_dtype": "float16",
+        "quantization": "8bit",  # ~16GB total, works on 16GB+ VRAM
+    },
+    "flux-fill-4bit": {
+        "model_id": "black-forest-labs/FLUX.1-Fill-dev",
+        "pipeline": "FluxFillPipeline",
+        "torch_dtype": "float16",
+        "quantization": "4bit",  # ~10GB total, works on 12GB+ VRAM
+    },
+    "flux-fill-nf4": {
+        "model_id": "black-forest-labs/FLUX.1-Fill-dev",
+        "pipeline": "FluxFillPipeline",
+        "torch_dtype": "float16",
+        "quantization": "nf4",  # NF4 quant from QLoRA, ~10GB total
     },
 }
 
@@ -172,6 +198,74 @@ class DiffusionService:
             return torch.float32
         return torch.float16
 
+    def _load_flux_fill_quantized(self, config: dict, quantization: str, torch_dtype: torch.dtype) -> Any:
+        """
+        Load FluxFillPipeline with bitsandbytes quantization.
+
+        This follows the official diffusers approach:
+        1. Load transformer with quantization
+        2. Load T5 text encoder with quantization
+        3. Pass both to the pipeline
+
+        Reference: https://huggingface.co/docs/diffusers/main/en/quantization/bitsandbytes
+        """
+        from diffusers import FluxFillPipeline, AutoModel
+        from diffusers import BitsAndBytesConfig as DiffusersBitsAndBytesConfig
+        from transformers import T5EncoderModel
+        from transformers import BitsAndBytesConfig as TransformersBitsAndBytesConfig
+
+        model_id = config["model_id"]
+
+        # Configure quantization
+        if quantization == "8bit":
+            print(f"  Loading transformer with 8-bit quantization...")
+            diffusers_quant_config = DiffusersBitsAndBytesConfig(load_in_8bit=True)
+            transformers_quant_config = TransformersBitsAndBytesConfig(load_in_8bit=True)
+        else:
+            # 4bit or nf4
+            quant_type = "nf4" if quantization == "nf4" else "fp4"
+            print(f"  Loading transformer with 4-bit ({quant_type}) quantization...")
+            diffusers_quant_config = DiffusersBitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type=quant_type,
+                bnb_4bit_compute_dtype=torch_dtype,
+            )
+            transformers_quant_config = TransformersBitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type=quant_type,
+                bnb_4bit_compute_dtype=torch_dtype,
+            )
+
+        # Load transformer with quantization
+        print(f"  Loading transformer from {model_id}...")
+        transformer = AutoModel.from_pretrained(
+            model_id,
+            subfolder="transformer",
+            quantization_config=diffusers_quant_config,
+            torch_dtype=torch_dtype,
+        )
+
+        # Load T5 text encoder with quantization
+        print(f"  Loading T5 text encoder with quantization...")
+        text_encoder_2 = T5EncoderModel.from_pretrained(
+            model_id,
+            subfolder="text_encoder_2",
+            quantization_config=transformers_quant_config,
+            torch_dtype=torch_dtype,
+        )
+
+        # Create the pipeline with quantized components
+        print(f"  Creating FluxFillPipeline with quantized components...")
+        pipe = FluxFillPipeline.from_pretrained(
+            model_id,
+            transformer=transformer,
+            text_encoder_2=text_encoder_2,
+            torch_dtype=torch_dtype,
+            device_map="auto",  # Automatically distribute across available devices
+        )
+
+        return pipe
+
     # =========================================================================
     # Pipeline Loading
     # =========================================================================
@@ -215,11 +309,50 @@ class DiffusionService:
 
         torch_dtype = self._get_torch_dtype(config["torch_dtype"])
 
-        pipe = pipeline_class.from_pretrained(
-            config["model_id"],
-            torch_dtype=torch_dtype,
-        )
-        pipe = pipe.to(self.device)
+        # Check for quantization options
+        quantization = config.get("quantization")
+        use_cpu_offload = config.get("use_cpu_offload", False)
+
+        # Handle bitsandbytes quantization for FLUX models
+        if quantization in ("8bit", "4bit", "nf4") and config["pipeline"] == "FluxFillPipeline":
+            pipe = self._load_flux_fill_quantized(config, quantization, torch_dtype)
+        elif quantization in ("8bit", "4bit", "nf4"):
+            # Generic quantization for non-FLUX models (fallback)
+            try:
+                from diffusers import BitsAndBytesConfig as DiffusersBitsAndBytesConfig
+                if quantization == "8bit":
+                    quant_config = DiffusersBitsAndBytesConfig(load_in_8bit=True)
+                else:
+                    quant_config = DiffusersBitsAndBytesConfig(
+                        load_in_4bit=True,
+                        bnb_4bit_quant_type="nf4" if quantization == "nf4" else "fp4",
+                        bnb_4bit_compute_dtype=torch_dtype,
+                    )
+                print(f"  Loading with {quantization} quantization...")
+                pipe = pipeline_class.from_pretrained(
+                    config["model_id"],
+                    torch_dtype=torch_dtype,
+                    quantization_config=quant_config,
+                )
+            except ImportError:
+                print("  bitsandbytes not available, falling back to standard loading")
+                pipe = pipeline_class.from_pretrained(
+                    config["model_id"],
+                    torch_dtype=torch_dtype,
+                )
+                pipe = pipe.to(self.device)
+        else:
+            pipe = pipeline_class.from_pretrained(
+                config["model_id"],
+                torch_dtype=torch_dtype,
+            )
+
+            # Use CPU offload for large models to reduce VRAM usage
+            if use_cpu_offload and self.device == "cuda":
+                print(f"  Enabling CPU offload for memory efficiency...")
+                pipe.enable_model_cpu_offload()
+            else:
+                pipe = pipe.to(self.device)
 
         # Enable memory optimizations
         if hasattr(pipe, "enable_attention_slicing"):

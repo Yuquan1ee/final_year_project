@@ -157,15 +157,17 @@ npm run preview  # Preview production build
 
 ## VRAM Requirements
 
-| Model | VRAM (FP16) |
-|-------|-------------|
-| SD Inpainting | 5-7 GB |
-| SDXL Inpainting | 10-12 GB |
-| Kandinsky Inpainting | 6-8 GB |
-| FLUX.1 Fill | 22-24 GB |
-| CodeFormer | 2-4 GB |
-| GFPGAN | 2-4 GB |
-| Real-ESRGAN | 2-6 GB |
+| Model | VRAM | Notes |
+|-------|------|-------|
+| SD Inpainting | 5-7 GB | FP16 |
+| SDXL Inpainting | 10-12 GB | FP16 |
+| Kandinsky Inpainting | 6-8 GB | FP16 |
+| FLUX.1 Fill (full) | 22-24 GB | BF16, requires CPU offload |
+| FLUX.1 Fill (8-bit) | ~16 GB | bitsandbytes quantized |
+| FLUX.1 Fill (4-bit/NF4) | ~10 GB | bitsandbytes quantized, best for Colab |
+| CodeFormer | 2-4 GB | |
+| GFPGAN | 2-4 GB | |
+| Real-ESRGAN | 2-6 GB | |
 
 ## Key Files to Know
 
