@@ -46,10 +46,10 @@ INPAINTING_MODELS = {
         "torch_dtype": "float16",
         "quantization": "4bit",  # ~4GB VRAM
     },
-    # Kandinsky
+    # Kandinsky (uses combined pipeline to handle prior + decoder automatically)
     "kandinsky-inpainting": {
         "model_id": "kandinsky-community/kandinsky-2-2-decoder-inpaint",
-        "pipeline": "KandinskyV22InpaintPipeline",
+        "pipeline": "AutoPipelineForInpainting",
         "torch_dtype": "float16",
     },
     # FLUX.1 Fill variants
@@ -326,9 +326,9 @@ class DiffusionService:
         }
 
         # Handle special cases
-        if config["pipeline"] == "KandinskyV22InpaintPipeline":
-            from diffusers import KandinskyV22InpaintPipeline
-            pipeline_classes["KandinskyV22InpaintPipeline"] = KandinskyV22InpaintPipeline
+        if config["pipeline"] == "AutoPipelineForInpainting":
+            from diffusers import AutoPipelineForInpainting
+            pipeline_classes["AutoPipelineForInpainting"] = AutoPipelineForInpainting
         elif config["pipeline"] == "FluxFillPipeline":
             from diffusers import FluxFillPipeline
             pipeline_classes["FluxFillPipeline"] = FluxFillPipeline
