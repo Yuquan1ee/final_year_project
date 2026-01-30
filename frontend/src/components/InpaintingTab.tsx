@@ -64,6 +64,14 @@ function InpaintingTab() {
   const [negativePrompt, setNegativePrompt] = useState('')
   const [selectedModel, setSelectedModel] = useState<ModelId>('sd-inpainting')
 
+  // Advanced parameters
+  const [guidanceScale, setGuidanceScale] = useState(7.5)
+  const [numInferenceSteps, setNumInferenceSteps] = useState(30)
+  const [strength, setStrength] = useState(1.0)
+  const [seed, setSeed] = useState<number | null>(null)
+  const [paddingMaskCrop, setPaddingMaskCrop] = useState<number | null>(null)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -105,6 +113,11 @@ function InpaintingTab() {
         prompt,
         negativePrompt: negativePrompt || undefined,
         model: selectedModel,
+        guidanceScale,
+        numInferenceSteps,
+        strength,
+        seed,
+        paddingMaskCrop,
       })
 
       if (response.success && response.image) {
@@ -236,6 +249,155 @@ function InpaintingTab() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Advanced Settings (collapsible) */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-slate-100 transition-colors"
+              >
+                <svg
+                  className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Advanced Settings
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-3 space-y-4 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+                  {/* Guidance Scale */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-sm font-medium text-slate-300">Guidance Scale</label>
+                      <span className="text-sm text-slate-400">{guidanceScale}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1.0}
+                      max={20.0}
+                      step={0.5}
+                      value={guidanceScale}
+                      onChange={(e) => setGuidanceScale(parseFloat(e.target.value))}
+                      className="w-full accent-indigo-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                      <span>1.0</span>
+                      <span>20.0</span>
+                    </div>
+                  </div>
+
+                  {/* Inference Steps */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-sm font-medium text-slate-300">Inference Steps</label>
+                      <span className="text-sm text-slate-400">{numInferenceSteps}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={10}
+                      max={100}
+                      step={1}
+                      value={numInferenceSteps}
+                      onChange={(e) => setNumInferenceSteps(parseInt(e.target.value))}
+                      className="w-full accent-indigo-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                      <span>10</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+
+                  {/* Strength */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-sm font-medium text-slate-300">Strength</label>
+                      <span className="text-sm text-slate-400">{Math.round(strength * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0.0}
+                      max={1.0}
+                      step={0.05}
+                      value={strength}
+                      onChange={(e) => setStrength(parseFloat(e.target.value))}
+                      className="w-full accent-indigo-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                      <span>Preserve Original</span>
+                      <span>Fully Regenerate</span>
+                    </div>
+                  </div>
+
+                  {/* Seed */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-1 block">Seed</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        max={2147483647}
+                        value={seed ?? ''}
+                        onChange={(e) => setSeed(e.target.value === '' ? null : parseInt(e.target.value))}
+                        placeholder="Random"
+                        className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg
+                                   text-slate-200 placeholder-slate-500 focus:outline-none
+                                   focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSeed(null)}
+                        title="Randomize"
+                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300
+                                   rounded-lg text-sm transition-colors"
+                      >
+                        🎲
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Leave empty for random seed</p>
+                  </div>
+
+                  {/* Padding Mask Crop */}
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-1">
+                      <input
+                        type="checkbox"
+                        checked={paddingMaskCrop !== null}
+                        onChange={(e) => setPaddingMaskCrop(e.target.checked ? 32 : null)}
+                        className="rounded border-slate-600 bg-slate-800 accent-indigo-500"
+                      />
+                      Crop around mask region
+                    </label>
+                    {paddingMaskCrop !== null && (
+                      <div className="mt-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-slate-400">Padding</span>
+                          <span className="text-sm text-slate-400">{paddingMaskCrop}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={8}
+                          max={256}
+                          step={8}
+                          value={paddingMaskCrop}
+                          onChange={(e) => setPaddingMaskCrop(parseInt(e.target.value))}
+                          className="w-full accent-indigo-500"
+                        />
+                        <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                          <span>8px</span>
+                          <span>256px</span>
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 mt-1">Focuses generation on the masked area (SD/SDXL only)</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Generate button */}

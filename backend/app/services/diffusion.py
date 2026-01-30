@@ -419,6 +419,9 @@ class DiffusionService:
         negative_prompt: str = "blurry, low quality, distorted, deformed",
         guidance_scale: float = 7.5,
         num_inference_steps: int = 30,
+        seed: Optional[int] = None,
+        strength: float = 1.0,
+        padding_mask_crop: Optional[int] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """
         Perform inpainting on an image.
@@ -454,16 +457,28 @@ class DiffusionService:
             # Load pipeline
             pipe = self._load_pipeline(model_key, config)
 
+            # Build inference kwargs
+            pipe_kwargs: Dict[str, Any] = {
+                "prompt": prompt,
+                "negative_prompt": negative_prompt,
+                "image": image,
+                "mask_image": mask,
+                "guidance_scale": guidance_scale,
+                "num_inference_steps": num_inference_steps,
+                "strength": strength,
+            }
+
+            # Set seed via generator if provided
+            if seed is not None:
+                pipe_kwargs["generator"] = torch.Generator(device=self.device).manual_seed(seed)
+
+            # padding_mask_crop is supported by SD/SDXL pipelines, not FLUX/Kandinsky
+            if padding_mask_crop is not None and "flux" not in model_key and "kandinsky" not in model_key:
+                pipe_kwargs["padding_mask_crop"] = padding_mask_crop
+
             # Run inference
             with torch.inference_mode():
-                result = pipe(
-                    prompt=prompt,
-                    negative_prompt=negative_prompt,
-                    image=image,
-                    mask_image=mask,
-                    guidance_scale=guidance_scale,
-                    num_inference_steps=num_inference_steps,
-                ).images[0]
+                result = pipe(**pipe_kwargs).images[0]
 
             # Rescale result back to original dimensions
             if result.size != original_size:

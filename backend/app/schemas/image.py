@@ -53,6 +53,9 @@ class InpaintingRequest(BaseModel):
     )
     guidance_scale: float = Field(default=7.5, ge=1.0, le=20.0)
     num_inference_steps: int = Field(default=30, ge=10, le=100)
+    seed: Optional[int] = Field(default=None, ge=0, le=2147483647, description="Random seed for reproducibility")
+    strength: float = Field(default=1.0, ge=0.0, le=1.0, description="Denoising strength (0=preserve original, 1=fully regenerate)")
+    padding_mask_crop: Optional[int] = Field(default=None, ge=0, le=512, description="Padding around mask crop for better small-region quality")
 
 
 class StylePreset(str, Enum):

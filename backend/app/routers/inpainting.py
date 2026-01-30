@@ -30,6 +30,9 @@ async def inpaint_image(request: InpaintingRequest) -> ImageResponse:
         negative_prompt=request.negative_prompt,
         guidance_scale=request.guidance_scale,
         num_inference_steps=request.num_inference_steps,
+        seed=request.seed,
+        strength=request.strength,
+        padding_mask_crop=request.padding_mask_crop,
     )
 
     if error:

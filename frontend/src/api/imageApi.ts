@@ -26,6 +26,9 @@ export interface InpaintingParams {
   model?: string;
   guidanceScale?: number;
   numInferenceSteps?: number;
+  seed?: number | null;
+  strength?: number;
+  paddingMaskCrop?: number | null;
 }
 
 export interface StyleTransferParams {
@@ -85,8 +88,11 @@ export async function inpaintImage(params: InpaintingParams): Promise<ImageRespo
       prompt: params.prompt,
       negative_prompt: params.negativePrompt || 'blurry, low quality, distorted, deformed',
       model: params.model || 'sd-inpainting',
-      guidance_scale: params.guidanceScale || 7.5,
-      num_inference_steps: params.numInferenceSteps || 30,
+      guidance_scale: params.guidanceScale ?? 7.5,
+      num_inference_steps: params.numInferenceSteps ?? 30,
+      seed: params.seed ?? null,
+      strength: params.strength ?? 1.0,
+      padding_mask_crop: params.paddingMaskCrop ?? null,
     }),
   });
 
