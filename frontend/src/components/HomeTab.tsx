@@ -42,9 +42,12 @@ function HomeTab() {
     <div className="space-y-8">
       {/* Hero Section */}
       <section className="text-center py-8">
-        <h2 className="text-3xl font-bold mb-4">
-          Diffusion Models for Intelligent Image Editing
+        <h2 className="text-4xl font-bold mb-2">
+          DiffusionDesk
         </h2>
+        <p className="text-lg text-indigo-400 mb-4">
+          Diffusion Models for Intelligent Image Editing and Inpainting
+        </p>
         <p className="text-slate-400 max-w-2xl mx-auto">
           This project leverages state-of-the-art diffusion models for image editing,
           inpainting, and style transfer. The AI enables context-aware modifications

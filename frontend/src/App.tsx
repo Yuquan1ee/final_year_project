@@ -24,7 +24,7 @@ function App() {
       {/* Header */}
       <header className="border-b border-slate-700 p-6">
         <h1 className="text-3xl font-bold text-center">
-          Diffusion Image Editor
+          DiffusionDesk
         </h1>
         <p className="text-slate-400 text-center mt-2">
           Intelligent image editing powered by diffusion models
