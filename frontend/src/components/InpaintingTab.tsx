@@ -277,6 +277,7 @@ function InpaintingTab() {
                       <label className="text-sm font-medium text-slate-300">Guidance Scale</label>
                       <span className="text-sm text-slate-400">{guidanceScale}</span>
                     </div>
+                    <p className="text-xs text-slate-500 mb-2">How closely the model follows your prompt. Higher values produce results more aligned with the prompt but may look less natural.</p>
                     <input
                       type="range"
                       min={1.0}
@@ -298,6 +299,7 @@ function InpaintingTab() {
                       <label className="text-sm font-medium text-slate-300">Inference Steps</label>
                       <span className="text-sm text-slate-400">{numInferenceSteps}</span>
                     </div>
+                    <p className="text-xs text-slate-500 mb-2">Number of denoising steps. More steps generally improve quality but take longer to generate.</p>
                     <input
                       type="range"
                       min={10}
@@ -319,6 +321,7 @@ function InpaintingTab() {
                       <label className="text-sm font-medium text-slate-300">Strength</label>
                       <span className="text-sm text-slate-400">{Math.round(strength * 100)}%</span>
                     </div>
+                    <p className="text-xs text-slate-500 mb-2">Controls how much the masked region changes. Lower values preserve more of the original image; higher values allow full regeneration.</p>
                     <input
                       type="range"
                       min={0.0}
@@ -337,6 +340,7 @@ function InpaintingTab() {
                   {/* Seed */}
                   <div>
                     <label className="text-sm font-medium text-slate-300 mb-1 block">Seed</label>
+                    <p className="text-xs text-slate-500 mb-2">Set a fixed seed to get reproducible results. The same seed with the same settings will produce the same output.</p>
                     <div className="flex gap-2">
                       <input
                         type="number"
@@ -394,7 +398,7 @@ function InpaintingTab() {
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-slate-500 mt-1">Focuses generation on the masked area (SD/SDXL only)</p>
+                    <p className="text-xs text-slate-500 mt-1">Crops around the mask and runs inpainting at full resolution on just that region, then blends back. Improves quality for small masks. Padding adds context around the crop for smoother blending. SD/SDXL only.</p>
                   </div>
                 </div>
               )}
