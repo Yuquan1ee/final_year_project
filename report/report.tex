@@ -1,0 +1,434 @@
+\documentclass[12pt,a4paper]{report}
+
+% ============================================================
+% Packages
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}                    % Times New Roman font
+\usepackage[margin=1in]{geometry}     % 1 inch margins
+\usepackage{graphicx}                 % Images
+\usepackage{float}                    % Figure placement
+\usepackage{caption}                  % Captions
+\usepackage{subcaption}               % Subfigures
+\usepackage{hyperref}                 % Hyperlinks
+\usepackage{setspace}                 % Line spacing
+\usepackage{titlesec}                 % Section formatting
+\usepackage{tocloft}                  % TOC formatting
+\usepackage{fancyhdr}                 % Headers and footers
+\usepackage{tabularx}                 % Tables
+\usepackage{booktabs}                 % Better table rules
+\usepackage{enumitem}                 % List formatting
+\usepackage{amsmath}                  % Math
+\usepackage{listings}                 % Code listings
+\usepackage{xcolor}                   % Colors
+\usepackage{url}                      % URL formatting
+\usepackage{pdfpages}                 % Include PDF pages
+\usepackage{longtable}                % Multi-page tables
+\usepackage[authoryear,round]{natbib}  % APA-style author-year citations
+
+% ============================================================
+% Configuration
+% ============================================================
+\graphicspath{{images/}}
+\onehalfspacing
+
+% Hyperlink styling
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=blue,
+    citecolor=black,
+}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    tabsize=2,
+    captionpos=b,
+}
+
+% Header/footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% Section numbering: use 1, 2, 3 instead of 0.1, 0.2
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+
+% Section formatting
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% Remove chapter numbering (we use sections directly)
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+
+% ============================================================
+% Document
+% ============================================================
+\begin{document}
+
+% ============================================================
+% TITLE PAGE
+% ============================================================
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+
+        % NTU Logo
+        \includegraphics[width=0.35\textwidth]{ntu_logo.png}
+
+        \vspace{1cm}
+
+        {\Large \textbf{NANYANG TECHNOLOGICAL UNIVERSITY}}
+
+        \vspace{0.5cm}
+
+        {\large SCHOOL OF COMPUTER SCIENCE AND ENGINEERING}
+
+        \vspace{2cm}
+
+        {\LARGE \textbf{Diffusion Models for Intelligent\\Image Editing and Inpainting}}
+
+        \vspace{2cm}
+
+        {\large
+        Lee Yu Quan\\
+        }
+
+        \vspace{2cm}
+
+        {\large
+        \textbf{Supervisor:} Prof Zhang Hanwang\\
+        }
+
+        \vspace{1cm}
+
+        {\large
+        School of Computer Science and Engineering\\
+        }
+
+        \vspace{1.5cm}
+
+        {\large
+        A Final Year Project report\\
+        presented to Nanyang Technological University\\
+        in partial fulfilment of the requirements for the\\
+        degree of Bachelor of Engineering\\
+        }
+
+        \vspace{1cm}
+
+        {\large 2025/2026}
+
+    \end{center}
+\end{titlepage}
+
+% ============================================================
+% ACKNOWLEDGEMENTS
+% ============================================================
+\pagenumbering{roman}
+\setcounter{page}{2}
+
+\section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+Over the course of two semesters working on this final year project, I would like to express my appreciation to everyone who has encouraged me and offered their guidance, helping make this project possible.
+
+I would like to extend my sincere gratitude to my supervisor, Prof Zhang Hanwang, for granting me the freedom to steer the direction of this project. His trust and openness allowed me to explore a wide variety of diffusion models and techniques in the field of image generation, which greatly enriched both the project and my learning experience.
+
+Lastly, I would like to thank my examiner, Prof (placeholder), for taking the time to review and evaluate this final year project.
+
+\vspace{1cm}
+\noindent Lee Yu Quan\\
+March 2026
+
+\newpage
+
+% ============================================================
+% TABLE OF CONTENTS
+% ============================================================
+\tableofcontents
+\newpage
+
+% ============================================================
+% TABLE OF FIGURES
+% ============================================================
+\listoffigures
+\addcontentsline{toc}{section}{Table of Figures}
+\newpage
+
+% ============================================================
+% LIST OF TABLES (optional)
+% ============================================================
+\listoftables
+\addcontentsline{toc}{section}{List of Tables}
+\newpage
+
+% ============================================================
+% MAIN BODY
+% ============================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ============================================================
+% 1. INTRODUCTION
+% ============================================================
+\section{Introduction}
+
+\subsection{Abstract}
+% TODO: Write abstract
+
+\subsection{Background and Motivation}
+
+Large language models are the most discussed aspect of generative AI today, but image generation is not far behind. According to Grand View Research, the global AI image generator market was valued at USD 349.6 million in 2023 and is projected to grow at a compound annual growth rate (CAGR) of 17.7\% to reach USD 1.08 billion by 2030 \citep{grandviewresearch2023}. Yet, there remains a lack of comprehensive software that caters to this growing demand in an accessible manner.
+
+Traditional methods in image inpainting, such as patch-based and exemplar-based approaches, have notable limitations in generating semantically meaningful content, particularly in high-resolution or complex scenarios \citep{ma2023uncertainty}. These methods often struggle with boundary artefacts when dealing with large masked regions due to insufficient constraints, resulting in visible seams and structurally inconsistent outputs \citep{ma2023uncertainty}. Such limitations create significant accessibility barriers, as current solutions frequently require extensive technical expertise and expensive software licences, effectively restricting advanced image editing capabilities to professional users.
+
+The introduction of deep learning techniques, particularly diffusion models \citep{ho2020ddpm, song2021ddim, rombach2022ldm}, has led to significant improvements in image generation quality and semantic comprehension, enabling capabilities that were previously difficult or impossible to automate. Recent advances such as ControlNet \citep{zhang2023controlnet} and Low-Rank Adaptation (LoRA) \citep{hu2022lora} have further expanded the practical applicability of these models. A detailed review of these developments is presented in Section~\ref{sec:literature_review}.
+
+Despite these breakthroughs, critical gaps persist between state-of-the-art image editing models and users' practical needs. Existing solutions face four key limitations: (1) fragmented ecosystems requiring users to switch between different applications for different editing tasks, (2) high complexity barriers that make advanced editing tools inaccessible to non-expert users, (3) reliance on command-line tools, Python programming, and GPU-equipped hardware, and (4) a lack of unified platforms that integrate multiple diffusion model capabilities within a single interface.
+
+This project, DiffusionDesk, addresses these gaps by deploying a web-based platform that integrates diffusion models for inpainting, style transfer, and image restoration within a single, user-friendly interface. Developed as a Final Year Project at Nanyang Technological University under the supervision of Prof Zhang Hanwang, the application provides three core image editing capabilities:
+
+\begin{enumerate}
+    \item \textbf{Inpainting} -- removing or replacing objects within selected regions of an image using models such as Stable Diffusion, Stable Diffusion XL, Kandinsky, and FLUX.1 Fill.
+    \item \textbf{Style Transfer} -- applying artistic styles such as anime, oil painting, and watercolour to images using diffusion-based image-to-image translation.
+    \item \textbf{Restoration} -- enhancing image quality through face restoration (CodeFormer, GFPGAN) and image upscaling (Real-ESRGAN).
+\end{enumerate}
+
+By exposing these models through a FastAPI backend and a React-based browser frontend, DiffusionDesk aims to make diffusion-based image editing accessible to users without requiring direct interaction with the underlying models or command-line tools.
+
+\subsection{Project Objective}
+
+The objective of this project is to design and deploy a web-based image editing platform that leverages open-source diffusion models to provide intelligent inpainting, style transfer, and image restoration capabilities. The specific objectives are as follows:
+
+\begin{enumerate}
+    \item To develop a responsive web application that integrates multiple diffusion models for image editing within a unified interface.
+    \item To implement an inpainting feature that enables users to selectively remove or replace objects in images using state-of-the-art diffusion models, including Stable Diffusion, Stable Diffusion XL, Kandinsky, and FLUX.1 Fill.
+    \item To implement a style transfer feature that allows users to apply artistic styles to images through diffusion-based image-to-image translation.
+    \item To implement an image restoration feature that enhances image quality through face restoration and upscaling using CodeFormer, GFPGAN, and Real-ESRGAN.
+    \item To design an intuitive user interface that enables non-expert users to perform advanced image editing tasks without requiring technical expertise in machine learning or programming.
+    \item To evaluate the system's performance through processing speed benchmarks, output quality assessments, and usability considerations.
+\end{enumerate}
+
+\subsection{Limitations}
+
+This project is subject to the following limitations:
+
+\begin{enumerate}
+    \item \textbf{Open-source models only} -- The application exclusively utilises open-source diffusion models available through the Hugging Face ecosystem. Proprietary or commercially licensed models are not included, which may limit the range of available capabilities compared to commercial solutions.
+    \item \textbf{GPU resource constraints} -- Diffusion model inference is computationally intensive and requires GPU acceleration. The available GPU memory (VRAM) constrains the size and complexity of models that can be loaded simultaneously. Quantisation techniques (4-bit, 8-bit) are employed to mitigate this, but may result in slight quality degradation.
+    \item \textbf{Supported image formats} -- The application supports JPEG, JPG, and PNG image formats only. Other formats such as TIFF, BMP, WebP, or RAW are not supported.
+    \item \textbf{No mobile application} -- The platform is designed as a web application accessible through desktop and mobile browsers. A dedicated native mobile application is not within the project scope.
+    \item \textbf{No video processing} -- The system processes individual images only. Video frame processing, video inpainting, or video style transfer are not supported.
+    \item \textbf{No 3D image manipulation} -- The application is limited to 2D image editing. 3D reconstruction, 3D-aware editing, or depth-based manipulation are not included.
+    \item \textbf{Inference only} -- The project focuses on model inference using pre-trained models. Model training, fine-tuning, or custom model development are outside the project scope.
+\end{enumerate}
+
+\subsection{Project Scope}
+
+The scope of this project encompasses the following:
+
+\subsubsection{In Scope}
+\begin{itemize}
+    \item Development of a web-based frontend using React, TypeScript, and Tailwind CSS that provides an intuitive user interface for all three editing features.
+    \item Development of a backend API using FastAPI and PyTorch that serves diffusion model inference for inpainting, style transfer, and image restoration.
+    \item Implementation of inpainting using Stable Diffusion Inpainting, Stable Diffusion XL Inpainting, Kandinsky Inpainting, and FLUX.1 Fill models.
+    \item Implementation of style transfer using SDXL image-to-image generation with artistic style prompts.
+    \item Implementation of image restoration using CodeFormer, GFPGAN (face restoration), and Real-ESRGAN (image upscaling).
+    \item Support for JPEG, JPG, and PNG image formats.
+    \item VRAM optimisation through model quantisation (4-bit, 8-bit) and CPU offloading to accommodate varying GPU configurations.
+    \item Deployment and testing on cloud GPU environments such as Google Colab.
+\end{itemize}
+
+\subsubsection{Out of Scope}
+\begin{itemize}
+    \item Native mobile application development.
+    \item Video processing, video inpainting, or video style transfer.
+    \item 3D image manipulation or depth-based editing.
+    \item Model training, fine-tuning, or custom model development.
+    \item User authentication, user account management, or multi-user collaboration features.
+    \item Image formats other than JPEG, JPG, and PNG.
+\end{itemize}
+
+Success will be measured through processing speed benchmarks, output quality assessments, and user experience evaluation across the three core features.
+
+\newpage
+
+% ============================================================
+% 2. PROJECT SCHEDULE
+% ============================================================
+\section{Project Schedule}
+
+\subsection{Work Breakdown}
+% TODO: Include Gantt chart or work breakdown structure
+
+\subsection{Risk Management}
+% TODO: Write risk management plan
+
+\newpage
+
+% ============================================================
+% 3. LITERATURE REVIEW
+% ============================================================
+\section{Literature Review}
+\label{sec:literature_review}
+
+\subsection{Diffusion Models}
+
+The foundation of modern image generation lies in diffusion models, which produce images through an iterative denoising process. This subsection reviews the key developments that underpin the models used in this project.
+
+\subsubsection{Denoising Diffusion Probabilistic Models (DDPM)}
+
+\citet{ho2020ddpm} proposed Denoising Diffusion Probabilistic Models (DDPMs), which generate images by treating the process as a series of denoising steps grounded in nonequilibrium thermodynamics. The forward process gradually adds Gaussian noise to an image over $T$ timesteps until the image becomes pure noise. The reverse process then learns to denoise step by step, recovering a clean image from random noise. DDPMs demonstrated image quality that surpassed the then-dominant Generative Adversarial Networks (GANs), producing diverse, high-fidelity samples without the training instability commonly associated with GANs. However, the original DDPM formulation required a large number of denoising steps (typically $T = 1000$), resulting in slow sampling speeds.
+
+\subsubsection{Denoising Diffusion Implicit Models (DDIM)}
+
+\citet{song2021ddim} addressed the slow sampling limitation of DDPMs by proposing Denoising Diffusion Implicit Models (DDIMs). DDIMs reformulate the reverse diffusion process as a non-Markovian process, meaning that each denoising step can depend on the original noisy input rather than solely on the immediately preceding step. This reformulation allows for deterministic sampling and, crucially, enables the use of a subsequence of only 20--100 steps while maintaining comparable image quality. The result is a 10--50$\times$ speedup over DDPMs, making diffusion-based generation significantly more practical for interactive applications.
+
+\subsubsection{Latent Diffusion Models (LDM)}
+
+\citet{rombach2022ldm} proposed Latent Diffusion Models (LDMs), which achieved an optimal balance between generative quality and computational efficiency. Rather than performing diffusion directly in pixel space, LDMs first encode images into a lower-dimensional latent representation using a pre-trained autoencoder, then apply the diffusion process within this compressed latent space. This approach alleviates critical computational bottlenecks, substantially reducing memory and computation requirements while preserving high image quality. LDMs form the basis of the widely adopted Stable Diffusion family of models, including the inpainting and image-to-image variants used in this project.
+
+\subsubsection{ControlNet}
+
+\citet{zhang2023controlnet} introduced ControlNet, a neural network architecture that enables fine-grained spatial control over pre-trained diffusion models. ControlNet creates a trainable copy of the encoding layers of a diffusion model while keeping the original model weights locked. Additional spatial conditions---such as edge maps, depth maps, or segmentation masks---are fed into the trainable copy, allowing users to guide the generation process with precise structural constraints. This architecture preserves the quality of the original model while adding controllability, making it particularly relevant for image editing tasks that require spatial precision.
+
+\subsubsection{Low-Rank Adaptation (LoRA)}
+
+\citet{hu2022lora} proposed Low-Rank Adaptation (LoRA), a parameter-efficient fine-tuning method that injects trainable low-rank decomposition matrices into the layers of a pre-trained model. Instead of updating all model parameters during fine-tuning, LoRA freezes the original weights and only trains the low-rank matrices, reducing the number of trainable parameters by several orders of magnitude. In the context of diffusion models, LoRA enables rapid adaptation to specific styles or domains without requiring full model retraining, making it a practical technique for customising image generation with limited computational resources.
+
+\subsection{Inpainting Techniques}
+% TODO: Review inpainting approaches (SD Inpainting, SDXL, Kandinsky, FLUX.1 Fill)
+
+\subsection{Style Transfer}
+% TODO: Review style transfer methods
+
+\subsection{Image Restoration}
+% TODO: Review CodeFormer, GFPGAN, Real-ESRGAN
+
+\subsection{Technology Stack Considerations}
+% TODO: Review and justify technology choices (React, FastAPI, PyTorch, Diffusers)
+
+\newpage
+
+% ============================================================
+% 4. SOFTWARE REQUIREMENTS
+% ============================================================
+\section{Software Requirements}
+
+\subsection{Use Case Diagram}
+% TODO: Include use case diagram
+
+\subsubsection{Use Case Descriptions}
+% TODO: Write use case descriptions
+
+\subsection{Functional and Non-Functional Requirements}
+
+\subsubsection{Functional Requirements}
+% TODO: List functional requirements
+
+\subsubsection{Non-Functional Requirements}
+% TODO: List non-functional requirements
+
+\newpage
+
+% ============================================================
+% 5. PLANNING AND DESIGN
+% ============================================================
+\section{Planning and Design}
+
+\subsection{Project Development Methodology}
+% TODO: Describe development methodology (Agile, iterative, etc.)
+
+\subsection{System Architecture}
+% TODO: Include system architecture diagram and description
+
+\subsection{User Interface Wireframe}
+% TODO: Include UI wireframes/mockups
+
+\newpage
+
+% ============================================================
+% 6. IMPLEMENTATION
+% ============================================================
+\section{Implementation}
+
+\subsection{Backend Development}
+
+\subsubsection{Project Structure}
+% TODO: Describe backend project structure
+
+\subsubsection{API Design}
+% TODO: Describe FastAPI endpoints and design decisions
+
+\subsubsection{Inpainting Service}
+% TODO: Describe inpainting service implementation
+
+\subsubsection{Style Transfer Service}
+% TODO: Describe style transfer service implementation
+
+\subsubsection{Restoration Service}
+% TODO: Describe restoration service implementation (CodeFormer, GFPGAN, Real-ESRGAN)
+
+\subsubsection{Model Management and VRAM Optimization}
+% TODO: Describe model loading, quantization (4-bit, 8-bit), CPU offloading
+
+\subsection{Frontend Development}
+
+\subsubsection{Project Structure}
+% TODO: Describe frontend project structure
+
+\subsubsection{User Interface Design}
+% TODO: Describe React components, tab navigation, Tailwind CSS styling
+
+\subsubsection{Canvas and Mask Drawing}
+% TODO: Describe inpainting mask drawing implementation
+
+\subsubsection{API Integration}
+% TODO: Describe frontend-backend communication
+
+\newpage
+
+% ============================================================
+% 7. PROJECT DIFFICULTIES AND LEARNING OUTCOMES
+% ============================================================
+\section{Project Difficulties and Learning Outcomes}
+
+\subsection{Project Difficulties}
+% TODO: Describe challenges encountered
+
+\subsection{Learning Outcomes}
+% TODO: Describe what was learned
+
+\newpage
+
+% ============================================================
+% 8. FUTURE IMPLEMENTATION
+% ============================================================
+\section{Future Implementation}
+% TODO: Describe future work and enhancements
+
+\newpage
+
+% ============================================================
+% 9. REFERENCES
+% ============================================================
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
