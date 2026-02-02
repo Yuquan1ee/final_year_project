@@ -36,6 +36,10 @@ export interface StyleTransferParams {
   style: string;
   model?: string;
   strength?: number;
+  negativePrompt?: string;
+  guidanceScale?: number;
+  numInferenceSteps?: number;
+  seed?: number | null;
 }
 
 export interface RestorationParams {
@@ -126,6 +130,10 @@ export async function styleTransfer(params: StyleTransferParams): Promise<ImageR
       style: params.style,
       model: params.model || 'sdxl-img2img',
       strength: params.strength || 0.6,
+      negative_prompt: params.negativePrompt || 'blurry, low quality, distorted, deformed',
+      guidance_scale: params.guidanceScale ?? 7.5,
+      num_inference_steps: params.numInferenceSteps ?? 30,
+      seed: params.seed ?? null,
     }),
   });
 

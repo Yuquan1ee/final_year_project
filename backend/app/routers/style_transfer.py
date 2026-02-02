@@ -28,6 +28,10 @@ async def apply_style(request: StyleTransferRequest) -> ImageResponse:
         style=request.style,
         model_key=request.model.value,
         strength=request.strength,
+        negative_prompt=request.negative_prompt,
+        guidance_scale=request.guidance_scale,
+        num_inference_steps=request.num_inference_steps,
+        seed=request.seed,
     )
 
     if error:

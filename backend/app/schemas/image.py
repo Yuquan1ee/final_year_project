@@ -97,6 +97,13 @@ class StyleTransferRequest(BaseModel):
         default=0.6, ge=0.0, le=1.0,
         description="Style strength (higher = more stylized)"
     )
+    negative_prompt: str = Field(
+        default="blurry, low quality, distorted, deformed",
+        description="What to avoid in generation"
+    )
+    guidance_scale: float = Field(default=7.5, ge=1.0, le=20.0)
+    num_inference_steps: int = Field(default=30, ge=10, le=100)
+    seed: Optional[int] = Field(default=None, ge=0, le=2147483647, description="Random seed for reproducibility")
 
 
 # =============================================================================

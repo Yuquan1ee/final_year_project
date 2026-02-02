@@ -347,25 +347,45 @@ class DiffusionService:
         if quantization in ("8bit", "4bit", "nf4") and config["pipeline"] == "FluxFillPipeline":
             pipe = self._load_flux_fill_quantized(config, quantization, torch_dtype)
         elif quantization in ("8bit", "4bit", "nf4"):
-            # Generic quantization for non-FLUX models (fallback)
+            # Pipeline-level quantization for non-FLUX models (SD, SDXL, etc.)
+            # Uses PipelineQuantizationConfig which auto-applies quantization to
+            # the correct model components (e.g., unet for SD/SDXL pipelines).
             try:
-                from diffusers import BitsAndBytesConfig as DiffusersBitsAndBytesConfig
+                from diffusers.quantizers import PipelineQuantizationConfig
+
                 if quantization == "8bit":
-                    quant_config = DiffusersBitsAndBytesConfig(load_in_8bit=True)
+                    quant_backend = "bitsandbytes_8bit"
+                    quant_kwargs = {"load_in_8bit": True}
                 else:
-                    quant_config = DiffusersBitsAndBytesConfig(
-                        load_in_4bit=True,
-                        bnb_4bit_quant_type="nf4" if quantization == "nf4" else "fp4",
-                        bnb_4bit_compute_dtype=torch_dtype,
-                    )
-                print(f"  Loading with {quantization} quantization...")
+                    quant_backend = "bitsandbytes_4bit"
+                    quant_type = "nf4" if quantization == "nf4" else "fp4"
+                    quant_kwargs = {
+                        "load_in_4bit": True,
+                        "bnb_4bit_quant_type": quant_type,
+                        "bnb_4bit_compute_dtype": torch_dtype,
+                    }
+
+                # Determine which components to quantize based on pipeline type
+                pipeline_name = config["pipeline"]
+                if "XL" in pipeline_name:
+                    components_to_quantize = ["unet"]
+                else:
+                    components_to_quantize = ["unet"]
+
+                pipeline_quant_config = PipelineQuantizationConfig(
+                    quant_backend=quant_backend,
+                    quant_kwargs=quant_kwargs,
+                    components_to_quantize=components_to_quantize,
+                )
+
+                print(f"  Loading with {quantization} quantization via PipelineQuantizationConfig...")
                 pipe = pipeline_class.from_pretrained(
                     config["model_id"],
                     torch_dtype=torch_dtype,
-                    quantization_config=quant_config,
+                    quantization_config=pipeline_quant_config,
                 )
             except ImportError:
-                print("  bitsandbytes not available, falling back to standard loading")
+                print("  PipelineQuantizationConfig not available, falling back to standard loading")
                 pipe = pipeline_class.from_pretrained(
                     config["model_id"],
                     torch_dtype=torch_dtype,
@@ -503,6 +523,10 @@ class DiffusionService:
         style: str,
         model_key: str = "sdxl-img2img",
         strength: float = 0.6,
+        negative_prompt: str = "blurry, low quality, distorted, deformed",
+        guidance_scale: float = 7.5,
+        num_inference_steps: int = 30,
+        seed: Optional[int] = None,
     ) -> Tuple[Optional[str], Optional[str], float]:
         """
         Apply style transfer to an image.
@@ -537,13 +561,23 @@ class DiffusionService:
             # Load pipeline
             pipe = self._load_pipeline(f"style-{model_key}", config)
 
+            # Build inference kwargs
+            pipe_kwargs: Dict[str, Any] = {
+                "prompt": style_prompt,
+                "negative_prompt": negative_prompt,
+                "image": image,
+                "strength": strength,
+                "guidance_scale": guidance_scale,
+                "num_inference_steps": num_inference_steps,
+            }
+
+            # Set seed via generator if provided
+            if seed is not None:
+                pipe_kwargs["generator"] = torch.Generator(device=self.device).manual_seed(seed)
+
             # Run inference
             with torch.inference_mode():
-                result = pipe(
-                    prompt=style_prompt,
-                    image=image,
-                    strength=strength,
-                ).images[0]
+                result = pipe(**pipe_kwargs).images[0]
 
             # Rescale result back to original dimensions
             if result.size != original_size:

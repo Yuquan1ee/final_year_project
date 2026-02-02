@@ -80,6 +80,13 @@ function StyleTransferTab() {
   const [strength, setStrength] = useState(0.7)
   const [selectedModel, setSelectedModel] = useState<ModelId>('sdxl-img2img')
 
+  // Advanced parameters
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [negativePrompt, setNegativePrompt] = useState('blurry, low quality, distorted, deformed')
+  const [guidanceScale, setGuidanceScale] = useState(7.5)
+  const [numInferenceSteps, setNumInferenceSteps] = useState(30)
+  const [seed, setSeed] = useState<number | null>(null)
+
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -121,6 +128,10 @@ function StyleTransferTab() {
         style: styleValue,
         model: selectedModel,
         strength,
+        negativePrompt,
+        guidanceScale,
+        numInferenceSteps,
+        seed,
       })
 
       if (response.success && response.image) {
@@ -296,6 +307,118 @@ function StyleTransferTab() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Advanced Settings (collapsible) */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-slate-100 transition-colors"
+              >
+                <svg
+                  className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Advanced Settings
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-3 space-y-4 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+                  {/* Negative Prompt */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-1 block">Negative Prompt</label>
+                    <p className="text-xs text-slate-500 mb-2">Describe what you want to avoid in the generated image.</p>
+                    <textarea
+                      value={negativePrompt}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
+                      placeholder="blurry, low quality, distorted, deformed"
+                      rows={2}
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg
+                                 text-slate-200 placeholder-slate-500 focus:outline-none
+                                 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                                 resize-none text-sm"
+                    />
+                  </div>
+
+                  {/* Guidance Scale */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-sm font-medium text-slate-300">Guidance Scale</label>
+                      <span className="text-sm text-slate-400">{guidanceScale}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mb-2">How closely the model follows your prompt. Higher values produce results more aligned with the prompt but may look less natural.</p>
+                    <input
+                      type="range"
+                      min={1.0}
+                      max={20.0}
+                      step={0.5}
+                      value={guidanceScale}
+                      onChange={(e) => setGuidanceScale(parseFloat(e.target.value))}
+                      className="w-full accent-indigo-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                      <span>1.0</span>
+                      <span>20.0</span>
+                    </div>
+                  </div>
+
+                  {/* Inference Steps */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-sm font-medium text-slate-300">Inference Steps</label>
+                      <span className="text-sm text-slate-400">{numInferenceSteps}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 mb-2">Number of denoising steps. More steps generally improve quality but take longer to generate.</p>
+                    <input
+                      type="range"
+                      min={10}
+                      max={100}
+                      step={1}
+                      value={numInferenceSteps}
+                      onChange={(e) => setNumInferenceSteps(parseInt(e.target.value))}
+                      className="w-full accent-indigo-500"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                      <span>10</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+
+                  {/* Seed */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-300 mb-1 block">Seed</label>
+                    <p className="text-xs text-slate-500 mb-2">Set a fixed seed to get reproducible results. The same seed with the same settings will produce the same output.</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        max={2147483647}
+                        value={seed ?? ''}
+                        onChange={(e) => setSeed(e.target.value === '' ? null : parseInt(e.target.value))}
+                        placeholder="Random"
+                        className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg
+                                   text-slate-200 placeholder-slate-500 focus:outline-none
+                                   focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSeed(null)}
+                        title="Randomize"
+                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300
+                                   rounded-lg text-sm transition-colors"
+                      >
+                        🎲
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">Leave empty for random seed</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Generate button */}
