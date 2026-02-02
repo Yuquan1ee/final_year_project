@@ -34,8 +34,6 @@ function HomeTab() {
     'Denoising Diffusion Probabilistic Models (DDPM)',
     'Denoising Diffusion Implicit Models (DDIM)',
     'Latent Diffusion Models (Stable Diffusion)',
-    'ControlNet',
-    'LoRA (Low-Rank Adaptation)',
   ]
 
   return (
@@ -140,7 +138,7 @@ function HomeTab() {
           </div>
           <div className="bg-slate-800 rounded-lg p-4">
             <h4 className="font-medium mb-2">AI Models</h4>
-            <p className="text-slate-400 text-sm">Stable Diffusion, ControlNet, IP-Adapter</p>
+            <p className="text-slate-400 text-sm">Stable Diffusion, SDXL, Kandinsky, FLUX.1</p>
           </div>
           <div className="bg-slate-800 rounded-lg p-4">
             <h4 className="font-medium mb-2">Experiments</h4>

@@ -1,6 +1,6 @@
 # Essential Papers for Diffusion Models & Image Generation
 
-A comprehensive reading list for understanding modern diffusion models, from foundational theory to state-of-the-art applications like Stable Diffusion, ControlNet, and Sora.
+A comprehensive reading list for understanding modern diffusion models, from foundational theory to state-of-the-art applications like Stable Diffusion and Sora.
 
 ---
 
@@ -88,23 +88,7 @@ A comprehensive reading list for understanding modern diffusion models, from fou
 
 ---
 
-### 6. Adding Conditional Control to Text-to-Image Diffusion Models (ControlNet)
-**Authors:** Lvmin Zhang, Anyi Rao, Maneesh Agrawala  
-**Year:** 2023  
-**Conference:** ICCV 2023  
-
-**Key Contribution:** Adds precise spatial control (edges, depth, pose, etc.) to pretrained diffusion models using zero convolutions.
-
-- **arXiv:** https://arxiv.org/abs/2302.05543
-- **PDF:** https://arxiv.org/pdf/2302.05543.pdf
-- **GitHub:** https://github.com/lllyasviel/ControlNet
-- **Hugging Face:** https://huggingface.co/lllyasviel/ControlNet
-
-**Why Read:** Revolutionary for controllable image generation. Shows how to add spatial conditioning to existing models.
-
----
-
-### 7. Prompt-to-Prompt Image Editing with Cross-Attention Control
+### 6. Prompt-to-Prompt Image Editing with Cross-Attention Control
 **Authors:** Amir Hertz, Ron Mokady, Jay Tenenbaum, Kfir Aberman, Yael Pritch, Daniel Cohen-Or  
 **Year:** 2022  
 
@@ -245,8 +229,7 @@ A comprehensive reading list for understanding modern diffusion models, from fou
 ---
 
 ### Week 4: Advanced Control & Architecture
-7. **ControlNet (2023)** - Spatial control mechanisms
-8. **DiT (2023)** - Transformer-based architecture
+7. **DiT (2023)** - Transformer-based architecture
 
 **Goal:** Learn about state-of-the-art control and architectural improvements.
 
@@ -275,7 +258,6 @@ A comprehensive reading list for understanding modern diffusion models, from fou
 
 ### Open Source Models
 - **Stable Diffusion Models:** https://huggingface.co/stabilityai
-- **ControlNet Models:** https://huggingface.co/lllyasviel
 - **DiT Checkpoints:** https://github.com/facebookresearch/DiT#pre-trained-dit-models
 
 ---

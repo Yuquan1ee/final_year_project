@@ -198,7 +198,7 @@ Large language models are the most discussed aspect of generative AI today, but 
 
 Traditional methods in image inpainting, such as patch-based and exemplar-based approaches, have notable limitations in generating semantically meaningful content, particularly in high-resolution or complex scenarios \citep{ma2023uncertainty}. These methods often struggle with boundary artefacts when dealing with large masked regions due to insufficient constraints, resulting in visible seams and structurally inconsistent outputs \citep{ma2023uncertainty}. Such limitations create significant accessibility barriers, as current solutions frequently require extensive technical expertise and expensive software licences, effectively restricting advanced image editing capabilities to professional users.
 
-The introduction of deep learning techniques, particularly diffusion models \citep{ho2020ddpm, song2021ddim, rombach2022ldm}, has led to significant improvements in image generation quality and semantic comprehension, enabling capabilities that were previously difficult or impossible to automate. Recent advances such as ControlNet \citep{zhang2023controlnet} and Low-Rank Adaptation (LoRA) \citep{hu2022lora} have further expanded the practical applicability of these models. A detailed review of these developments is presented in Section~\ref{sec:literature_review}.
+The introduction of deep learning techniques, particularly diffusion models \citep{ho2020ddpm, song2021ddim, rombach2022ldm}, has led to significant improvements in image generation quality and semantic comprehension, enabling capabilities that were previously difficult or impossible to automate. A detailed review of these developments is presented in Section~\ref{sec:literature_review}.
 
 Despite these breakthroughs, critical gaps persist between state-of-the-art image editing models and users' practical needs. Existing solutions face four key limitations: (1) fragmented ecosystems requiring users to switch between different applications for different editing tasks, (2) high complexity barriers that make advanced editing tools inaccessible to non-expert users, (3) reliance on command-line tools, Python programming, and GPU-equipped hardware, and (4) a lack of unified platforms that integrate multiple diffusion model capabilities within a single interface.
 
@@ -303,14 +303,6 @@ The foundation of modern image generation lies in diffusion models, which produc
 \subsubsection{Latent Diffusion Models (LDM)}
 
 \citet{rombach2022ldm} proposed Latent Diffusion Models (LDMs), which achieved an optimal balance between generative quality and computational efficiency. Rather than performing diffusion directly in pixel space, LDMs first encode images into a lower-dimensional latent representation using a pre-trained autoencoder, then apply the diffusion process within this compressed latent space. This approach alleviates critical computational bottlenecks, substantially reducing memory and computation requirements while preserving high image quality. LDMs form the basis of the widely adopted Stable Diffusion family of models, including the inpainting and image-to-image variants used in this project.
-
-\subsubsection{ControlNet}
-
-\citet{zhang2023controlnet} introduced ControlNet, a neural network architecture that enables fine-grained spatial control over pre-trained diffusion models. ControlNet creates a trainable copy of the encoding layers of a diffusion model while keeping the original model weights locked. Additional spatial conditions---such as edge maps, depth maps, or segmentation masks---are fed into the trainable copy, allowing users to guide the generation process with precise structural constraints. This architecture preserves the quality of the original model while adding controllability, making it particularly relevant for image editing tasks that require spatial precision.
-
-\subsubsection{Low-Rank Adaptation (LoRA)}
-
-\citet{hu2022lora} proposed Low-Rank Adaptation (LoRA), a parameter-efficient fine-tuning method that injects trainable low-rank decomposition matrices into the layers of a pre-trained model. Instead of updating all model parameters during fine-tuning, LoRA freezes the original weights and only trains the low-rank matrices, reducing the number of trainable parameters by several orders of magnitude. In the context of diffusion models, LoRA enables rapid adaptation to specific styles or domains without requiring full model retraining, making it a practical technique for customising image generation with limited computational resources.
 
 \subsection{Inpainting Techniques}
 % TODO: Review inpainting approaches (SD Inpainting, SDXL, Kandinsky, FLUX.1 Fill)

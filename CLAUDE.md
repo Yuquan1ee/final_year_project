@@ -23,8 +23,6 @@ This project focuses on leveraging diffusion models (e.g., Stable Diffusion, FLU
 - Denoising Diffusion Probabilistic Models (DDPM)
 - Denoising Diffusion Implicit Models (DDIM)
 - Latent Diffusion Models (Stable Diffusion)
-- ControlNet (conditional control for diffusion models)
-- LoRA (Low-Rank Adaptation for efficient fine-tuning)
 
 ## Current Status
 
