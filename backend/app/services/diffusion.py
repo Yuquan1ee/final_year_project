@@ -384,6 +384,9 @@ class DiffusionService:
                     torch_dtype=torch_dtype,
                     quantization_config=pipeline_quant_config,
                 )
+                # Move non-quantized components (VAE, text encoders, scheduler)
+                # to GPU. The quantized UNet is already on CUDA from bitsandbytes.
+                pipe = pipe.to(self.device)
             except ImportError:
                 print("  PipelineQuantizationConfig not available, falling back to standard loading")
                 pipe = pipeline_class.from_pretrained(
