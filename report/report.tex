@@ -274,11 +274,136 @@ Success will be measured through processing speed benchmarks, output quality ass
 % ============================================================
 \section{Project Schedule}
 
+This section outlines the project timeline, work breakdown structure, and risk management plan for DiffusionDesk. The project spans two semesters of Academic Year 2025/2026, with key milestones aligned to the FYP submission deadlines.
+
+\subsection{Project Timeline}
+
+Table~\ref{tab:timeline} presents the key milestones and deliverables for the project.
+
+\begin{table}[H]
+\centering
+\caption{Project Timeline and Milestones}
+\label{tab:timeline}
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\textbf{Date} & \textbf{Week} & \textbf{Milestone} \\
+\hline
+11 Aug 2025 & Sem 1, Wk 1 & FYP officially commences \\
+\hline
+1 Sep 2025 & Sem 1, Wk 4 & Submission of Project Plan to Supervisor \\
+\hline
+Oct 2025 & Sem 1, Wk 8--10 & Backend API and diffusion service implementation \\
+\hline
+Nov 2025 & Sem 1, Wk 12--13 & Frontend development and API integration \\
+\hline
+26 Jan 2026 & Sem 2, Wk 3 & Submission of Interim Report \\
+\hline
+Feb 2026 & Sem 2, Wk 5--7 & Feature refinement and testing on cloud GPU \\
+\hline
+23 Mar 2026 & Sem 2, Wk 10 & Submission of Final Report \\
+\hline
+17 Apr 2026 & Sem 2, Wk 13 & Submission of Amended Final Report \\
+\hline
+8--13 May 2026 & -- & Oral Presentation (20 min + 10 min Q\&A) \\
+\hline
+\end{tabularx}
+\end{table}
+
 \subsection{Work Breakdown}
-% TODO: Include Gantt chart or work breakdown structure
+
+This section provides a structured breakdown of the project activities, their descriptions, estimated effort, and dependencies. The work breakdown structure facilitates progress tracking and resource allocation throughout the development lifecycle.
+
+\begin{longtable}{|p{0.5cm}|p{2.8cm}|p{5.5cm}|p{1.8cm}|p{2cm}|}
+\caption{Work Breakdown Structure} \label{tab:wbs} \\
+\hline
+\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Dependencies} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Dependencies} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+1.1 & Literature Review & Review foundational papers on diffusion models (DDPM, DDIM, LDM) and existing inpainting, style transfer, and restoration techniques. & 10 & NIL \\
+\hline
+1.2 & Technology Evaluation & Evaluate and select appropriate frameworks, libraries, and pre-trained models from the Hugging Face ecosystem. & 5 & 1.1 \\
+\hline
+1.3 & Requirements Specification & Define functional and non-functional requirements based on project objectives and supervisor feedback. & 4 & 1.2 \\
+\hline
+2.1 & Backend Architecture Design & Design the FastAPI backend structure, including API endpoints, service layers, and model management strategy. & 6 & 1.3 \\
+\hline
+2.2 & Inpainting Service Implementation & Implement the inpainting service supporting Stable Diffusion, SDXL, Kandinsky, and FLUX.1 Fill models with quantisation support. & 15 & 2.1 \\
+\hline
+2.3 & Style Transfer Service Implementation & Implement the style transfer service using SDXL image-to-image generation with configurable style prompts and parameters. & 10 & 2.1 \\
+\hline
+2.4 & Restoration Service Implementation & Implement face restoration (CodeFormer, GFPGAN) and image upscaling (Real-ESRGAN) services. & 10 & 2.1 \\
+\hline
+2.5 & VRAM Optimisation & Implement model quantisation (4-bit, 8-bit) and CPU offloading strategies to support varying GPU configurations. & 8 & 2.2, 2.3 \\
+\hline
+3.1 & Frontend UI Design & Design the user interface layout, including wireframes for the Home, Inpainting, Style Transfer, and Restoration tabs. & 5 & 1.3 \\
+\hline
+3.2 & Frontend Implementation & Develop the React frontend with TypeScript and Tailwind CSS, implementing all UI components and tab navigation. & 15 & 3.1 \\
+\hline
+3.3 & Canvas and Mask Drawing & Implement the interactive canvas component for users to draw inpainting masks on uploaded images. & 8 & 3.2 \\
+\hline
+3.4 & API Integration & Connect the frontend to the backend API, implementing image upload, processing requests, and result display. & 6 & 2.2, 2.3, 2.4, 3.2 \\
+\hline
+4.1 & Cloud Deployment Testing & Deploy and test the backend on Google Colab with ngrok tunnelling to validate GPU inference performance. & 5 & 3.4 \\
+\hline
+4.2 & Feature Testing and Refinement & Conduct end-to-end testing of all features, addressing bugs and refining based on test results. & 10 & 4.1 \\
+\hline
+4.3 & Performance Benchmarking & Measure and document inference times, memory usage, and output quality across different models and configurations. & 5 & 4.2 \\
+\hline
+5.1 & Supervisor Meetings & Regular meetings with the supervisor to report progress, seek guidance, and align on project direction. & 8 & All Tasks \\
+\hline
+5.2 & Interim Report Writing & Prepare and submit the interim report documenting progress, challenges, and preliminary results. & 5 & 2.5, 3.4 \\
+\hline
+5.3 & Final Report Writing & Prepare the final report with comprehensive documentation of the system design, implementation, and evaluation. & 15 & 4.3, 5.2 \\
+\hline
+5.4 & Oral Presentation Preparation & Prepare presentation slides and rehearse for the oral examination. & 5 & 5.3 \\
+\hline
+
+\end{longtable}
 
 \subsection{Risk Management}
-% TODO: Write risk management plan
+
+This section identifies potential risks that may impact the project's success and outlines mitigation strategies. Each risk is assessed based on its probability of occurrence, potential impact, and overall risk level. Proactive risk management ensures that challenges are anticipated and addressed promptly.
+
+\begin{longtable}{|p{2.5cm}|p{4cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
+\caption{Risk Management Plan} \label{tab:risk} \\
+\hline
+\textbf{Risk Description} & \textbf{Mitigation Strategy} & \textbf{Probability} & \textbf{Impact} & \textbf{Risk Level} \\
+\hline
+\endfirsthead
+\hline
+\textbf{Risk Description} & \textbf{Mitigation Strategy} & \textbf{Probability} & \textbf{Impact} & \textbf{Risk Level} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+Insufficient GPU memory for large models & Implement model quantisation (4-bit, 8-bit) using bitsandbytes and enable CPU offloading. Prioritise smaller models (SD Inpainting) when VRAM is limited. & High & High & High \\
+\hline
+Model inference too slow for interactive use & Use DDIM sampling with reduced steps (20--50), enable attention slicing, and consider model caching to reduce repeated loading overhead. & Medium & High & Medium \\
+\hline
+Diffusion model produces low-quality or artefacted outputs & Fine-tune prompt engineering, adjust guidance scale and denoising strength parameters, and provide users with parameter controls for iterative refinement. & Medium & Medium & Medium \\
+\hline
+Breaking changes in Hugging Face Diffusers library & Pin specific library versions in requirements.txt and test compatibility before updating dependencies. & Medium & Medium & Medium \\
+\hline
+Cloud GPU availability constraints (e.g., Colab session limits) & Design the system for stateless operation, allowing sessions to be restarted without data loss. Document alternative deployment options (NTU HPC, local GPU). & Medium & Medium & Medium \\
+\hline
+Frontend-backend integration issues & Define clear API contracts using OpenAPI specifications, implement comprehensive error handling, and test integration incrementally throughout development. & Medium & High & Medium \\
+\hline
+Scope creep due to additional feature requests & Adhere strictly to the defined project scope. Evaluate new requests against timeline constraints and prioritise core features over enhancements. & Medium & Medium & Medium \\
+\hline
+Unfamiliarity with diffusion model architectures & Conduct thorough literature review early in the project. Leverage existing tutorials, documentation, and pre-trained models to accelerate learning. & Low & High & Low \\
+\hline
+Personal time management challenges & Maintain a detailed project schedule with milestones. Allocate buffer time for unexpected delays and communicate proactively with the supervisor. & Low & High & Low \\
+\hline
+
+\end{longtable}
 
 \newpage
 
@@ -305,16 +430,125 @@ The foundation of modern image generation lies in diffusion models, which produc
 \citet{rombach2022ldm} proposed Latent Diffusion Models (LDMs), which achieved an optimal balance between generative quality and computational efficiency. Rather than performing diffusion directly in pixel space, LDMs first encode images into a lower-dimensional latent representation using a pre-trained autoencoder, then apply the diffusion process within this compressed latent space. This approach alleviates critical computational bottlenecks, substantially reducing memory and computation requirements while preserving high image quality. LDMs form the basis of the widely adopted Stable Diffusion family of models, including the inpainting and image-to-image variants used in this project.
 
 \subsection{Inpainting Techniques}
-% TODO: Review inpainting approaches (SD Inpainting, SDXL, Kandinsky, FLUX.1 Fill)
+
+% TODO: Write introduction to inpainting - define the problem, traditional approaches (patch-based, exemplar-based), and transition to deep learning methods
+
+\subsubsection{Stable Diffusion Inpainting}
+% TODO: Review runwayml/stable-diffusion-inpainting
+% - Architecture: How it extends SD v1.5 for inpainting (additional input channels for mask)
+% - Conditioning mechanism for masked regions
+% - Strengths and limitations
+
+\subsubsection{Stable Diffusion XL Inpainting}
+% TODO: Review diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+% - Improvements over SD 1.5 (larger UNet, dual text encoders, higher resolution)
+% - VRAM requirements and quantisation options
+% - Quality vs computational trade-offs
+
+\subsubsection{Kandinsky Inpainting}
+% TODO: Review kandinsky-community/kandinsky-2-2-decoder-inpaint
+% - Two-stage architecture (prior + decoder)
+% - CLIP image embeddings for conditioning
+% - Comparison with SD-based approaches
+
+\subsubsection{FLUX.1 Fill}
+% TODO: Review black-forest-labs/FLUX.1-Fill-dev
+% - Flow matching vs traditional diffusion
+% - Transformer-based architecture (DiT)
+% - State-of-the-art quality but high VRAM requirements
+% - Quantisation strategies (NF4) for practical deployment
 
 \subsection{Style Transfer}
-% TODO: Review style transfer methods
+
+% TODO: Write introduction to neural style transfer - from Gatys et al. to diffusion-based approaches
+
+\subsubsection{Traditional Neural Style Transfer}
+% TODO: Brief review of:
+% - Gatys et al. (2015) - optimisation-based style transfer
+% - Feed-forward style transfer networks
+% - Limitations leading to diffusion-based approaches
+
+\subsubsection{Diffusion-Based Style Transfer}
+% TODO: Review img2img approach for style transfer
+% - How img2img works (adding noise to source, then denoising with style prompt)
+% - Role of denoising strength in preserving structure vs applying style
+% - SDXL img2img for higher quality results
+
+\subsubsection{Style Prompting Strategies}
+% TODO: Discuss prompt engineering for different artistic styles
+% - Anime, oil painting, watercolour, pencil sketch, etc.
+% - Negative prompts for quality control
+% - Guidance scale and its effect on style adherence
 
 \subsection{Image Restoration}
-% TODO: Review CodeFormer, GFPGAN, Real-ESRGAN
+
+% TODO: Write introduction to image restoration - degradation types, traditional vs deep learning approaches
+
+\subsubsection{Face Restoration}
+
+\paragraph{CodeFormer}
+% TODO: Review CodeFormer (Zhou et al., 2022)
+% - Codebook lookup approach for face restoration
+% - Transformer-based architecture
+% - Fidelity vs quality trade-off parameter
+% - Why chosen for this project
+
+\paragraph{GFPGAN}
+% TODO: Review GFPGAN (Wang et al., 2021)
+% - GAN-based face restoration
+% - Facial component dictionaries
+% - Comparison with CodeFormer
+% - Use cases where GFPGAN excels
+
+\subsubsection{Image Upscaling}
+
+\paragraph{Real-ESRGAN}
+% TODO: Review Real-ESRGAN (Wang et al., 2021)
+% - ESRGAN architecture improvements
+% - Real-world degradation modelling
+% - 2x and 4x upscaling options
+% - Integration with face restoration pipeline
 
 \subsection{Technology Stack Considerations}
-% TODO: Review and justify technology choices (React, FastAPI, PyTorch, Diffusers)
+
+This section reviews and justifies the technology choices for developing DiffusionDesk, considering factors such as performance, ecosystem support, developer experience, and suitability for machine learning workloads.
+
+\subsubsection{Frontend Framework Selection}
+
+% TODO: Compare frontend frameworks and justify React choice
+% - React vs Vue vs Angular
+% - Criteria: component model, TypeScript support, ecosystem, learning curve
+% - Why React: mature ecosystem, hooks for state management, large community
+% - Vite as build tool (faster than Create React App)
+% - Tailwind CSS for utility-first styling
+
+\subsubsection{Backend Framework Selection}
+
+% TODO: Compare backend frameworks and justify FastAPI choice
+% - FastAPI vs Flask vs Django
+% - Criteria: async support, automatic documentation, type hints, ML ecosystem compatibility
+% - Why FastAPI: native async, Pydantic validation, OpenAPI docs, PyTorch compatibility
+% - Comparison of performance characteristics
+
+\subsubsection{Machine Learning Framework and Libraries}
+
+% TODO: Review PyTorch and Hugging Face ecosystem
+% - PyTorch vs TensorFlow for inference
+% - Hugging Face Diffusers library
+%   - Pipeline abstractions
+%   - Model hub and pre-trained weights
+%   - Scheduler support (DDIM, DPM++, etc.)
+% - Hugging Face Transformers for text encoders
+% - bitsandbytes for quantisation
+% - Why this stack enables rapid prototyping with SOTA models
+
+\subsubsection{Deployment Considerations}
+
+% TODO: Discuss deployment options
+% - Google Colab for prototyping (free GPU, ngrok tunnelling)
+% - NTU HPC cluster for production workloads
+% - Docker containerisation considerations
+% - Trade-offs between different deployment environments
 
 \newpage
 
