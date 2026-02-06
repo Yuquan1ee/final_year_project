@@ -25,6 +25,7 @@
 \usepackage{url}                      % URL formatting
 \usepackage{pdfpages}                 % Include PDF pages
 \usepackage{longtable}                % Multi-page tables
+\usepackage{array}                    % Extended column definitions
 \usepackage[authoryear,round]{natbib}  % APA-style author-year citations
 
 % ============================================================
@@ -284,7 +285,8 @@ Table~\ref{tab:timeline} presents the key milestones and deliverables for the pr
 \centering
 \caption{Project Timeline and Milestones}
 \label{tab:timeline}
-\begin{tabularx}{\textwidth}{|l|l|X|}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3cm}|p{3cm}|p{7.5cm}|}
 \hline
 \textbf{Date} & \textbf{Week} & \textbf{Milestone} \\
 \hline
@@ -306,27 +308,29 @@ Feb 2026 & Sem 2, Wk 5--7 & Feature refinement and testing on cloud GPU \\
 \hline
 8--13 May 2026 & -- & Oral Presentation (20 min + 10 min Q\&A) \\
 \hline
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 \subsection{Work Breakdown}
 
 This section provides a structured breakdown of the project activities, their descriptions, estimated effort, and dependencies. The work breakdown structure facilitates progress tracking and resource allocation throughout the development lifecycle.
 
-\begin{longtable}{|p{0.5cm}|p{2.8cm}|p{5.5cm}|p{1.8cm}|p{2cm}|}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{|p{0.6cm}|p{2.6cm}|p{5.8cm}|p{1.4cm}|p{1.8cm}|}
 \caption{Work Breakdown Structure} \label{tab:wbs} \\
 \hline
-\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Dependencies} \\
+\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Depends On} \\
 \hline
 \endfirsthead
 \hline
-\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Dependencies} \\
+\textbf{ID} & \textbf{Activity} & \textbf{Description} & \textbf{Effort (Days)} & \textbf{Depends On} \\
 \hline
 \endhead
 \hline
 \endfoot
 
-1.1 & Literature Review & Review foundational papers on diffusion models (DDPM, DDIM, LDM) and existing inpainting, style transfer, and restoration techniques. & 10 & NIL \\
+1.1 & Literature Review & Review foundational papers on diffusion models (DDPM, DDIM, LDM) and existing inpainting, style transfer, and restoration techniques. & 10 & -- \\
 \hline
 1.2 & Technology Evaluation & Evaluate and select appropriate frameworks, libraries, and pre-trained models from the Hugging Face ecosystem. & 5 & 1.1 \\
 \hline
@@ -334,11 +338,11 @@ This section provides a structured breakdown of the project activities, their de
 \hline
 2.1 & Backend Architecture Design & Design the FastAPI backend structure, including API endpoints, service layers, and model management strategy. & 6 & 1.3 \\
 \hline
-2.2 & Inpainting Service Implementation & Implement the inpainting service supporting Stable Diffusion, SDXL, Kandinsky, and FLUX.1 Fill models with quantisation support. & 15 & 2.1 \\
+2.2 & Inpainting Service & Implement the inpainting service supporting SD, SDXL, Kandinsky, and FLUX.1 Fill models with quantisation support. & 15 & 2.1 \\
 \hline
-2.3 & Style Transfer Service Implementation & Implement the style transfer service using SDXL image-to-image generation with configurable style prompts and parameters. & 10 & 2.1 \\
+2.3 & Style Transfer Service & Implement the style transfer service using SDXL img2img with configurable style prompts and parameters. & 10 & 2.1 \\
 \hline
-2.4 & Restoration Service Implementation & Implement face restoration (CodeFormer, GFPGAN) and image upscaling (Real-ESRGAN) services. & 10 & 2.1 \\
+2.4 & Restoration Service & Implement face restoration (CodeFormer, GFPGAN) and image upscaling (Real-ESRGAN) services. & 10 & 2.1 \\
 \hline
 2.5 & VRAM Optimisation & Implement model quantisation (4-bit, 8-bit) and CPU offloading strategies to support varying GPU configurations. & 8 & 2.2, 2.3 \\
 \hline
@@ -348,62 +352,68 @@ This section provides a structured breakdown of the project activities, their de
 \hline
 3.3 & Canvas and Mask Drawing & Implement the interactive canvas component for users to draw inpainting masks on uploaded images. & 8 & 3.2 \\
 \hline
-3.4 & API Integration & Connect the frontend to the backend API, implementing image upload, processing requests, and result display. & 6 & 2.2, 2.3, 2.4, 3.2 \\
+3.4 & API Integration & Connect the frontend to the backend API, implementing image upload, processing requests, and result display. & 6 & 2.2--2.4, 3.2 \\
 \hline
 4.1 & Cloud Deployment Testing & Deploy and test the backend on Google Colab with ngrok tunnelling to validate GPU inference performance. & 5 & 3.4 \\
 \hline
-4.2 & Feature Testing and Refinement & Conduct end-to-end testing of all features, addressing bugs and refining based on test results. & 10 & 4.1 \\
+4.2 & Feature Testing & Conduct end-to-end testing of all features, addressing bugs and refining based on test results. & 10 & 4.1 \\
 \hline
-4.3 & Performance Benchmarking & Measure and document inference times, memory usage, and output quality across different models and configurations. & 5 & 4.2 \\
+4.3 & Performance Benchmarking & Measure and document inference times, memory usage, and output quality across different models. & 5 & 4.2 \\
 \hline
-5.1 & Supervisor Meetings & Regular meetings with the supervisor to report progress, seek guidance, and align on project direction. & 8 & All Tasks \\
+5.1 & Supervisor Meetings & Regular meetings with the supervisor to report progress, seek guidance, and align on project direction. & 8 & All \\
 \hline
 5.2 & Interim Report Writing & Prepare and submit the interim report documenting progress, challenges, and preliminary results. & 5 & 2.5, 3.4 \\
 \hline
-5.3 & Final Report Writing & Prepare the final report with comprehensive documentation of the system design, implementation, and evaluation. & 15 & 4.3, 5.2 \\
+5.3 & Final Report Writing & Prepare the final report with comprehensive documentation of system design, implementation, and evaluation. & 15 & 4.3, 5.2 \\
 \hline
-5.4 & Oral Presentation Preparation & Prepare presentation slides and rehearse for the oral examination. & 5 & 5.3 \\
+5.4 & Oral Presentation Prep & Prepare presentation slides and rehearse for the oral examination. & 5 & 5.3 \\
 \hline
 
 \end{longtable}
+\normalsize
 
 \subsection{Risk Management}
 
 This section identifies potential risks that may impact the project's success and outlines mitigation strategies. Each risk is assessed based on its probability of occurrence, potential impact, and overall risk level. Proactive risk management ensures that challenges are anticipated and addressed promptly.
 
-\begin{longtable}{|p{2.5cm}|p{4cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
+\footnotesize
+\renewcommand{\arraystretch}{1.4}
+\setlength{\tabcolsep}{5pt}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{6.2cm}|c|c|c|}
 \caption{Risk Management Plan} \label{tab:risk} \\
 \hline
-\textbf{Risk Description} & \textbf{Mitigation Strategy} & \textbf{Probability} & \textbf{Impact} & \textbf{Risk Level} \\
+\textbf{Risk} & \textbf{Mitigation Strategy} & \textbf{Prob.} & \textbf{Impact} & \textbf{Level} \\
 \hline
 \endfirsthead
 \hline
-\textbf{Risk Description} & \textbf{Mitigation Strategy} & \textbf{Probability} & \textbf{Impact} & \textbf{Risk Level} \\
+\textbf{Risk} & \textbf{Mitigation Strategy} & \textbf{Prob.} & \textbf{Impact} & \textbf{Level} \\
 \hline
 \endhead
 \hline
 \endfoot
 
-Insufficient GPU memory for large models & Implement model quantisation (4-bit, 8-bit) using bitsandbytes and enable CPU offloading. Prioritise smaller models (SD Inpainting) when VRAM is limited. & High & High & High \\
+Insufficient GPU memory for large models & Implement model quantisation (4-bit, 8-bit) using bitsandbytes and enable CPU offloading. Prioritise smaller models when VRAM is limited. & High & High & High \\
 \hline
-Model inference too slow for interactive use & Use DDIM sampling with reduced steps (20--50), enable attention slicing, and consider model caching to reduce repeated loading overhead. & Medium & High & Medium \\
+Slow model inference & Use DDIM sampling with reduced steps (20--50), enable attention slicing, and implement model caching to reduce loading overhead. & Medium & High & Medium \\
 \hline
-Diffusion model produces low-quality or artefacted outputs & Fine-tune prompt engineering, adjust guidance scale and denoising strength parameters, and provide users with parameter controls for iterative refinement. & Medium & Medium & Medium \\
+Low-quality or artefacted outputs & Fine-tune prompt engineering, adjust guidance scale and denoising strength, and provide users with parameter controls for iterative refinement. & Medium & Medium & Medium \\
 \hline
-Breaking changes in Hugging Face Diffusers library & Pin specific library versions in requirements.txt and test compatibility before updating dependencies. & Medium & Medium & Medium \\
+Diffusers library breaking changes & Pin specific library versions in requirements.txt and test compatibility before updating dependencies. & Medium & Medium & Medium \\
 \hline
-Cloud GPU availability constraints (e.g., Colab session limits) & Design the system for stateless operation, allowing sessions to be restarted without data loss. Document alternative deployment options (NTU HPC, local GPU). & Medium & Medium & Medium \\
+Cloud GPU constraints (Colab limits) & Design for stateless operation, allowing sessions to restart without data loss. Document alternative deployment options (NTU HPC, local GPU). & Medium & Medium & Medium \\
 \hline
-Frontend-backend integration issues & Define clear API contracts using OpenAPI specifications, implement comprehensive error handling, and test integration incrementally throughout development. & Medium & High & Medium \\
+Frontend-backend integration issues & Define clear API contracts using OpenAPI, implement comprehensive error handling, and test integration incrementally. & Medium & High & Medium \\
 \hline
-Scope creep due to additional feature requests & Adhere strictly to the defined project scope. Evaluate new requests against timeline constraints and prioritise core features over enhancements. & Medium & Medium & Medium \\
+Scope creep & Adhere strictly to defined scope. Evaluate new requests against timeline constraints and prioritise core features. & Medium & Medium & Medium \\
 \hline
-Unfamiliarity with diffusion model architectures & Conduct thorough literature review early in the project. Leverage existing tutorials, documentation, and pre-trained models to accelerate learning. & Low & High & Low \\
+Unfamiliarity with diffusion architectures & Conduct thorough literature review early. Leverage tutorials, documentation, and pre-trained models to accelerate learning. & Low & High & Low \\
 \hline
-Personal time management challenges & Maintain a detailed project schedule with milestones. Allocate buffer time for unexpected delays and communicate proactively with the supervisor. & Low & High & Low \\
+Time management challenges & Maintain detailed project schedule with milestones. Allocate buffer time and communicate proactively with supervisor. & Low & High & Low \\
 \hline
 
 \end{longtable}
+\normalsize
+\setlength{\tabcolsep}{6pt}
 
 \newpage
 
@@ -429,126 +439,478 @@ The foundation of modern image generation lies in diffusion models, which produc
 
 \citet{rombach2022ldm} proposed Latent Diffusion Models (LDMs), which achieved an optimal balance between generative quality and computational efficiency. Rather than performing diffusion directly in pixel space, LDMs first encode images into a lower-dimensional latent representation using a pre-trained autoencoder, then apply the diffusion process within this compressed latent space. This approach alleviates critical computational bottlenecks, substantially reducing memory and computation requirements while preserving high image quality. LDMs form the basis of the widely adopted Stable Diffusion family of models, including the inpainting and image-to-image variants used in this project.
 
-\subsection{Inpainting Techniques}
+\subsubsection{Enabling Technologies for Conditional Generation}
 
-% TODO: Write introduction to inpainting - define the problem, traditional approaches (patch-based, exemplar-based), and transition to deep learning methods
+The diffusion models reviewed above provide the foundational denoising mechanism, but practical text-to-image systems require additional components for conditional generation. This subsection reviews three key enabling technologies that bridge the gap between unconditional diffusion and controllable image synthesis.
 
-\subsubsection{Stable Diffusion Inpainting}
-% TODO: Review runwayml/stable-diffusion-inpainting
-% - Architecture: How it extends SD v1.5 for inpainting (additional input channels for mask)
-% - Conditioning mechanism for masked regions
-% - Strengths and limitations
+\paragraph{Classifier-Free Guidance}
 
-\subsubsection{Stable Diffusion XL Inpainting}
-% TODO: Review diffusers/stable-diffusion-xl-1.0-inpainting-0.1
-% - Improvements over SD 1.5 (larger UNet, dual text encoders, higher resolution)
-% - VRAM requirements and quantisation options
-% - Quality vs computational trade-offs
+\citet{ho2022cfg} introduced classifier-free guidance, a technique that enables conditional diffusion models to produce outputs strongly aligned with input conditions (e.g., text prompts) without requiring a separate classifier network. The method trains a single neural network to perform both conditional and unconditional generation by randomly dropping the conditioning signal during training. At inference time, the model's output is extrapolated away from the unconditional prediction towards the conditional prediction, controlled by a guidance scale parameter $w$:
+\begin{equation}
+\tilde{\epsilon}_\theta(z_t, c) = \epsilon_\theta(z_t, \emptyset) + w \cdot (\epsilon_\theta(z_t, c) - \epsilon_\theta(z_t, \emptyset))
+\end{equation}
+where $\epsilon_\theta(z_t, c)$ is the conditional prediction, $\epsilon_\theta(z_t, \emptyset)$ is the unconditional prediction, and $w$ is the guidance scale. Higher values of $w$ produce outputs more faithful to the conditioning but may reduce diversity and introduce artefacts. This parameter is exposed in DiffusionDesk as ``guidance scale'' and is fundamental to all inpainting and style transfer operations.
 
-\subsubsection{Kandinsky Inpainting}
-% TODO: Review kandinsky-community/kandinsky-2-2-decoder-inpaint
-% - Two-stage architecture (prior + decoder)
-% - CLIP image embeddings for conditioning
-% - Comparison with SD-based approaches
+\paragraph{CLIP Text-Image Alignment}
 
-\subsubsection{FLUX.1 Fill}
-% TODO: Review black-forest-labs/FLUX.1-Fill-dev
-% - Flow matching vs traditional diffusion
-% - Transformer-based architecture (DiT)
-% - State-of-the-art quality but high VRAM requirements
-% - Quantisation strategies (NF4) for practical deployment
+\citet{radford2021clip} developed CLIP (Contrastive Language-Image Pre-training), a model trained on 400 million image-text pairs to learn a joint embedding space for images and text. CLIP's text encoder transforms natural language prompts into dense vector representations that can guide image generation. In Stable Diffusion and similar models, the CLIP text encoder processes user prompts into conditioning embeddings that direct the denoising process. This architecture enables intuitive text-based control: users describe their desired output in natural language, and the model generates images aligned with that description. SDXL extends this by using dual text encoders (CLIP ViT-L and OpenCLIP ViT-G) for richer text understanding.
 
-\subsection{Style Transfer}
+\paragraph{Diffusion Transformers (DiT)}
 
-% TODO: Write introduction to neural style transfer - from Gatys et al. to diffusion-based approaches
+While Stable Diffusion and SDXL use U-Net architectures as their denoising backbone, \citet{peebles2023dit} demonstrated that Vision Transformers can serve as effective diffusion backbones. Diffusion Transformers (DiT) replace the convolutional U-Net with a transformer architecture, operating on sequences of latent patches. This approach scales more efficiently with model size and has led to state-of-the-art image generation quality. FLUX.1, developed by Black Forest Labs, adopts a DiT-based architecture with flow matching (a generalisation of diffusion that learns direct probability paths rather than score functions), achieving superior quality at the cost of increased computational requirements. The architectural shift from U-Net to DiT represents a significant evolution in diffusion model design.
 
-\subsubsection{Traditional Neural Style Transfer}
-% TODO: Brief review of:
-% - Gatys et al. (2015) - optimisation-based style transfer
-% - Feed-forward style transfer networks
-% - Limitations leading to diffusion-based approaches
+\vspace{1em}
+\noindent\textit{Having established the theoretical foundations---from DDPM's denoising mechanism, through DDIM's accelerated sampling, to LDM's latent space operation and the enabling technologies of classifier-free guidance, CLIP conditioning, and transformer backbones---the following sections examine how these principles are instantiated in practical models for specific image editing tasks.}
 
-\subsubsection{Diffusion-Based Style Transfer}
-% TODO: Review img2img approach for style transfer
-% - How img2img works (adding noise to source, then denoising with style prompt)
-% - Role of denoising strength in preserving structure vs applying style
-% - SDXL img2img for higher quality results
+\subsection{Diffusion-Based Image Inpainting}
 
-\subsubsection{Style Prompting Strategies}
-% TODO: Discuss prompt engineering for different artistic styles
-% - Anime, oil painting, watercolour, pencil sketch, etc.
-% - Negative prompts for quality control
-% - Guidance scale and its effect on style adherence
+Image inpainting is the task of filling in missing or masked regions of an image with plausible content. Traditional approaches include patch-based methods that copy similar patches from elsewhere in the image, and exemplar-based techniques that iteratively fill regions based on surrounding texture and structure. While effective for simple cases, these methods struggle with large masked regions, complex scenes, and semantically meaningful content generation---they cannot, for example, intelligently fill a masked region with a contextually appropriate object.
+
+Deep learning approaches, particularly diffusion models, have transformed inpainting by learning rich semantic priors from large datasets. Rather than relying on local texture matching, diffusion-based inpainting models understand scene context and can generate novel content that is both visually coherent and semantically meaningful. This subsection reviews four diffusion-based inpainting models implemented in DiffusionDesk, each building upon the theoretical foundations established in Section~3.1.
+
+\subsubsection{Problem Definition}
+
+Given an input image $x$ and a binary mask $m$ indicating the region to be inpainted, the goal is to generate an output image $\hat{x}$ where the masked region contains plausible content consistent with the surrounding context. In diffusion-based inpainting, the model is additionally conditioned on a text prompt $c$ that guides the generation. The inpainting process can be formulated as:
+\begin{equation}
+\hat{x} = f(x, m, c; \theta)
+\end{equation}
+where $f$ is the inpainting model with parameters $\theta$. The model must preserve the unmasked regions exactly while generating coherent content in the masked areas.
+
+\subsubsection{Inpainting Model Architectures}
+
+\paragraph{Stable Diffusion Inpainting}
+
+Stable Diffusion Inpainting \citep{rombach2022ldm} extends the base Stable Diffusion v1.5 model for inpainting by modifying the input architecture. While the original model accepts a 4-channel latent input, the inpainting variant accepts 9 channels: 4 for the noisy latent, 4 for the encoded masked image, and 1 for the downsampled mask. This architectural modification allows the model to explicitly condition on both the masked image content and the mask geometry.
+
+The model inherits the core DDPM/DDIM denoising mechanism and operates in the latent space as per LDM principles. Text conditioning is provided through the CLIP ViT-L/14 text encoder, and classifier-free guidance controls the fidelity to the text prompt. With approximately 860 million parameters and VRAM requirements of 5--7 GB in FP16 precision, Stable Diffusion Inpainting offers a good balance of quality and computational efficiency, making it suitable for users with limited GPU resources.
+
+\paragraph{Stable Diffusion XL Inpainting}
+
+SDXL Inpainting builds upon the base SDXL architecture, which introduced several improvements over Stable Diffusion v1.5: a larger U-Net backbone with approximately 2.6 billion parameters, native 1024$\times$1024 resolution support, and dual text encoders (CLIP ViT-L and OpenCLIP ViT-G) for enhanced prompt understanding. These improvements translate to higher-quality inpainting results with better detail preservation and more accurate text-to-image alignment.
+
+The theoretical foundations remain consistent: SDXL Inpainting uses DDPM-based denoising, supports DDIM and other accelerated schedulers, operates in latent space, and employs classifier-free guidance. However, the increased model capacity comes at a computational cost---SDXL Inpainting requires 10--12 GB VRAM in FP16 precision. To address this, DiffusionDesk implements 8-bit and 4-bit quantisation using the bitsandbytes library, reducing VRAM requirements to approximately 6 GB and 4 GB respectively, with minimal quality degradation.
+
+\paragraph{Kandinsky 2.2 Inpainting}
+
+Kandinsky 2.2 employs a distinct two-stage architecture inspired by unCLIP/DALL-E 2. The first stage (``prior'') maps the text prompt to a CLIP image embedding, predicting what the image embedding should look like given the text. The second stage (``decoder'') generates the actual image conditioned on both the text and the predicted image embedding. This architecture leverages CLIP's powerful joint text-image space to guide generation.
+
+For inpainting, Kandinsky conditions the decoder on the masked image and mask geometry in addition to the CLIP embeddings. With approximately 2 billion parameters across both stages and VRAM requirements of 6--8 GB, Kandinsky offers comparable resource usage to Stable Diffusion while providing different aesthetic characteristics. The two-stage approach can produce results with strong text alignment due to the explicit CLIP image embedding conditioning.
+
+\paragraph{FLUX.1 Fill}
+
+FLUX.1 Fill, developed by Black Forest Labs, represents a significant architectural departure from the U-Net-based models. Built on the Diffusion Transformer (DiT) architecture, FLUX.1 uses a transformer backbone operating on sequences of latent patches rather than a convolutional U-Net. Additionally, FLUX.1 employs flow matching rather than traditional score-based diffusion, learning direct probability paths between noise and data distributions.
+
+With approximately 12 billion parameters and a T5-XXL text encoder (rather than CLIP), FLUX.1 Fill achieves state-of-the-art inpainting quality with exceptional detail, coherence, and prompt following. However, this quality comes at significant computational cost: full BF16 inference requires 22--24 GB VRAM. DiffusionDesk implements NF4 quantisation to reduce this to approximately 10 GB, enabling deployment on consumer GPUs like the NVIDIA T4 available in Google Colab.
+
+\subsubsection{Model Comparison}
+
+Table~\ref{tab:inpainting_comparison} summarises the key characteristics of the four inpainting models implemented in DiffusionDesk.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of Inpainting Models}
+\label{tab:inpainting_comparison}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{2.2cm}|p{2.5cm}|p{2.8cm}|p{2.5cm}|p{2.8cm}|}
+\hline
+\textbf{Criteria} & \textbf{SD Inpainting} & \textbf{SDXL Inpainting} & \textbf{Kandinsky 2.2} & \textbf{FLUX.1 Fill} \\
+\hline
+Architecture & U-Net (LDM) & U-Net (LDM) & Prior + Decoder & DiT (Transformer) \\
+\hline
+Parameters & $\sim$860M & $\sim$2.6B & $\sim$2B & $\sim$12B \\
+\hline
+Text Encoder & CLIP ViT-L & CLIP + OpenCLIP & CLIP & T5-XXL \\
+\hline
+VRAM (FP16) & 5--7 GB & 10--12 GB & 6--8 GB & 22--24 GB \\
+\hline
+VRAM (4-bit) & N/A & $\sim$4 GB & N/A & $\sim$10 GB \\
+\hline
+Quality & Good & Very Good & Good & Excellent \\
+\hline
+Theory Basis & DDPM, DDIM, LDM, CFG & DDPM, DDIM, LDM, CFG & DDPM, DDIM, LDM, CLIP & Flow Matching, DiT \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Selection Justification}
+
+DiffusionDesk includes all four inpainting models to provide users with flexibility across different use cases and hardware constraints:
+
+\begin{itemize}
+    \item \textbf{SD Inpainting}: Entry-level option for users with limited VRAM ($<$8 GB). Provides good quality results with fast inference.
+    \item \textbf{SDXL Inpainting}: Recommended default for users with mid-range GPUs (8--12 GB). Offers improved quality and prompt understanding with quantisation options for constrained environments.
+    \item \textbf{Kandinsky 2.2}: Alternative architecture providing different aesthetic characteristics. Useful when SDXL results are unsatisfactory for specific prompts.
+    \item \textbf{FLUX.1 Fill}: State-of-the-art quality for users with high-end GPUs or when quantised deployment is acceptable. Best choice for complex inpainting tasks requiring maximum coherence.
+\end{itemize}
+
+\noindent\textit{The diffusion architectures examined for inpainting can also be applied to style transfer. Rather than filling masked regions, style transfer leverages the same denoising process to transform an entire image's aesthetic while preserving its structure.}
+
+\subsection{Diffusion-Based Style Transfer}
+
+Style transfer aims to render an image in a different artistic style while preserving its underlying content and structure. This section reviews the evolution of neural style transfer techniques and explains how diffusion models provide a powerful and flexible approach through the image-to-image (img2img) mechanism.
+
+\subsubsection{Evolution of Neural Style Transfer}
+
+\citet{gatys2016style} pioneered neural style transfer by demonstrating that convolutional neural networks (CNNs) encode both content and style information in their hierarchical feature representations. Their optimisation-based approach iteratively modifies an image to match the content features of a source image and the style features (captured via Gram matrices) of a reference style image. While producing impressive results, this method requires a slow optimisation process for each image pair.
+
+Subsequent work developed feed-forward style transfer networks that train a single network per style, enabling real-time inference. However, these methods are limited to pre-defined styles and cannot generalise to arbitrary style descriptions. More recent approaches explored arbitrary style transfer using adaptive instance normalisation or attention mechanisms, but these often struggle with complex style semantics or structural preservation.
+
+Diffusion models offer a compelling alternative: rather than explicitly separating content and style features, they leverage the denoising process with text conditioning to apply stylistic transformations described in natural language. This approach supports arbitrary styles without retraining and benefits from the semantic understanding encoded in large-scale text-image models.
+
+\subsubsection{Image-to-Image Mechanism}
+
+Diffusion-based style transfer operates through the image-to-image (img2img) pipeline, which differs fundamentally from text-to-image generation. Rather than starting from pure random noise, img2img begins by adding controlled noise to the input image and then denoises with a style-describing prompt. This process can be understood as follows:
+
+\begin{enumerate}
+    \item \textbf{Encoding}: The input image is encoded into latent space using the VAE encoder.
+    \item \textbf{Noise Addition}: Gaussian noise is added to the latent representation according to a specified ``denoising strength'' parameter $s \in [0, 1]$. Higher values add more noise, starting the denoising from a later timestep.
+    \item \textbf{Conditional Denoising}: The noised latent is denoised using the diffusion model, conditioned on a text prompt describing the desired style (e.g., ``oil painting style'', ``anime illustration'').
+    \item \textbf{Decoding}: The denoised latent is decoded back to pixel space.
+\end{enumerate}
+
+The denoising strength parameter directly controls the trade-off between structure preservation and style application:
+\begin{itemize}
+    \item \textbf{Low strength (0.2--0.4)}: Subtle stylisation; original composition, shapes, and details are largely preserved.
+    \item \textbf{Medium strength (0.5--0.7)}: Moderate stylisation; structural elements remain recognisable but undergo significant aesthetic transformation.
+    \item \textbf{High strength (0.8--1.0)}: Aggressive stylisation; the output may diverge substantially from the input, using it primarily as compositional guidance.
+\end{itemize}
+
+This mechanism directly leverages the DDPM/DDIM denoising process: the noise schedule determines at which timestep the denoising begins, and classifier-free guidance ensures the output adheres to the style prompt.
+
+\subsubsection{Approach Selection}
+
+DiffusionDesk implements style transfer using SDXL img2img for the following reasons:
+
+\begin{itemize}
+    \item \textbf{Quality}: SDXL's larger capacity and dual text encoders produce higher-quality stylisations with better detail and prompt following compared to SD 1.5.
+    \item \textbf{Resolution}: Native 1024$\times$1024 support enables high-resolution style transfer without tiling artefacts.
+    \item \textbf{Flexibility}: Text-based style conditioning supports arbitrary styles (anime, oil painting, watercolour, pencil sketch, cyberpunk, etc.) without requiring style reference images.
+    \item \textbf{Parameter Control}: Exposing denoising strength, guidance scale, and inference steps gives users fine-grained control over the structure-style trade-off.
+    \item \textbf{Quantisation Support}: 8-bit and 4-bit quantisation via bitsandbytes enables deployment on resource-constrained GPUs.
+\end{itemize}
+
+DiffusionDesk provides preset style prompts (anime, oil painting, watercolour, pencil sketch, digital art) while allowing users to specify custom prompts for specialised styles.
+
+\vspace{1em}
+\noindent\textit{While diffusion models excel at generative tasks like inpainting and style transfer, image restoration requires specialised architectures optimised for specific degradation types. The following section examines restoration models that complement diffusion-based editing.}
 
 \subsection{Image Restoration}
 
-% TODO: Write introduction to image restoration - degradation types, traditional vs deep learning approaches
+Image restoration addresses the inverse problem of recovering high-quality images from degraded observations. Common degradations include compression artefacts, noise, blur, low resolution, and facial damage (wrinkles, scratches, low quality). Unlike the generative tasks of inpainting and style transfer, restoration aims to recover or enhance existing content rather than synthesise new content.
+
+Notably, the restoration models reviewed in this section are \textit{not} diffusion models. They employ distinct architectures---codebook-based transformers, generative adversarial networks (GANs), and enhanced super-resolution networks---each optimised for specific restoration tasks. DiffusionDesk includes these models to provide a comprehensive image editing pipeline that addresses both generative and restorative user needs.
 
 \subsubsection{Face Restoration}
 
+Face restoration is a specialised task that recovers high-quality facial details from degraded face images. The challenge lies in reconstructing plausible facial features (eyes, nose, mouth) while maintaining the subject's identity. DiffusionDesk implements two complementary approaches: CodeFormer and GFPGAN.
+
 \paragraph{CodeFormer}
-% TODO: Review CodeFormer (Zhou et al., 2022)
-% - Codebook lookup approach for face restoration
-% - Transformer-based architecture
-% - Fidelity vs quality trade-off parameter
-% - Why chosen for this project
+
+\citet{zhou2022codeformer} proposed CodeFormer, a transformer-based face restoration method that leverages a learned discrete codebook of high-quality facial features. The approach consists of three components:
+
+\begin{enumerate}
+    \item \textbf{Codebook Learning}: A vector-quantised autoencoder learns a discrete codebook capturing diverse high-quality facial features from a large face dataset.
+    \item \textbf{Code Prediction}: Given a degraded face image, a transformer predicts the sequence of codebook indices that best represent the underlying face.
+    \item \textbf{Controllable Decoding}: The decoder reconstructs the face from the predicted codes, with a fidelity parameter $w \in [0, 1]$ controlling the trade-off between restoration quality and identity preservation.
+\end{enumerate}
+
+The fidelity parameter is particularly valuable: setting $w = 0$ produces maximum restoration quality (potentially altering facial features), while $w = 1$ maximally preserves the input identity (with less aggressive restoration). Users can adjust this parameter based on whether they prioritise visual quality or identity fidelity.
+
+CodeFormer excels at restoring severely degraded faces, producing natural-looking results with realistic textures. It handles diverse degradation types robustly and provides controllable output through the fidelity parameter.
 
 \paragraph{GFPGAN}
-% TODO: Review GFPGAN (Wang et al., 2021)
-% - GAN-based face restoration
-% - Facial component dictionaries
-% - Comparison with CodeFormer
-% - Use cases where GFPGAN excels
+
+\citet{wang2021gfpgan} developed GFPGAN (Generative Facial Prior GAN), which incorporates rich facial priors from a pre-trained face generation model (StyleGAN2) to assist face restoration. The key innovations include:
+
+\begin{enumerate}
+    \item \textbf{Generative Facial Prior}: Channel-split spatial feature transforms inject pre-trained StyleGAN2 features to provide high-quality facial priors.
+    \item \textbf{Facial Component Dictionaries}: Pre-computed dictionaries of facial components (left eye, right eye, mouth) enable component-specific enhancement.
+    \item \textbf{Identity-Preserving Loss}: An identity loss term encourages the restored face to match the input identity.
+\end{enumerate}
+
+GFPGAN tends to produce sharper results than CodeFormer in some cases but may occasionally alter facial features more aggressively. It performs particularly well on moderately degraded faces and old photographs.
+
+\paragraph{Face Restoration Comparison}
+
+Table~\ref{tab:face_restoration} compares CodeFormer and GFPGAN across key characteristics.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of Face Restoration Models}
+\label{tab:face_restoration}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.5cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Criteria} & \textbf{CodeFormer} & \textbf{GFPGAN} \\
+\hline
+Architecture & Transformer + Codebook & GAN + StyleGAN2 Prior \\
+\hline
+Controllability & Fidelity parameter (0--1) & Fixed \\
+\hline
+Severe Degradation & Excellent & Good \\
+\hline
+Identity Preservation & Controllable & Moderate \\
+\hline
+Output Sharpness & Natural & Sharp \\
+\hline
+VRAM Usage & 2--4 GB & 2--4 GB \\
+\hline
+\end{tabular}
+\end{table}
+
+DiffusionDesk includes both models to accommodate different user preferences and degradation scenarios. CodeFormer is recommended for severely degraded images or when identity preservation is critical, while GFPGAN is suitable for general enhancement of moderately degraded faces.
 
 \subsubsection{Image Upscaling}
 
+Image upscaling (super-resolution) increases image resolution while adding plausible high-frequency details. Classical interpolation methods (bicubic, bilinear) produce blurry results, while deep learning approaches can hallucinate realistic details.
+
 \paragraph{Real-ESRGAN}
-% TODO: Review Real-ESRGAN (Wang et al., 2021)
-% - ESRGAN architecture improvements
-% - Real-world degradation modelling
-% - 2x and 4x upscaling options
-% - Integration with face restoration pipeline
 
-\subsection{Technology Stack Considerations}
+\citet{wang2021realesrgan} extended ESRGAN (Enhanced Super-Resolution GAN) to handle real-world degradations. Unlike prior methods trained on synthetic bicubic downsampling, Real-ESRGAN models a comprehensive degradation pipeline including blur, noise, compression, and their combinations. This training strategy enables robust performance on diverse real-world images.
 
-This section reviews and justifies the technology choices for developing DiffusionDesk, considering factors such as performance, ecosystem support, developer experience, and suitability for machine learning workloads.
+Key characteristics of Real-ESRGAN include:
 
-\subsubsection{Frontend Framework Selection}
+\begin{itemize}
+    \item \textbf{RRDB Architecture}: Residual-in-Residual Dense Blocks provide powerful feature extraction for upscaling.
+    \item \textbf{Real-World Degradation Model}: Training includes blur kernels, noise injection, JPEG compression, and resize operations in various orders.
+    \item \textbf{Scale Options}: Supports 2$\times$ and 4$\times$ upscaling with pre-trained models.
+    \item \textbf{Face Enhancement Integration}: A face-enhanced variant (Real-ESRGAN + GFPGAN) applies face restoration after upscaling for improved facial detail.
+\end{itemize}
 
-% TODO: Compare frontend frameworks and justify React choice
-% - React vs Vue vs Angular
-% - Criteria: component model, TypeScript support, ecosystem, learning curve
-% - Why React: mature ecosystem, hooks for state management, large community
-% - Vite as build tool (faster than Create React App)
-% - Tailwind CSS for utility-first styling
+Real-ESRGAN produces sharp, detailed upscaled images with minimal artefacts, making it suitable for enhancing low-resolution photographs, enlarging images for printing, or improving image quality before further editing.
+
+\subsubsection{Selection Justification}
+
+DiffusionDesk includes CodeFormer, GFPGAN, and Real-ESRGAN to provide comprehensive restoration capabilities:
+
+\begin{itemize}
+    \item \textbf{CodeFormer}: Primary face restoration model offering controllable quality-fidelity trade-off.
+    \item \textbf{GFPGAN}: Alternative face restoration for users preferring sharper outputs or as a fallback when CodeFormer results are unsatisfactory.
+    \item \textbf{Real-ESRGAN}: Essential for image upscaling, complementing face restoration for full-image enhancement pipelines.
+\end{itemize}
+
+These restoration models integrate seamlessly with diffusion-based editing: users can upscale low-resolution images before inpainting, or restore faces after style transfer to recover facial details.
+
+\subsection{Technology Stack}
+
+This section reviews and justifies the technology choices for developing DiffusionDesk. Each subsection follows a structured approach: exploring available options, comparing them against relevant criteria, and justifying the final selection.
+
+\subsubsection{Machine Learning Framework Selection}
+
+\paragraph{Options Explored}
+
+Two major deep learning frameworks were considered for model inference:
+\begin{itemize}
+    \item \textbf{PyTorch}: Developed by Meta AI, known for dynamic computation graphs, Pythonic API, and strong research community adoption.
+    \item \textbf{TensorFlow}: Developed by Google, known for production deployment tools, static graph optimisation, and TensorFlow Serving.
+\end{itemize}
+
+\paragraph{Comparison}
+
+\begin{table}[H]
+\centering
+\caption{ML Framework Comparison}
+\label{tab:ml_framework}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{4cm}|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Criteria} & \textbf{PyTorch} & \textbf{TensorFlow} \\
+\hline
+Diffusion Model Support & Excellent (Diffusers, native) & Limited (some ports exist) \\
+\hline
+Pre-trained Models & Extensive (Hugging Face Hub) & Moderate \\
+\hline
+Dynamic Graphs & Native & TF2 eager mode (added later) \\
+\hline
+Debugging & Straightforward (Python) & More complex (graph mode) \\
+\hline
+Research Adoption & Dominant in generative AI & Strong in production ML \\
+\hline
+Quantisation Libraries & bitsandbytes, GPTQ, AWQ & TensorFlow Lite \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Decision}
+
+PyTorch was selected as the ML framework for the following reasons:
+\begin{itemize}
+    \item \textbf{Diffusers Library}: The Hugging Face Diffusers library, which provides unified pipeline abstractions for all diffusion models used in this project, is built on PyTorch.
+    \item \textbf{Model Availability}: All target models (SD, SDXL, Kandinsky, FLUX.1, CodeFormer, GFPGAN, Real-ESRGAN) have official PyTorch implementations available on Hugging Face Hub.
+    \item \textbf{Quantisation Support}: The bitsandbytes library for 8-bit and 4-bit quantisation is PyTorch-native and essential for deploying large models on resource-constrained GPUs.
+    \item \textbf{Research Alignment}: PyTorch dominates generative AI research, ensuring access to the latest models and techniques.
+\end{itemize}
+
+\paragraph{Supporting Libraries}
+
+The following PyTorch ecosystem libraries are utilised:
+\begin{itemize}
+    \item \textbf{Diffusers}: Unified pipeline API for diffusion models, scheduler implementations (DDIM, DPM++, Euler), and model loading utilities.
+    \item \textbf{Transformers}: Text encoder loading (CLIP, T5) for conditioning diffusion models.
+    \item \textbf{bitsandbytes}: 8-bit (LLM.int8) and 4-bit (NF4) quantisation for reduced VRAM usage.
+    \item \textbf{Accelerate}: Device placement and mixed-precision inference utilities.
+\end{itemize}
 
 \subsubsection{Backend Framework Selection}
 
-% TODO: Compare backend frameworks and justify FastAPI choice
-% - FastAPI vs Flask vs Django
-% - Criteria: async support, automatic documentation, type hints, ML ecosystem compatibility
-% - Why FastAPI: native async, Pydantic validation, OpenAPI docs, PyTorch compatibility
-% - Comparison of performance characteristics
+\paragraph{Options Explored}
 
-\subsubsection{Machine Learning Framework and Libraries}
+Three Python web frameworks were considered for the API backend:
+\begin{itemize}
+    \item \textbf{FastAPI}: Modern, async-first framework with automatic OpenAPI documentation.
+    \item \textbf{Flask}: Lightweight, mature framework with extensive ecosystem.
+    \item \textbf{Django}: Full-featured framework with ORM, admin interface, and batteries-included philosophy.
+\end{itemize}
 
-% TODO: Review PyTorch and Hugging Face ecosystem
-% - PyTorch vs TensorFlow for inference
-% - Hugging Face Diffusers library
-%   - Pipeline abstractions
-%   - Model hub and pre-trained weights
-%   - Scheduler support (DDIM, DPM++, etc.)
-% - Hugging Face Transformers for text encoders
-% - bitsandbytes for quantisation
-% - Why this stack enables rapid prototyping with SOTA models
+\paragraph{Comparison}
 
-\subsubsection{Deployment Considerations}
+\begin{table}[H]
+\centering
+\caption{Backend Framework Comparison}
+\label{tab:backend_framework}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{2.8cm}|p{3.5cm}|p{3.2cm}|p{3.5cm}|}
+\hline
+\textbf{Criteria} & \textbf{FastAPI} & \textbf{Flask} & \textbf{Django} \\
+\hline
+Async Support & Native (ASGI) & Extension (async views) & Limited (ASGI adapter) \\
+\hline
+Type Hints & Native (Pydantic) & Manual & Manual \\
+\hline
+Auto Documentation & OpenAPI + Swagger UI & Extension required & Extension required \\
+\hline
+Performance & High (async I/O) & Moderate & Moderate \\
+\hline
+Learning Curve & Low & Low & Moderate \\
+\hline
+ML Ecosystem Fit & Excellent & Good & Moderate (ORM overhead) \\
+\hline
+\end{tabular}
+\end{table}
 
-% TODO: Discuss deployment options
-% - Google Colab for prototyping (free GPU, ngrok tunnelling)
-% - NTU HPC cluster for production workloads
-% - Docker containerisation considerations
-% - Trade-offs between different deployment environments
+\paragraph{Decision}
+
+FastAPI was selected for the following reasons:
+\begin{itemize}
+    \item \textbf{Async Support}: Native async/await enables efficient handling of long-running inference requests without blocking other clients.
+    \item \textbf{Pydantic Integration}: Type-validated request/response models ensure robust API contracts and clear documentation.
+    \item \textbf{Automatic Documentation}: Built-in Swagger UI and OpenAPI specification generation facilitates frontend integration and testing.
+    \item \textbf{Performance}: ASGI-based architecture provides high throughput suitable for inference workloads.
+    \item \textbf{Simplicity}: No unnecessary features (ORM, admin) that add complexity without benefit for an ML inference API.
+\end{itemize}
+
+\subsubsection{Frontend Framework Selection}
+
+\paragraph{Options Explored}
+
+Three major frontend frameworks were considered:
+\begin{itemize}
+    \item \textbf{React}: Component-based library by Meta with extensive ecosystem.
+    \item \textbf{Vue}: Progressive framework with gentle learning curve.
+    \item \textbf{Angular}: Full-featured framework by Google with strong typing.
+\end{itemize}
+
+\paragraph{Comparison}
+
+\begin{table}[H]
+\centering
+\caption{Frontend Framework Comparison}
+\label{tab:frontend_framework}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{2.8cm}|p{3.5cm}|p{3.5cm}|p{3.2cm}|}
+\hline
+\textbf{Criteria} & \textbf{React} & \textbf{Vue} & \textbf{Angular} \\
+\hline
+TypeScript Support & Excellent & Good & Native \\
+\hline
+Component Model & Functional + Hooks & Options/Composition API & Class-based \\
+\hline
+Ecosystem Size & Largest & Large & Large \\
+\hline
+Learning Curve & Moderate & Low & Steep \\
+\hline
+Canvas Libraries & Extensive (Fabric.js, Konva) & Good & Limited \\
+\hline
+Build Tooling & Vite, Next.js, CRA & Vite, Nuxt & Angular CLI \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Decision}
+
+React with TypeScript was selected for the following reasons:
+\begin{itemize}
+    \item \textbf{Ecosystem}: The largest ecosystem provides libraries for every need, including canvas manipulation (critical for mask drawing in inpainting).
+    \item \textbf{TypeScript Integration}: Mature TypeScript support enables type-safe development with excellent IDE support.
+    \item \textbf{Hooks}: Functional components with hooks provide clean state management without class complexity.
+    \item \textbf{Community}: Extensive documentation, tutorials, and community support accelerate development.
+\end{itemize}
+
+\paragraph{Supporting Tools}
+\begin{itemize}
+    \item \textbf{Vite}: Fast build tool with hot module replacement, significantly faster than Create React App.
+    \item \textbf{Tailwind CSS}: Utility-first CSS framework enabling rapid UI development without writing custom CSS.
+    \item \textbf{Canvas API}: Native HTML5 canvas for mask drawing, integrated via React refs.
+\end{itemize}
+
+\subsubsection{Deployment Strategy}
+
+\paragraph{Options Explored}
+
+Three deployment environments were evaluated:
+\begin{itemize}
+    \item \textbf{Google Colab}: Free cloud Jupyter environment with T4 GPU access.
+    \item \textbf{NTU HPC Cluster}: University-provided high-performance computing resources.
+    \item \textbf{Cloud VM}: Commercial cloud instances (AWS, GCP, Azure) with GPU support.
+\end{itemize}
+
+\paragraph{Comparison}
+
+\begin{table}[H]
+\centering
+\caption{Deployment Environment Comparison}
+\label{tab:deployment}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{2.8cm}|p{3.2cm}|p{3.2cm}|p{3.5cm}|}
+\hline
+\textbf{Criteria} & \textbf{Google Colab} & \textbf{NTU HPC} & \textbf{Cloud VM} \\
+\hline
+Cost & Free (T4) & Free (for students) & \$1--3/hour (GPU) \\
+\hline
+GPU Availability & T4 (15GB) & V100/A100 & Various \\
+\hline
+Session Limits & 12 hours, idle timeout & Queue-based & Persistent \\
+\hline
+Public Access & ngrok tunnelling & VPN required & Direct \\
+\hline
+Setup Complexity & Low (notebook) & Moderate (job scripts) & High (infrastructure) \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Decision}
+
+A hybrid deployment strategy was adopted:
+\begin{itemize}
+    \item \textbf{Development/Demo}: Google Colab with ngrok tunnelling for rapid prototyping and demonstration. The T4 GPU (15 GB VRAM) supports all models with quantisation.
+    \item \textbf{Extended Testing}: NTU HPC for longer-running experiments requiring V100/A100 GPUs without session limits.
+    \item \textbf{Frontend Hosting}: Static frontend deployed separately (e.g., Vercel, Netlify) to avoid session timeout issues.
+\end{itemize}
+
+\paragraph{Quantisation Strategy}
+
+To enable deployment on memory-constrained environments like Colab's T4 GPU, DiffusionDesk implements dynamic quantisation:
+\begin{itemize}
+    \item \textbf{8-bit (LLM.int8)}: Reduces VRAM by $\sim$50\% with minimal quality impact. Suitable for SDXL on 8--12 GB GPUs.
+    \item \textbf{4-bit (NF4)}: Reduces VRAM by $\sim$75\% with some quality trade-off. Enables FLUX.1 Fill on T4 GPU.
+    \item \textbf{CPU Offloading}: Sequential layer offloading to CPU RAM when GPU VRAM is exhausted, trading speed for memory.
+\end{itemize}
+
+Users can select quantisation level per model based on their hardware constraints and quality requirements.
 
 \newpage
 
