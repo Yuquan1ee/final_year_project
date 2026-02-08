@@ -919,19 +919,658 @@ Users can select quantisation level per model based on their hardware constraint
 % ============================================================
 \section{Software Requirements}
 
+This section presents the software requirements for DiffusionDesk, a web-based image editing application powered by diffusion models. The requirements were gathered through a combination of literature review of existing image editing tools, analysis of diffusion model capabilities, and consideration of the target deployment environment (Google Colab with NVIDIA T4 GPU). The requirements are organised into use cases, functional requirements, and non-functional requirements.
+
 \subsection{Use Case Diagram}
-% TODO: Include use case diagram
+
+Figure~\ref{fig:use_case_diagram} presents the use case diagram for DiffusionDesk, illustrating the interactions between the User actor and the system's core functionalities. The system boundary encompasses ten use cases spanning the three main feature areas: Inpainting, Style Transfer, and Restoration.
+
+% TODO: Create use case diagram in draw.io or Lucidchart and export to images/use_case_diagram.png
+% Diagram Layout Description:
+% - Primary Actor (stick figure, left): User
+% - Secondary Actor (stick figure, right): System
+% - System Boundary (rectangle): DiffusionDesk
+%
+% Use Cases inside boundary:
+%   UC-1: Upload Image (top centre)
+%   UC-2: Perform Inpainting (left cluster)
+%   UC-3: Draw Inpainting Mask (left cluster)
+%   UC-4: Apply Style Transfer (centre cluster)
+%   UC-5: Select Style Preset (centre cluster)
+%   UC-6: Restore Image (right cluster)
+%   UC-7: Select Model (bottom left)
+%   UC-8: Configure Generation Parameters (bottom centre)
+%   UC-9: Download Result Image (bottom right)
+%   UC-10: Load Diffusion Model (right side, near System actor)
+%
+% Relationships:
+%   User --> UC-1, UC-2, UC-3, UC-4, UC-5, UC-6, UC-7, UC-8, UC-9
+%   System --> UC-10
+%   UC-2 <<include>> UC-1 (must upload image before inpainting)
+%   UC-2 <<include>> UC-3 (must draw mask for inpainting)
+%   UC-4 <<include>> UC-1 (must upload image before style transfer)
+%   UC-6 <<include>> UC-1 (must upload image before restoration)
+%   UC-2 <<extend>> UC-7 (optionally select model)
+%   UC-4 <<extend>> UC-5 (optionally select preset)
+%   UC-2 <<extend>> UC-8 (optionally configure parameters)
+%   UC-4 <<extend>> UC-8 (optionally configure parameters)
+%   UC-6 <<extend>> UC-8 (optionally configure parameters)
+%   UC-2 <<include>> UC-10 (system loads model)
+%   UC-4 <<include>> UC-10 (system loads model)
+%   UC-6 <<include>> UC-10 (system loads model)
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the diagram image is created:
+    % \includegraphics[width=0.85\textwidth]{use_case_diagram.png}
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{4cm}\textit{Use case diagram to be inserted.\\See comments in source for diagram specification.}\vspace{4cm}}}
+    \caption{Use Case Diagram for DiffusionDesk}
+    \label{fig:use_case_diagram}
+\end{figure}
+
+The User actor interacts directly with all use cases except UC-10 (Load Diffusion Model), which is triggered by the System when a model is needed for inference. Key relationships include:
+
+\begin{itemize}
+    \item \textbf{Include relationships}: UC-2, UC-4, and UC-6 all include UC-1 (Upload Image), as an image must be uploaded before any editing operation. UC-2 also includes UC-3 (Draw Inpainting Mask), as a mask is required for inpainting. All editing operations include UC-10 (Load Diffusion Model).
+    \item \textbf{Extend relationships}: UC-7 (Select Model) and UC-8 (Configure Generation Parameters) extend the editing use cases, as users may optionally change the model or adjust parameters. UC-5 (Select Style Preset) extends UC-4 (Apply Style Transfer).
+\end{itemize}
 
 \subsubsection{Use Case Descriptions}
-% TODO: Write use case descriptions
+
+The following tables provide detailed descriptions for each use case identified in the use case diagram. Each table follows a standardised format documenting the use case metadata, flow of events, and related information.
+
+\vspace{0.5em}
+
+% ---- UC-1: Upload Image ----
+\noindent\textbf{UC-1: Upload Image}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-1 \\ \hline
+Use Case Name & Upload Image \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user uploads an image from their local device to the application for subsequent editing operations (inpainting, style transfer, or restoration). \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user has navigated to one of the editing tabs (Inpainting, Style Transfer, or Restoration).
+    \item The user has an image file in a supported format (JPEG, PNG, WebP).
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The uploaded image is displayed as a preview in the editing canvas.
+    \item The image is ready for subsequent editing operations.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & Every editing session \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user clicks the upload area or drag-and-drop zone.
+    \item The system opens a file selection dialog.
+    \item The user selects an image file.
+    \item The system validates the file format and size.
+    \item The system displays the image preview in the canvas.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] The user drags and drops an image file onto the upload area instead of using the file dialog.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[4a.] The file format is not supported: the system displays an error message listing supported formats.
+    \item[4b.] The file exceeds the maximum size limit: the system displays an error with the size constraint.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & -- \\ \hline
+Special Requirements & Image files must not exceed 10 MB. Supported formats: JPEG, PNG, WebP. \\ \hline
+Assumptions & The user has a compatible web browser with JavaScript enabled. \\ \hline
+Notes and Issues & Large images may be resized on the backend to fit within model input constraints. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-2: Perform Inpainting ----
+\noindent\textbf{UC-2: Perform Inpainting}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-2 \\ \hline
+Use Case Name & Perform Inpainting \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user fills in or replaces a masked region of an uploaded image using a diffusion-based inpainting model. The user provides a text prompt describing the desired content for the masked area. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item An image has been uploaded (UC-1).
+    \item A mask has been drawn over the region to inpaint (UC-3).
+    \item The backend server is running and a GPU is available.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The inpainted image is displayed alongside the original for comparison.
+    \item The result image is available for download (UC-9).
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & Frequent \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user navigates to the Inpainting tab.
+    \item The user uploads an image (UC-1).
+    \item The user draws a mask over the region to edit (UC-3).
+    \item The user enters a text prompt describing the desired content.
+    \item The user optionally selects a model (UC-7) and configures parameters (UC-8).
+    \item The user clicks the ``Generate'' button.
+    \item The system sends the image, mask, prompt, and parameters to the backend.
+    \item The system loads the selected model if not already cached (UC-10).
+    \item The system performs inpainting inference and returns the result.
+    \item The system displays the inpainted image.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[4a.] The user enters a negative prompt to specify undesired content.
+    \item[10a.] The user is unsatisfied and regenerates with different parameters.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[8a.] The model fails to load due to insufficient GPU VRAM: the system suggests a lower quantisation level or smaller model.
+    \item[9a.] Inference fails or times out: the system displays an error message and allows the user to retry.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & UC-1 (Upload Image), UC-3 (Draw Inpainting Mask), UC-10 (Load Diffusion Model) \\ \hline
+Special Requirements & Requires an active GPU backend. Inference time varies by model (10--120 seconds). \\ \hline
+Assumptions & The backend has sufficient VRAM for the selected model and quantisation level. \\ \hline
+Notes and Issues & FLUX.1 Fill models require NF4 quantisation to run on T4 GPUs. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-3: Draw Inpainting Mask ----
+\noindent\textbf{UC-3: Draw Inpainting Mask}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-3 \\ \hline
+Use Case Name & Draw Inpainting Mask \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user draws a binary mask on the uploaded image to indicate the region that should be inpainted. White pixels in the mask denote the area to be filled. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item An image has been uploaded and displayed in the Inpainting tab.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item A mask overlay is visible on the image canvas.
+    \item The mask data is ready to be sent with the inpainting request.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & Every inpainting operation \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user selects the brush tool on the canvas.
+    \item The user adjusts the brush size using the slider control.
+    \item The user draws over the region to be inpainted by clicking and dragging on the canvas.
+    \item The system renders the mask overlay in a semi-transparent colour.
+    \item The user reviews the mask coverage.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] The user uses the eraser tool to remove parts of the mask.
+    \item[3b.] The user clicks ``Clear Mask'' to reset the entire mask.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] No image is loaded: the canvas tools are disabled.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & -- \\ \hline
+Special Requirements & The canvas must support touch input for tablet/touchscreen devices. \\ \hline
+Assumptions & The user can use a mouse or touchscreen to draw on the canvas. \\ \hline
+Notes and Issues & The mask is internally represented as a black-and-white image matching the uploaded image dimensions. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-4: Apply Style Transfer ----
+\noindent\textbf{UC-4: Apply Style Transfer}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-4 \\ \hline
+Use Case Name & Apply Style Transfer \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user applies an artistic style (e.g., anime, oil painting, watercolour, pixel art) to an uploaded image using a diffusion-based image-to-image pipeline. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item An image has been uploaded (UC-1).
+    \item The backend server is running and a GPU is available.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The stylised image is displayed alongside the original.
+    \item The result image is available for download (UC-9).
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & Frequent \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user navigates to the Style Transfer tab.
+    \item The user uploads an image (UC-1).
+    \item The user selects a style preset (UC-5) or enters a custom style prompt.
+    \item The user optionally adjusts the strength parameter to control style intensity.
+    \item The user optionally configures additional parameters (UC-8).
+    \item The user clicks the ``Generate'' button.
+    \item The system sends the image, prompt, and parameters to the backend.
+    \item The system loads the model if not already cached (UC-10).
+    \item The system performs image-to-image inference and returns the result.
+    \item The system displays the stylised image.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] The user enters a custom prompt instead of selecting a preset.
+    \item[10a.] The user adjusts the strength and regenerates to fine-tune the result.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[8a.] Model fails to load: the system suggests a lower quantisation level.
+    \item[9a.] Inference fails: the system displays an error message.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & UC-1 (Upload Image), UC-10 (Load Diffusion Model) \\ \hline
+Special Requirements & Requires an active GPU backend. \\ \hline
+Assumptions & The backend has sufficient VRAM for the SDXL img2img model. \\ \hline
+Notes and Issues & Higher strength values produce more stylised results but may lose original content details. A strength of 0.5--0.7 is recommended for most styles. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-5: Select Style Preset ----
+\noindent\textbf{UC-5: Select Style Preset}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-5 \\ \hline
+Use Case Name & Select Style Preset \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user selects a predefined artistic style from a list of presets. Each preset maps to a curated prompt optimised for that style. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user is on the Style Transfer tab.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The selected style preset is applied to the prompt field.
+    \item The style is ready to be used in the next generation.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & Medium \\ \hline
+Frequency of Use & Frequent \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user views the list of available style presets (e.g., Anime, Oil Painting, Watercolour, Pixel Art, Cinematic, Pencil Sketch).
+    \item The user clicks on a style preset.
+    \item The system populates the prompt field with the preset's curated prompt.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] The user modifies the auto-populated prompt to customise the style further.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & -- \\ \hline
+Includes & -- \\ \hline
+Special Requirements & -- \\ \hline
+Assumptions & The list of presets is fetched from the backend API. \\ \hline
+Notes and Issues & Presets can be extended by adding new entries to the backend configuration. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-6: Restore Image ----
+\noindent\textbf{UC-6: Restore Image}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-6 \\ \hline
+Use Case Name & Restore Image \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user restores or enhances a degraded image using one of the available restoration models: CodeFormer and GFPGAN for face restoration, or Real-ESRGAN for general image upscaling and enhancement. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item An image has been uploaded (UC-1).
+    \item The backend server is running and a GPU is available.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The restored image is displayed alongside the original.
+    \item The result image is available for download (UC-9).
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & Frequent \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user navigates to the Restoration tab.
+    \item The user uploads an image (UC-1).
+    \item The user selects a restoration model (e.g., CodeFormer, GFPGAN, or Real-ESRGAN).
+    \item The user optionally adjusts model-specific parameters (e.g., fidelity weight for CodeFormer, upscale factor for Real-ESRGAN).
+    \item The user clicks the ``Restore'' button.
+    \item The system sends the image and parameters to the backend.
+    \item The system loads the selected model (UC-10).
+    \item The system performs restoration inference and returns the result.
+    \item The system displays the restored image.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] The user tries a different restoration model on the same image.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] Face restoration models (CodeFormer, GFPGAN) produce suboptimal results on images without detectable faces: the system returns the image with minimal changes.
+    \item[8a.] Inference fails: the system displays an error message.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & UC-1 (Upload Image), UC-10 (Load Diffusion Model) \\ \hline
+Special Requirements & Requires an active GPU backend. Face restoration models work best on images containing human faces. \\ \hline
+Assumptions & The uploaded image contains content suitable for the selected restoration model. \\ \hline
+Notes and Issues & Real-ESRGAN can upscale images by 2$\times$ or 4$\times$, which increases output resolution and file size. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-7: Select Model ----
+\noindent\textbf{UC-7: Select Model}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-7 \\ \hline
+Use Case Name & Select Model \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user selects a specific AI model from the list of available models for the current editing operation. Different models offer varying trade-offs between quality, speed, and VRAM requirements. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user is on an editing tab (Inpainting, Style Transfer, or Restoration).
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The selected model is stored and will be used for the next generation request.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & Medium \\ \hline
+Frequency of Use & Occasional \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user views the model selection dropdown.
+    \item The system displays available models with their names.
+    \item The user selects a model from the dropdown.
+    \item The system updates the selected model for subsequent requests.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[1a.] The user keeps the default model selection.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & -- \\ \hline
+Includes & -- \\ \hline
+Special Requirements & The model list should be fetched dynamically from the backend API. \\ \hline
+Assumptions & The backend returns a list of models appropriate for the current task. \\ \hline
+Notes and Issues & Available inpainting models include SD Inpainting, SDXL Inpainting, Kandinsky, and FLUX.1 Fill. Style transfer uses SDXL img2img. Restoration models include CodeFormer, GFPGAN, and Real-ESRGAN. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-8: Configure Generation Parameters ----
+\noindent\textbf{UC-8: Configure Generation Parameters}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-8 \\ \hline
+Use Case Name & Configure Generation Parameters \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user adjusts generation parameters that control the behaviour and quality of the AI inference, such as guidance scale, number of inference steps, strength, and random seed. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user is on an editing tab with parameter controls visible.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The configured parameters are stored and will be sent with the next generation request.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & Medium \\ \hline
+Frequency of Use & Occasional \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user expands the advanced parameters section.
+    \item The user adjusts one or more parameters using sliders or input fields:
+    \begin{itemize}[nosep,leftmargin=*]
+        \item Guidance scale (1.0--20.0)
+        \item Number of inference steps (1--100)
+        \item Strength (0.0--1.0, for img2img/style transfer)
+        \item Random seed (integer, or $-1$ for random)
+        \item Quantisation level (none, 8-bit, 4-bit)
+    \end{itemize}
+    \item The system validates the parameter values against allowed ranges.
+    \item The system updates the stored parameters.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[1a.] The user does not expand the advanced section and uses default values.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] A parameter value is out of range: the system clamps it to the nearest valid value.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & -- \\ \hline
+Special Requirements & Parameter controls must provide sensible default values. \\ \hline
+Assumptions & The user understands the effect of advanced parameters or is satisfied with defaults. \\ \hline
+Notes and Issues & Increasing inference steps improves quality but increases generation time. Guidance scale controls prompt adherence. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-9: Download Result Image ----
+\noindent\textbf{UC-9: Download Result Image}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-9 \\ \hline
+Use Case Name & Download Result Image \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & User \\ \hline
+Description & The user downloads the generated or restored image to their local device. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item A result image has been generated by one of the editing operations.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The result image is saved to the user's local device.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & Medium \\ \hline
+Frequency of Use & After each successful generation \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The user clicks the ``Download'' button below the result image.
+    \item The system triggers a file download in the browser.
+    \item The image is saved to the user's default download directory.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[1a.] The user right-clicks the image and selects ``Save Image As'' from the browser context menu.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & -- \\ \hline
+Includes & -- \\ \hline
+Special Requirements & The downloaded image should be in PNG format to preserve quality. \\ \hline
+Assumptions & The user's browser supports programmatic file downloads. \\ \hline
+Notes and Issues & The filename includes a timestamp and operation type for easy identification. \\ \hline
+\end{longtable}
+
+\vspace{0.5em}
+
+% ---- UC-10: Load Diffusion Model ----
+\noindent\textbf{UC-10: Load Diffusion Model}
+
+\begin{longtable}{|>{\bfseries\raggedright}p{4.2cm}|p{10.3cm}|}
+\hline
+Use Case ID & UC-10 \\ \hline
+Use Case Name & Load Diffusion Model \\ \hline
+Created By & Lee Yu Quan \\ \hline
+Date Created & 8 February 2026 \\ \hline
+Actor & System \\ \hline
+Description & The system loads the requested diffusion model into GPU memory, applying quantisation if specified. Previously loaded models are cached to avoid redundant loading. \\ \hline
+Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item An editing operation has been requested (UC-2, UC-4, or UC-6).
+    \item The requested model is not already cached in GPU memory.
+\end{enumerate}\end{minipage} \\ \hline
+Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The model is loaded into GPU memory and ready for inference.
+    \item The model is cached for subsequent requests.
+\end{enumerate}\end{minipage} \\ \hline
+Priority & High \\ \hline
+Frequency of Use & On first use of each model per session \\ \hline
+Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item The system receives a generation request specifying a model.
+    \item The system checks if the model is already cached in memory.
+    \item If not cached, the system downloads the model weights from Hugging Face Hub (or loads from local cache).
+    \item The system applies the requested quantisation level (none, 8-bit, or 4-bit).
+    \item The system loads the model onto the GPU.
+    \item The system caches the loaded model for future requests.
+    \item The system returns control to the calling use case for inference.
+\end{enumerate}\end{minipage} \\ \hline
+Alternative Flows & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[2a.] The model is already cached: skip to step 7.
+    \item[4a.] If the model requires CPU offloading, the system enables sequential offloading.
+\end{enumerate}\end{minipage} \\ \hline
+Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
+    \item[3a.] Model weights are unavailable (network error or missing from Hub): the system returns an error to the user.
+    \item[5a.] Insufficient GPU VRAM: the system clears cached models and retries, or returns an error suggesting a lower quantisation level.
+\end{enumerate}\end{minipage} \\ \hline
+Includes & -- \\ \hline
+Special Requirements & Model loading can take 30--120 seconds depending on model size and network speed. A progress indicator should be shown to the user. \\ \hline
+Assumptions & The backend has internet access to download model weights on first use. \\ \hline
+Notes and Issues & Switching between large models (e.g., SDXL to FLUX.1) may require clearing the previous model from VRAM first. \\ \hline
+\end{longtable}
 
 \subsection{Functional and Non-Functional Requirements}
 
+The functional and non-functional requirements for DiffusionDesk were derived from the use case analysis above, supplemented by best practices in web application development and the specific constraints of deploying diffusion models on consumer-grade GPUs. Functional requirements define the system's behaviour, while non-functional requirements specify quality attributes and constraints.
+
 \subsubsection{Functional Requirements}
-% TODO: List functional requirements
+
+The functional requirements are organised by use case, with each requirement identified by a unique code in the format \textbf{FR-XX}.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Upload Image}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=1]
+    \item The system shall accept image uploads in JPEG, PNG, and WebP formats.
+    \item The system shall reject image files exceeding 10 MB and display an appropriate error message.
+    \item The system shall display a preview of the uploaded image in the editing canvas.
+    \item The system shall support drag-and-drop image upload in addition to the file selection dialog.
+    \item The system shall resize images exceeding the model's maximum input resolution while preserving the aspect ratio.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Perform Inpainting}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=6]
+    \item The system shall provide a selection of inpainting models (SD Inpainting, SDXL Inpainting, Kandinsky Inpainting, FLUX.1 Fill).
+    \item The system shall accept a text prompt describing the desired content for the masked region.
+    \item The system shall accept an optional negative prompt to specify undesired content.
+    \item The system shall send the image, mask, prompt, negative prompt, and generation parameters to the backend API.
+    \item The system shall display the inpainted result image alongside the original for visual comparison.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Draw Inpainting Mask}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=11]
+    \item The system shall provide a canvas-based brush tool for drawing masks over the uploaded image.
+    \item The system shall allow the user to adjust the brush size via a slider control.
+    \item The system shall render the mask as a semi-transparent overlay on the image.
+    \item The system shall provide a ``Clear Mask'' button to reset the entire mask.
+    \item The system shall generate a binary mask image (black background, white mask) matching the uploaded image dimensions.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Apply Style Transfer}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=16]
+    \item The system shall support style transfer via diffusion-based image-to-image generation.
+    \item The system shall provide predefined style presets (e.g., Anime, Oil Painting, Watercolour, Pixel Art, Cinematic, Pencil Sketch).
+    \item The system shall allow the user to enter a custom style prompt.
+    \item The system shall provide a strength parameter (0.0--1.0) to control the intensity of the style application.
+    \item The system shall display the stylised result image alongside the original for comparison.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Restore Image}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=21]
+    \item The system shall support face restoration using CodeFormer and GFPGAN models.
+    \item The system shall support general image upscaling and enhancement using Real-ESRGAN.
+    \item The system shall provide model-specific parameters (e.g., fidelity weight for CodeFormer, upscale factor for Real-ESRGAN).
+    \item The system shall display the restored result image alongside the original for comparison.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Select Model}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=25]
+    \item The system shall fetch the list of available models from the backend API dynamically.
+    \item The system shall display the available models in a dropdown selection menu.
+    \item The system shall set a sensible default model for each editing tab.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Configure Generation Parameters}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=28]
+    \item The system shall provide controls for adjusting guidance scale (1.0--20.0).
+    \item The system shall provide controls for adjusting the number of inference steps (1--100).
+    \item The system shall provide controls for adjusting strength (0.0--1.0) for image-to-image operations.
+    \item The system shall provide a seed input field for reproducible generation ($-1$ for random).
+    \item The system shall provide quantisation level selection (none, 8-bit, 4-bit) where applicable.
+    \item The system shall validate parameter values and clamp them to valid ranges.
+    \item The system shall provide sensible default values for all parameters.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Download Result Image}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=35]
+    \item The system shall provide a download button for each generated result image.
+    \item The system shall download the image in PNG format with a descriptive filename.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Load Diffusion Model}}
+
+\begin{enumerate}[label=\textbf{FR-\arabic*}.,start=37]
+    \item The system shall load diffusion models on demand when a generation request is received.
+    \item The system shall cache loaded models in GPU memory to avoid redundant loading.
+    \item The system shall apply quantisation (8-bit or 4-bit) when specified by the user.
+    \item The system shall clear previously cached models when GPU VRAM is insufficient for a new model.
+    \item The system shall display a loading indicator while a model is being loaded.
+\end{enumerate}
 
 \subsubsection{Non-Functional Requirements}
-% TODO: List non-functional requirements
+
+The non-functional requirements define the quality attributes and constraints of DiffusionDesk. Each requirement is identified by a unique code in the format \textbf{NFR-XX}.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Usability}}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*}.,start=1]
+    \item The user interface shall be intuitive and require no prior experience with diffusion models to use basic features.
+    \item The system shall provide clear labels, tooltips, and instructions for all controls.
+    \item The system shall maintain a consistent visual design across all tabs using Tailwind CSS.
+    \item The system shall provide real-time feedback during image generation, including progress indicators and status messages.
+    \item The system shall organise features into clearly labelled tabs (Inpainting, Style Transfer, Restoration) for easy navigation.
+    \item The system shall display error messages in a user-friendly format, avoiding raw technical error traces.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Performance}}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*}.,start=7]
+    \item The frontend shall load within 3 seconds on a standard broadband connection.
+    \item Image upload and preview rendering shall complete within 2 seconds for files under 5 MB.
+    \item Inpainting and style transfer inference shall complete within 120 seconds on a T4 GPU with 4-bit quantisation.
+    \item Image restoration shall complete within 30 seconds on a T4 GPU.
+    \item The system shall display generation progress to the user so that long-running operations do not appear unresponsive.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Reliability}}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*}.,start=12]
+    \item The system shall handle backend errors gracefully and display meaningful error messages to the user.
+    \item The system shall recover from GPU out-of-memory errors by suggesting alternative models or quantisation levels.
+    \item The frontend shall remain functional even if the backend is temporarily unavailable, allowing image upload and parameter configuration.
+    \item The system shall validate all user inputs on both the frontend and backend to prevent invalid requests.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Maintainability}}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*}.,start=16]
+    \item The system shall follow a modular architecture with clear separation between frontend, backend API, and ML inference services.
+    \item The backend shall use a router-service pattern with low coupling between API endpoints and model inference logic.
+    \item The frontend shall use reusable React components with well-defined props interfaces.
+    \item New models shall be addable to the system by extending the backend service configuration without modifying existing code.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Compatibility}}
+
+\begin{enumerate}[label=\textbf{NFR-\arabic*}.,start=20]
+    \item The frontend shall be compatible with the latest versions of Google Chrome, Mozilla Firefox, Microsoft Edge, and Apple Safari.
+    \item The frontend shall be responsive and functional on screen widths from 1024 pixels and above.
+    \item The backend shall run on NVIDIA GPUs with CUDA support (compute capability 7.0 or higher).
+    \item The system shall support deployment on Google Colab with T4 GPU using ngrok for backend exposure.
+\end{enumerate}
 
 \newpage
 
@@ -940,14 +1579,326 @@ Users can select quantisation level per model based on their hardware constraint
 % ============================================================
 \section{Planning and Design}
 
+This section presents the planning and design decisions made during the development of DiffusionDesk. It covers the software development methodology adopted, the system architecture, and the user interface wireframe designs that guided the implementation.
+
 \subsection{Project Development Methodology}
-% TODO: Describe development methodology (Agile, iterative, etc.)
+
+The software development methodology adopted for DiffusionDesk is the \textbf{Iterative and Incremental Development} methodology. This approach was chosen because the project involves integrating multiple AI models with varying hardware requirements, where each feature (inpainting, style transfer, restoration) can be developed and tested as an independent increment. The iterative nature allows for continuous refinement based on testing feedback, which is particularly important when working with diffusion models where output quality depends heavily on parameter tuning and model selection.
+
+% TODO: Create Agile/Iterative methodology diagram in draw.io and export to images/iterative_methodology.png
+% Diagram should show the iterative cycle: Requirements → Design → Implement → Test → Evaluate → (repeat)
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the diagram image is created:
+    % \includegraphics[width=0.7\textwidth]{iterative_methodology.png}
+    \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm}\textit{Iterative development methodology diagram to be inserted.}\vspace{3cm}}}
+    \caption{Iterative and Incremental Development Methodology}
+    \label{fig:iterative_methodology}
+\end{figure}
+
+The project was divided into four main iterations, each building upon the previous:
+
+\begin{enumerate}
+    \item \textbf{Iteration 1 --- Project Setup and Backend Foundation}: Established the FastAPI backend structure with the router-service architecture pattern. Set up the project repository, defined API schemas using Pydantic, and implemented the health check endpoint. The frontend scaffolding was created using React, TypeScript, and Vite with Tailwind CSS for styling.
+
+    \item \textbf{Iteration 2 --- Inpainting Feature}: Implemented the inpainting service with support for multiple diffusion models (SD Inpainting, SDXL Inpainting, Kandinsky, FLUX.1 Fill). Developed the frontend \texttt{InpaintingTab} component with the interactive \texttt{MaskCanvas} for drawing masks. Integrated quantisation support (8-bit and 4-bit) using bitsandbytes to enable deployment on memory-constrained GPUs.
+
+    \item \textbf{Iteration 3 --- Style Transfer and Restoration Features}: Added the style transfer service using SDXL img2img pipelines with predefined style presets. Implemented the restoration service integrating CodeFormer, GFPGAN, and Real-ESRGAN models. Developed the corresponding frontend tabs (\texttt{StyleTransferTab} and \texttt{RestorationTab}).
+
+    \item \textbf{Iteration 4 --- Integration Testing and Deployment}: Configured Google Colab deployment with ngrok for backend exposure. Tested all three features end-to-end on T4 GPU hardware. Refined parameter defaults and error handling based on testing results.
+\end{enumerate}
+
+At the end of each iteration, the working software was reviewed and evaluated against the project requirements. Feedback from testing on actual GPU hardware informed the subsequent iteration, particularly regarding VRAM constraints and quantisation strategies. This iterative approach proved well-suited for the project, as requirements around model support and parameter ranges evolved as new models were tested and evaluated.
 
 \subsection{System Architecture}
-% TODO: Include system architecture diagram and description
+
+DiffusionDesk adopts a \textbf{client-server architecture} with a clear separation between the frontend application and the backend API server. The frontend is a single-page application (SPA) built with React that communicates with the backend via RESTful HTTP requests. The backend is a FastAPI server that handles API routing, request validation, and delegates ML inference to dedicated service modules. Figure~\ref{fig:system_architecture} illustrates the overall system architecture.
+
+% TODO: Create system architecture diagram in draw.io and export to images/system_architecture.png
+% Diagram Layout:
+%
+%   +------------------+         HTTP/JSON         +---------------------------+
+%   |   Frontend       | -----------------------> |   Backend (FastAPI)        |
+%   |   (React SPA)    | <----------------------- |                           |
+%   |                  |    Base64 Images +        |   +---------------------+ |
+%   | +-------------+  |    JSON Params            |   | Routers             | |
+%   | | InpaintingTab| |                           |   |  /api/inpainting/   | |
+%   | | StyleTransfer| |                           |   |  /api/style/        | |
+%   | | RestorationTab||                           |   |  /api/restoration/  | |
+%   | +-------------+  |                           |   |  /api/health        | |
+%   | | MaskCanvas   |  |                           |   +---------------------+ |
+%   | | ImageUpload  |  |                           |            |              |
+%   | +-------------+  |                           |            v              |
+%   | | API Client   |  |                           |   +---------------------+ |
+%   | | (imageApi.ts)|  |                           |   | Schemas (Pydantic)  | |
+%   | +-------------+  |                           |   | InpaintingRequest   | |
+%   +------------------+                           |   | StyleTransferRequest| |
+%         |                                        |   | RestorationRequest  | |
+%         | Hosted on                              |   | ImageResponse       | |
+%         | Vercel/Netlify                         |   +---------------------+ |
+%         | or localhost:5173                       |            |              |
+%                                                  |            v              |
+%                                                  |   +---------------------+ |
+%                                                  |   | Services            | |
+%                                                  |   |  DiffusionService   | |
+%                                                  |   |  RestorationService | |
+%                                                  |   +---------------------+ |
+%                                                  |            |              |
+%                                                  |            v              |
+%                                                  |   +---------------------+ |
+%                                                  |   | GPU (CUDA)          | |
+%                                                  |   | PyTorch + Diffusers | |
+%                                                  |   | Model Cache         | |
+%                                                  |   +---------------------+ |
+%                                                  +---------------------------+
+%                                                        |
+%                                                        | Hosted on
+%                                                        | Colab + ngrok
+%                                                        | or localhost:8000
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the diagram image is created:
+    % \includegraphics[width=0.9\textwidth]{system_architecture.png}
+    \fbox{\parbox{0.9\textwidth}{\centering\vspace{5cm}\textit{System architecture diagram to be inserted.\\See comments in source for diagram specification.}\vspace{5cm}}}
+    \caption{System Architecture of DiffusionDesk}
+    \label{fig:system_architecture}
+\end{figure}
+
+The architecture consists of two main components: the \textbf{Frontend Application} and the \textbf{Backend API Server}, connected via HTTP/JSON communication. This separation enables independent deployment --- the frontend can be hosted on static hosting platforms such as Vercel or Netlify, while the backend runs on a GPU-equipped machine such as Google Colab.
+
+\subsubsection{Frontend Architecture}
+
+The frontend is a React 19 single-page application built with TypeScript and bundled using Vite. Tailwind CSS provides utility-first styling with a dark theme (slate-900 background with indigo accents). The application is organised into the following layers:
+
+\begin{itemize}
+    \item \textbf{App Component} (\texttt{App.tsx}): The root component manages tab navigation through an \texttt{activeTab} state variable. Four tabs are available: Home, Inpainting, Style Transfer, and Restoration. Each tab renders its corresponding component.
+
+    \item \textbf{Tab Components} (\texttt{components/}): Each editing feature is encapsulated in its own tab component (\texttt{InpaintingTab.tsx}, \texttt{StyleTransferTab.tsx}, \texttt{RestorationTab.tsx}). Each tab manages its own local state for image data, generation parameters, and UI state (loading, errors, results). This design ensures that tabs are independent and do not share mutable state.
+
+    \item \textbf{Shared Components}: Reusable components include \texttt{ImageUpload} (drag-and-drop file upload with preview) and \texttt{MaskCanvas} (HTML5 Canvas-based interactive drawing tool for creating inpainting masks). These are used across multiple tabs to maintain consistency.
+
+    \item \textbf{API Client} (\texttt{api/}): The \texttt{imageApi.ts} module provides typed API functions (\texttt{inpaintImage()}, \texttt{styleTransfer()}, \texttt{restoreImage()}) that handle base64 encoding, request construction, and response parsing. The \texttt{config.ts} module reads the API base URL from the \texttt{VITE\_API\_URL} environment variable, enabling seamless switching between local and cloud-deployed backends.
+\end{itemize}
+
+\subsubsection{Backend Architecture}
+
+The backend follows a \textbf{three-layer router-service-schema architecture} built on FastAPI. This pattern separates concerns cleanly and mirrors the structure used in production web services:
+
+\begin{itemize}
+    \item \textbf{Router Layer} (\texttt{routers/}): Three router modules (\texttt{inpainting.py}, \texttt{style\_transfer.py}, \texttt{restoration.py}) define the API endpoints. Each router receives HTTP requests, extracts validated parameters from Pydantic schemas, delegates processing to the corresponding service, and returns a standardised \texttt{ImageResponse}. Routers are registered in \texttt{main.py} with URL prefixes (\texttt{/api/inpainting/}, \texttt{/api/style/}, \texttt{/api/restoration/}).
+
+    \item \textbf{Schema Layer} (\texttt{schemas/image.py}): Pydantic models define the API contracts. \texttt{InpaintingRequest}, \texttt{StyleTransferRequest}, and \texttt{RestorationRequest} validate incoming data with type checking and range constraints (e.g., \texttt{guidance\_scale} between 1.0 and 20.0, \texttt{num\_inference\_steps} between 10 and 100). The shared \texttt{ImageResponse} model provides a consistent response format with fields for \texttt{success}, \texttt{image} (base64), \texttt{error}, \texttt{model\_used}, and \texttt{processing\_time}.
+
+    \item \textbf{Service Layer} (\texttt{services/}): The \texttt{DiffusionService} class manages diffusion model pipelines for inpainting and style transfer, while the \texttt{RestorationService} handles CodeFormer, GFPGAN, and Real-ESRGAN models. Services are instantiated as \textbf{singletons} using factory functions (\texttt{get\_diffusion\_service()}, \texttt{get\_restoration\_service()}), ensuring that loaded models are cached in GPU memory across multiple requests. This avoids redundant model loading and reduces response latency for subsequent requests.
+\end{itemize}
+
+\subsubsection{Model Management Strategy}
+
+A key architectural decision is the \textbf{lazy loading with caching} strategy for ML models. Models are not loaded at server startup; instead, they are loaded on demand when the first request for a given model is received. Once loaded, the model pipeline is cached in a dictionary keyed by model identifier. This approach offers several benefits:
+
+\begin{itemize}
+    \item \textbf{Memory efficiency}: Only models that are actively used consume GPU VRAM.
+    \item \textbf{Fast subsequent requests}: Cached models skip the loading phase (which can take 30--120 seconds) on repeat use.
+    \item \textbf{Flexible model switching}: Users can select different models per request without preloading all options.
+    \item \textbf{Quantisation on demand}: Models can be loaded with different precision levels (FP16, 8-bit, 4-bit NF4) based on the user's hardware constraints.
+\end{itemize}
+
+When GPU VRAM is insufficient for a new model, the system clears previously cached models before attempting to load the requested model.
+
+\subsubsection{Communication Protocol}
+
+The frontend and backend communicate via \textbf{RESTful JSON APIs}. Images are transmitted as base64-encoded strings within JSON payloads, which simplifies the API design by avoiding multipart form data. The data flow for a typical editing operation proceeds as follows:
+
+\begin{enumerate}
+    \item The user uploads an image file in the browser. The frontend converts it to a base64 data URL using the \texttt{FileReader} API.
+    \item The user configures parameters (prompt, model, generation settings) through the UI controls.
+    \item The frontend constructs a JSON payload containing the base64 image, parameters, and (for inpainting) the mask, and sends it as a POST request to the corresponding API endpoint.
+    \item The backend validates the request using Pydantic schemas, decodes the base64 images to PIL Image objects, and invokes the appropriate service method.
+    \item The service loads the model if needed, performs GPU inference, and encodes the result image back to base64.
+    \item The backend returns an \texttt{ImageResponse} JSON object containing the result image, model used, and processing time.
+    \item The frontend converts the base64 response to a data URL and displays the result alongside the original image for comparison.
+\end{enumerate}
+
+\subsubsection{Deployment Architecture}
+
+DiffusionDesk is designed for flexible deployment across different environments:
+
+\begin{itemize}
+    \item \textbf{Local development}: The frontend runs on \texttt{localhost:5173} (Vite dev server) and the backend on \texttt{localhost:8000} (Uvicorn). CORS middleware configured with \texttt{allow\_origins=["*"]} permits cross-origin requests between the two ports.
+
+    \item \textbf{Google Colab deployment}: The backend runs inside a Colab notebook with GPU acceleration. Ngrok exposes the FastAPI server via a public HTTPS URL. The frontend is configured to point to the ngrok URL through the \texttt{VITE\_API\_URL} environment variable and can be hosted on a static platform or run locally.
+
+    \item \textbf{Production deployment}: The frontend is built to static files using \texttt{npm run build} and deployed to Vercel or Netlify. The backend is deployed on a GPU-equipped server (e.g., NTU HPC cluster with V100/A100 GPUs).
+\end{itemize}
 
 \subsection{User Interface Wireframe}
-% TODO: Include UI wireframes/mockups
+
+This section presents the wireframe designs for the key pages of the DiffusionDesk web application. These wireframes provide a visual representation of the interface's layout and functionality, serving as a blueprint for the frontend implementation. The wireframes were designed to prioritise usability, with clear separation of controls, input areas, and result displays.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Home Page}}
+
+% TODO: Create wireframe in draw.io and export to images/wireframe_home.png
+% Layout:
+%   +----------------------------------------------------------+
+%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
+%   +----------------------------------------------------------+
+%   |                                                          |
+%   |              Welcome to DiffusionDesk                    |
+%   |     AI-Powered Image Editing with Diffusion Models       |
+%   |                                                          |
+%   |  +----------------+  +----------------+  +-----------+   |
+%   |  | Inpainting     |  | Style Transfer |  | Restoration|  |
+%   |  | Remove objects |  | Apply artistic |  | Enhance   |  |
+%   |  | and fill       |  | styles to your |  | faces and |  |
+%   |  | regions        |  | images         |  | upscale   |  |
+%   |  +----------------+  +----------------+  +-----------+   |
+%   |                                                          |
+%   +----------------------------------------------------------+
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the wireframe image is created:
+    % \includegraphics[width=0.85\textwidth]{wireframe_home.png}
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{3cm}\textit{Home page wireframe to be inserted.}\vspace{3cm}}}
+    \caption{Home Page (Wireframe)}
+    \label{fig:wireframe_home}
+\end{figure}
+
+The Home page serves as the landing page for DiffusionDesk. It provides an overview of the application's three core features --- Inpainting, Style Transfer, and Restoration --- presented as feature cards with brief descriptions. The top navigation bar displays the application name and tab buttons for navigating to each feature. This page is designed to orient new users and provide quick access to any feature.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Inpainting Page}}
+
+% TODO: Create wireframe in draw.io and export to images/wireframe_inpainting.png
+% Layout:
+%   +----------------------------------------------------------+
+%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
+%   +----------------------------------------------------------+
+%   |                                                          |
+%   |  +---------------------------+  Model: [SD Inpainting v] |
+%   |  |                           |                           |
+%   |  |   [Image Canvas with      |  Prompt:                  |
+%   |  |    Mask Overlay]           |  [Enter prompt...      ]  |
+%   |  |                           |                           |
+%   |  |   Brush: [====o=====]     |  Negative Prompt:         |
+%   |  |   [Clear Mask]            |  [blurry, low quality  ]  |
+%   |  +---------------------------+                           |
+%   |                                 ▶ Advanced Settings      |
+%   |  [Upload Image]                   Guidance: [===o===]    |
+%   |                                   Steps:    [===o===]    |
+%   |                                   Strength: [===o===]    |
+%   |                                   Seed:     [_______]    |
+%   |                                   Quant:    [None   v]   |
+%   |                                                          |
+%   |                    [Generate]                            |
+%   |                                                          |
+%   |  +-------------+    +-------------+                      |
+%   |  | Original    |    | Result      |                      |
+%   |  |             |    |             |                       |
+%   |  +-------------+    +-------------+                      |
+%   |                     [Download]                           |
+%   +----------------------------------------------------------+
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the wireframe image is created:
+    % \includegraphics[width=0.85\textwidth]{wireframe_inpainting.png}
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}\textit{Inpainting page wireframe to be inserted.}\vspace{5cm}}}
+    \caption{Inpainting Page (Wireframe)}
+    \label{fig:wireframe_inpainting}
+\end{figure}
+
+The Inpainting page is the most complex interface in DiffusionDesk. The left side features the image canvas with a mask overlay, where users draw over the region to be inpainted using a configurable brush tool. A brush size slider and ``Clear Mask'' button are positioned below the canvas. The right side contains the control panel: model selection dropdown, text prompt input, negative prompt input, and a collapsible ``Advanced Settings'' section with sliders for guidance scale, inference steps, strength, seed input, and quantisation level selection. The ``Generate'' button triggers the inpainting operation, and the result is displayed below in a side-by-side comparison with the original image. A ``Download'' button allows saving the result.
+
+The ``Generate'' button is disabled until three conditions are met: an image is uploaded, a mask is drawn, and a prompt is entered. Inline hints inform the user of any missing requirements.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Style Transfer Page}}
+
+% TODO: Create wireframe in draw.io and export to images/wireframe_style.png
+% Layout:
+%   +----------------------------------------------------------+
+%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
+%   +----------------------------------------------------------+
+%   |                                                          |
+%   |  [Upload Image]      Model: [SDXL img2img          v]   |
+%   |  +----------------+                                      |
+%   |  | Image Preview  |  Style Presets:                      |
+%   |  |                |  [Anime] [Oil Painting] [Watercolor] |
+%   |  +----------------+  [Pixel Art] [Cinematic] [Sketch]    |
+%   |                      [Cyberpunk] [Pop Art]               |
+%   |                                                          |
+%   |                      □ Use custom prompt                 |
+%   |                      [Custom prompt...               ]   |
+%   |                                                          |
+%   |                      Strength: [=======o===] 0.7         |
+%   |                                                          |
+%   |                      ▶ Advanced Settings                 |
+%   |                                                          |
+%   |                    [Generate]                            |
+%   |                                                          |
+%   |  +-------------+    +-------------+                      |
+%   |  | Original    |    | Stylised    |                      |
+%   |  |             |    |             |                       |
+%   |  +-------------+    +-------------+                      |
+%   |                     [Download]                           |
+%   +----------------------------------------------------------+
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the wireframe image is created:
+    % \includegraphics[width=0.85\textwidth]{wireframe_style.png}
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}\textit{Style Transfer page wireframe to be inserted.}\vspace{5cm}}}
+    \caption{Style Transfer Page (Wireframe)}
+    \label{fig:wireframe_style}
+\end{figure}
+
+The Style Transfer page provides a streamlined interface for applying artistic styles to images. The left side displays the uploaded image preview with an upload control. The right side features a grid of style preset buttons (Anime, Oil Painting, Watercolour, Pixel Art, Cinematic, Pencil Sketch, Cyberpunk, Pop Art), each with a visual icon and label. Users can alternatively enable a custom prompt checkbox to enter a free-text style description. A prominent strength slider (0.0--1.0, default 0.7) controls the intensity of the style application --- lower values preserve more of the original content, while higher values produce more stylised results. The model selection dropdown and collapsible advanced settings (guidance scale, inference steps, seed) are also available. Results are displayed in the same side-by-side comparison format as the Inpainting page.
+
+\vspace{0.5em}
+\noindent\underline{\textbf{Restoration Page}}
+
+% TODO: Create wireframe in draw.io and export to images/wireframe_restoration.png
+% Layout:
+%   +----------------------------------------------------------+
+%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
+%   +----------------------------------------------------------+
+%   |                                                          |
+%   |  [Upload Image]                                          |
+%   |  +----------------+   Restoration Options:               |
+%   |  | Image Preview  |                                      |
+%   |  |                |   ☑ Face Enhancement                 |
+%   |  +----------------+     Model: [CodeFormer v]            |
+%   |                         Fidelity: [====o====] 0.5        |
+%   |                                                          |
+%   |                       Upscaling:                         |
+%   |                         Scale: [None] [2x] [4x]         |
+%   |                                                          |
+%   |                       ☐ Scratch Removal                  |
+%   |                       ☐ Colorisation                     |
+%   |                                                          |
+%   |                    [Restore]                             |
+%   |                                                          |
+%   |  +-------------+    +-------------+                      |
+%   |  | Original    |    | Restored    |                      |
+%   |  |             |    |             |                       |
+%   |  +-------------+    +-------------+                      |
+%   |                     [Download]                           |
+%   +----------------------------------------------------------+
+
+\begin{figure}[H]
+    \centering
+    % Uncomment the line below once the wireframe image is created:
+    % \includegraphics[width=0.85\textwidth]{wireframe_restoration.png}
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{5cm}\textit{Restoration page wireframe to be inserted.}\vspace{5cm}}}
+    \caption{Restoration Page (Wireframe)}
+    \label{fig:wireframe_restoration}
+\end{figure}
+
+The Restoration page offers a checkbox-based interface for selecting restoration operations. The primary options include: Face Enhancement with a model selector (CodeFormer or GFPGAN) and a fidelity slider (for CodeFormer, controlling the balance between quality enhancement and original fidelity); Upscaling with radio buttons for scale factor (None, 2$\times$, 4$\times$) using Real-ESRGAN; and optional Scratch Removal and Colourisation toggles. The ``Restore'' button is disabled unless at least one restoration option is enabled. This page does not require a text prompt, making it simpler than the Inpainting and Style Transfer pages. Results are displayed in the same side-by-side comparison format with a download option.
 
 \newpage
 
