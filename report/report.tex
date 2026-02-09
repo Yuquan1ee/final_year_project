@@ -34,7 +34,7 @@
 % ============================================================
 \graphicspath{{images/}}
 \onehalfspacing
-\emergencystretch=1em                 % Allow slightly looser spacing to prevent overfull boxes
+\emergencystretch=2em                 % Allow slightly looser spacing to prevent overfull boxes
 
 % Hyperlink styling
 \hypersetup{
@@ -1687,7 +1687,7 @@ The frontend is a React 19 single-page application built with TypeScript and bun
 \begin{itemize}
     \item \textbf{App Component} (\texttt{App.tsx}): The root component manages tab navigation through an \texttt{activeTab} state variable. Four tabs are available: Home, Inpainting, Style Transfer, and Restoration. Each tab renders its corresponding component.
 
-    \item \textbf{Tab Components} (\texttt{components/}): Each editing feature is encapsulated in its own tab component (\texttt{InpaintingTab.tsx}, \texttt{StyleTransferTab.tsx}, \texttt{RestorationTab.tsx}). Each tab manages its own local state for image data, generation parameters, and UI state (loading, errors, results). This design ensures that tabs are independent and do not share mutable state.
+    \item \textbf{Tab Components} (\texttt{components/}): Each editing feature is encapsulated in its own tab component --- \texttt{InpaintingTab.tsx}, \texttt{Style\-Transfer\-Tab.tsx}, and \texttt{Restoration\-Tab.tsx}. Each tab manages its own local state for image data, generation parameters, and UI state (loading, errors, results). This design ensures that tabs are independent and do not share mutable state.
 
     \item \textbf{Shared Components}: Reusable components include \texttt{ImageUpload} (drag-and-drop file upload with preview) and \texttt{MaskCanvas} (HTML5 Canvas-based interactive drawing tool for creating inpainting masks). These are used across multiple tabs to maintain consistency.
 
@@ -1699,11 +1699,11 @@ The frontend is a React 19 single-page application built with TypeScript and bun
 The backend follows a \textbf{three-layer router-service-schema architecture} built on FastAPI. This pattern separates concerns cleanly and mirrors the structure used in production web services:
 
 \begin{itemize}
-    \item \textbf{Router Layer} (\texttt{routers/}): Three router modules (\texttt{inpainting.py}, \texttt{style\_transfer.py}, \texttt{restoration.py}) define the API endpoints. Each router receives HTTP requests, extracts validated parameters from Pydantic schemas, delegates processing to the corresponding service, and returns a standardised \texttt{ImageResponse}. Routers are registered in \texttt{main.py} with URL prefixes (\texttt{/api/inpainting/}, \texttt{/api/style/}, \texttt{/api/restoration/}).
+    \item \textbf{Router Layer} (\texttt{routers/}): Three router modules --- \texttt{inpainting.py}, \texttt{style\_\allowbreak{}transfer.py}, and \texttt{restoration.py} --- define the API endpoints. Each router receives HTTP requests, extracts validated parameters from Pydantic schemas, delegates processing to the corresponding service, and returns a standardised \texttt{Image\-Response}. Routers are registered in \texttt{main.py} with URL prefixes: \texttt{/api/\allowbreak{}inpainting/}, \texttt{/api/\allowbreak{}style/}, and \texttt{/api/\allowbreak{}restoration/}.
 
-    \item \textbf{Schema Layer} (\texttt{schemas/image.py}): Pydantic models define the API contracts. \texttt{InpaintingRequest}, \texttt{StyleTransferRequest}, and \texttt{RestorationRequest} validate incoming data with type checking and range constraints (e.g., \texttt{guidance\_scale} between 1.0 and 20.0, \texttt{num\_inference\_steps} between 10 and 100). The shared \texttt{ImageResponse} model provides a consistent response format with fields for \texttt{success}, \texttt{image} (base64), \texttt{error}, \texttt{model\_used}, and \texttt{processing\_time}.
+    \item \textbf{Schema Layer} (\texttt{schemas/\allowbreak{}image.py}): Pydantic models define the API contracts. \texttt{Inpainting\-Request}, \texttt{Style\-Transfer\-Request}, and \texttt{Restoration\-Request} validate incoming data with type checking and range constraints (e.g., \texttt{guidance\_\allowbreak{}scale} between 1.0 and 20.0, \texttt{num\_\allowbreak{}inference\_\allowbreak{}steps} between 10 and 100). The shared \texttt{Image\-Response} model provides a consistent response format with fields for \texttt{success}, \texttt{image} (base64), \texttt{error}, \texttt{model\_used}, and \texttt{processing\_\allowbreak{}time}.
 
-    \item \textbf{Service Layer} (\texttt{services/}): The \texttt{DiffusionService} class manages diffusion model pipelines for inpainting and style transfer, while the \texttt{RestorationService} handles CodeFormer, GFPGAN, and Real-ESRGAN models. Services are instantiated as \textbf{singletons} using factory functions (\texttt{get\_diffusion\_service()}, \texttt{get\_restoration\_service()}), ensuring that loaded models are cached in GPU memory across multiple requests. This avoids redundant model loading and reduces response latency for subsequent requests.
+    \item \textbf{Service Layer} (\texttt{services/}): The \texttt{Diffusion\-Service} class manages diffusion model pipelines for inpainting and style transfer, while the \texttt{Restoration\-Service} handles CodeFormer, GFPGAN, and Real-ESRGAN models. Services are instantiated as \textbf{singletons} using factory functions (\texttt{get\_diffusion\_service()} and \texttt{get\_restoration\_service()}), ensuring that loaded models are cached in GPU memory across multiple requests. This avoids redundant model loading and reduces response latency for subsequent requests.
 \end{itemize}
 
 \subsubsection{Model Management Strategy}
