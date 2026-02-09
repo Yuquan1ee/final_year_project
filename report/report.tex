@@ -23,6 +23,7 @@
 \usepackage{listings}                 % Code listings
 \usepackage{xcolor}                   % Colors
 \usepackage{url}                      % URL formatting
+\usepackage{microtype}                % Microtypographic enhancements (prevents margin overflow)
 \usepackage{pdfpages}                 % Include PDF pages
 \usepackage{longtable}                % Multi-page tables
 \usepackage{array}                    % Extended column definitions
@@ -33,6 +34,7 @@
 % ============================================================
 \graphicspath{{images/}}
 \onehalfspacing
+\emergencystretch=1em                 % Allow slightly looser spacing to prevent overfull boxes
 
 % Hyperlink styling
 \hypersetup{
@@ -944,20 +946,30 @@ Figure~\ref{fig:use_case_diagram} presents the use case diagram for DiffusionDes
 %   UC-10: Load Diffusion Model (right side, near System actor)
 %
 % Relationships:
-%   User --> UC-1, UC-2, UC-3, UC-4, UC-5, UC-6, UC-7, UC-8, UC-9
-%   System --> UC-10
+%   Direct actor associations (User only connects to primary use cases):
+%   User --> UC-2 (Perform Inpainting)
+%   User --> UC-4 (Apply Style Transfer)
+%   User --> UC-6 (Restore Image)
+%   System --> UC-10 (Load Diffusion Model)
+%
+%   <<include>> relationships (required steps):
 %   UC-2 <<include>> UC-1 (must upload image before inpainting)
 %   UC-2 <<include>> UC-3 (must draw mask for inpainting)
 %   UC-4 <<include>> UC-1 (must upload image before style transfer)
 %   UC-6 <<include>> UC-1 (must upload image before restoration)
+%   UC-2 <<include>> UC-10 (system loads model)
+%   UC-4 <<include>> UC-10 (system loads model)
+%   UC-6 <<include>> UC-10 (system loads model)
+%
+%   <<extend>> relationships (optional steps):
 %   UC-2 <<extend>> UC-7 (optionally select model)
 %   UC-4 <<extend>> UC-5 (optionally select preset)
 %   UC-2 <<extend>> UC-8 (optionally configure parameters)
 %   UC-4 <<extend>> UC-8 (optionally configure parameters)
 %   UC-6 <<extend>> UC-8 (optionally configure parameters)
-%   UC-2 <<include>> UC-10 (system loads model)
-%   UC-4 <<include>> UC-10 (system loads model)
-%   UC-6 <<include>> UC-10 (system loads model)
+%   UC-2 <<extend>> UC-9 (optionally download result)
+%   UC-4 <<extend>> UC-9 (optionally download result)
+%   UC-6 <<extend>> UC-9 (optionally download result)
 
 \begin{figure}[H]
     \centering
@@ -968,11 +980,11 @@ Figure~\ref{fig:use_case_diagram} presents the use case diagram for DiffusionDes
     \label{fig:use_case_diagram}
 \end{figure}
 
-The User actor interacts directly with all use cases except UC-10 (Load Diffusion Model), which is triggered by the System when a model is needed for inference. Key relationships include:
+The User actor interacts directly with three primary use cases: UC-2 (Perform Inpainting), UC-4 (Apply Style Transfer), and UC-6 (Restore Image). The remaining use cases are reached indirectly through include and extend relationships. UC-10 (Load Diffusion Model) is associated with the System actor, as it is triggered automatically when a model is needed for inference. Key relationships include:
 
 \begin{itemize}
     \item \textbf{Include relationships}: UC-2, UC-4, and UC-6 all include UC-1 (Upload Image), as an image must be uploaded before any editing operation. UC-2 also includes UC-3 (Draw Inpainting Mask), as a mask is required for inpainting. All editing operations include UC-10 (Load Diffusion Model).
-    \item \textbf{Extend relationships}: UC-7 (Select Model) and UC-8 (Configure Generation Parameters) extend the editing use cases, as users may optionally change the model or adjust parameters. UC-5 (Select Style Preset) extends UC-4 (Apply Style Transfer).
+    \item \textbf{Extend relationships}: UC-7 (Select Model) and UC-8 (Configure Generation Parameters) extend the editing use cases, as users may optionally change the model or adjust parameters. UC-5 (Select Style Preset) extends UC-4 (Apply Style Transfer). UC-9 (Download Result Image) extends all three editing use cases, as the user may optionally download the generated result.
 \end{itemize}
 
 \subsubsection{Use Case Descriptions}
