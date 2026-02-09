@@ -963,6 +963,8 @@ Figure~\ref{fig:use_case_diagram} presents the use case diagram for DiffusionDes
 %
 %   <<extend>> relationships (optional steps):
 %   UC-2 <<extend>> UC-7 (optionally select model)
+%   UC-4 <<extend>> UC-7 (optionally select model)
+%   UC-6 <<extend>> UC-7 (optionally select model)
 %   UC-4 <<extend>> UC-5 (optionally select preset)
 %   UC-2 <<extend>> UC-8 (optionally configure parameters)
 %   UC-4 <<extend>> UC-8 (optionally configure parameters)
@@ -1153,7 +1155,7 @@ Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmarg
     \item The user navigates to the Style Transfer tab.
     \item The user uploads an image (UC-1).
     \item The user selects a style preset (UC-5) or enters a custom style prompt.
-    \item The user optionally adjusts the strength parameter to control style intensity.
+    \item The user optionally selects a model (UC-7) and adjusts the strength parameter to control style intensity.
     \item The user optionally configures additional parameters (UC-8).
     \item The user clicks the ``Generate'' button.
     \item The system sends the image, prompt, and parameters to the backend.
@@ -1238,8 +1240,8 @@ Frequency of Use & Frequent \\ \hline
 Flow of Events & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
     \item The user navigates to the Restoration tab.
     \item The user uploads an image (UC-1).
-    \item The user selects a restoration model (e.g., CodeFormer, GFPGAN, or Real-ESRGAN).
-    \item The user optionally adjusts model-specific parameters (e.g., fidelity weight for CodeFormer, upscale factor for Real-ESRGAN).
+    \item The user optionally selects a restoration model (UC-7) (e.g., CodeFormer, GFPGAN, or Real-ESRGAN).
+    \item The user optionally adjusts model-specific parameters (UC-8) (e.g., fidelity weight for CodeFormer, upscale factor for Real-ESRGAN).
     \item The user clicks the ``Restore'' button.
     \item The system sends the image and parameters to the backend.
     \item The system loads the selected model (UC-10).
