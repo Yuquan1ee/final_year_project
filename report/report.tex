@@ -193,7 +193,8 @@ March 2026
 \section{Introduction}
 
 \subsection{Abstract}
-% TODO: Write abstract
+
+This report presents DiffusionDesk, a web-based image editing platform that leverages open-source diffusion models to provide intelligent inpainting, style transfer, and image restoration capabilities within a unified interface. The application addresses the fragmentation and complexity barriers of existing AI-powered image editing tools by integrating multiple state-of-the-art models---including Stable Diffusion, Stable Diffusion XL, Kandinsky 2.2, and FLUX.1 Fill for inpainting; SDXL image-to-image for style transfer; and CodeFormer, GFPGAN, and Real-ESRGAN for restoration---into a single, accessible web application. The system is built with a FastAPI backend serving model inference on GPU-equipped hardware and a React frontend providing an intuitive browser-based interface. Key technical contributions include a VRAM optimisation strategy using BitsAndBytes quantisation (4-bit and 8-bit) that reduces FLUX.1 Fill memory requirements from 22--24\,GB to approximately 10\,GB, an interactive canvas-based mask drawing component for precise inpainting control, and a modular service architecture that supports dynamic model loading and caching. The platform is designed for deployment on cloud GPU environments such as Google Colab, making diffusion-based image editing accessible to users without local GPU hardware or programming expertise.
 
 \subsection{Background and Motivation}
 
@@ -926,52 +927,6 @@ This section presents the software requirements for DiffusionDesk, a web-based i
 \subsection{Use Case Diagram}
 
 Figure~\ref{fig:use_case_diagram} presents the use case diagram for DiffusionDesk, illustrating the interactions between the User actor and the system's core functionalities. The system boundary encompasses ten use cases spanning the three main feature areas: Inpainting, Style Transfer, and Restoration.
-
-% TODO: Create use case diagram in draw.io or Lucidchart and export to images/use_case_diagram.png
-% Diagram Layout Description:
-% - Primary Actor (stick figure, left): User
-% - Secondary Actor (stick figure, right): System
-% - System Boundary (rectangle): DiffusionDesk
-%
-% Use Cases inside boundary:
-%   UC-1: Upload Image (top centre)
-%   UC-2: Perform Inpainting (left cluster)
-%   UC-3: Draw Inpainting Mask (left cluster)
-%   UC-4: Apply Style Transfer (centre cluster)
-%   UC-5: Select Style Preset (centre cluster)
-%   UC-6: Restore Image (right cluster)
-%   UC-7: Select Model (bottom left)
-%   UC-8: Configure Generation Parameters (bottom centre)
-%   UC-9: Download Result Image (bottom right)
-%   UC-10: Load Diffusion Model (right side, near System actor)
-%
-% Relationships:
-%   Direct actor associations (User only connects to primary use cases):
-%   User --> UC-2 (Perform Inpainting)
-%   User --> UC-4 (Apply Style Transfer)
-%   User --> UC-6 (Restore Image)
-%   System --> UC-10 (Load Diffusion Model)
-%
-%   <<include>> relationships (required steps):
-%   UC-2 <<include>> UC-1 (must upload image before inpainting)
-%   UC-2 <<include>> UC-3 (must draw mask for inpainting)
-%   UC-4 <<include>> UC-1 (must upload image before style transfer)
-%   UC-6 <<include>> UC-1 (must upload image before restoration)
-%   UC-2 <<include>> UC-10 (system loads model)
-%   UC-4 <<include>> UC-10 (system loads model)
-%   UC-6 <<include>> UC-10 (system loads model)
-%
-%   <<extend>> relationships (optional steps):
-%   UC-2 <<extend>> UC-7 (optionally select model)
-%   UC-4 <<extend>> UC-7 (optionally select model)
-%   UC-6 <<extend>> UC-7 (optionally select model)
-%   UC-4 <<extend>> UC-5 (optionally select preset)
-%   UC-2 <<extend>> UC-8 (optionally configure parameters)
-%   UC-4 <<extend>> UC-8 (optionally configure parameters)
-%   UC-6 <<extend>> UC-8 (optionally configure parameters)
-%   UC-2 <<extend>> UC-9 (optionally download result)
-%   UC-4 <<extend>> UC-9 (optionally download result)
-%   UC-6 <<extend>> UC-9 (optionally download result)
 
 \begin{figure}[H]
     \centering
@@ -1746,29 +1701,12 @@ DiffusionDesk is designed for flexible deployment across different environments:
 \end{itemize}
 
 \subsection{User Interface Wireframe}
+\label{sec:wireframes}
 
 This section presents the wireframe designs for the key pages of the DiffusionDesk web application. These wireframes provide a visual representation of the interface's layout and functionality, serving as a blueprint for the frontend implementation. The wireframes were designed to prioritise usability, with clear separation of controls, input areas, and result displays.
 
 \vspace{0.5em}
 \noindent\underline{\textbf{Home Page}}
-
-% TODO: Create wireframe in draw.io and export to images/wireframe_home.png
-% Layout:
-%   +----------------------------------------------------------+
-%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
-%   +----------------------------------------------------------+
-%   |                                                          |
-%   |              Welcome to DiffusionDesk                    |
-%   |     AI-Powered Image Editing with Diffusion Models       |
-%   |                                                          |
-%   |  +----------------+  +----------------+  +-----------+   |
-%   |  | Inpainting     |  | Style Transfer |  | Restoration|  |
-%   |  | Remove objects |  | Apply artistic |  | Enhance   |  |
-%   |  | and fill       |  | styles to your |  | faces and |  |
-%   |  | regions        |  | images         |  | upscale   |  |
-%   |  +----------------+  +----------------+  +-----------+   |
-%   |                                                          |
-%   +----------------------------------------------------------+
 
 \begin{figure}[H]
     \centering
@@ -1781,36 +1719,6 @@ The Home page serves as the landing page for DiffusionDesk. It provides an overv
 
 \vspace{0.5em}
 \noindent\underline{\textbf{Inpainting Page}}
-
-% TODO: Create wireframe in draw.io and export to images/wireframe_inpainting.png
-% Layout:
-%   +----------------------------------------------------------+
-%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
-%   +----------------------------------------------------------+
-%   |                                                          |
-%   |  +---------------------------+  Model: [SD Inpainting v] |
-%   |  |                           |                           |
-%   |  |   [Image Canvas with      |  Prompt:                  |
-%   |  |    Mask Overlay]           |  [Enter prompt...      ]  |
-%   |  |                           |                           |
-%   |  |   Brush: [====o=====]     |  Negative Prompt:         |
-%   |  |   [Clear Mask]            |  [blurry, low quality  ]  |
-%   |  +---------------------------+                           |
-%   |                                 ▶ Advanced Settings      |
-%   |  [Upload Image]                   Guidance: [===o===]    |
-%   |                                   Steps:    [===o===]    |
-%   |                                   Strength: [===o===]    |
-%   |                                   Seed:     [_______]    |
-%   |                                   Quant:    [None   v]   |
-%   |                                                          |
-%   |                    [Generate]                            |
-%   |                                                          |
-%   |  +-------------+    +-------------+                      |
-%   |  | Original    |    | Result      |                      |
-%   |  |             |    |             |                       |
-%   |  +-------------+    +-------------+                      |
-%   |                     [Download]                           |
-%   +----------------------------------------------------------+
 
 \begin{figure}[H]
     \centering
@@ -1826,35 +1734,6 @@ The ``Generate'' button is disabled until three conditions are met: an image is 
 \vspace{0.5em}
 \noindent\underline{\textbf{Style Transfer Page}}
 
-% TODO: Create wireframe in draw.io and export to images/wireframe_style.png
-% Layout:
-%   +----------------------------------------------------------+
-%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
-%   +----------------------------------------------------------+
-%   |                                                          |
-%   |  [Upload Image]      Model: [SDXL img2img          v]   |
-%   |  +----------------+                                      |
-%   |  | Image Preview  |  Style Presets:                      |
-%   |  |                |  [Anime] [Oil Painting] [Watercolor] |
-%   |  +----------------+  [Pixel Art] [Cinematic] [Sketch]    |
-%   |                      [Cyberpunk] [Pop Art]               |
-%   |                                                          |
-%   |                      □ Use custom prompt                 |
-%   |                      [Custom prompt...               ]   |
-%   |                                                          |
-%   |                      Strength: [=======o===] 0.7         |
-%   |                                                          |
-%   |                      ▶ Advanced Settings                 |
-%   |                                                          |
-%   |                    [Generate]                            |
-%   |                                                          |
-%   |  +-------------+    +-------------+                      |
-%   |  | Original    |    | Stylised    |                      |
-%   |  |             |    |             |                       |
-%   |  +-------------+    +-------------+                      |
-%   |                     [Download]                           |
-%   +----------------------------------------------------------+
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{wireframe_style.png}
@@ -1866,34 +1745,6 @@ The Style Transfer page provides a streamlined interface for applying artistic s
 
 \vspace{0.5em}
 \noindent\underline{\textbf{Restoration Page}}
-
-% TODO: Create wireframe in draw.io and export to images/wireframe_restoration.png
-% Layout:
-%   +----------------------------------------------------------+
-%   | DIFFUSIONDESK   [Home] [Inpainting] [Style] [Restoration]|
-%   +----------------------------------------------------------+
-%   |                                                          |
-%   |  [Upload Image]                                          |
-%   |  +----------------+   Restoration Options:               |
-%   |  | Image Preview  |                                      |
-%   |  |                |   ☑ Face Enhancement                 |
-%   |  +----------------+     Model: [CodeFormer v]            |
-%   |                         Fidelity: [====o====] 0.5        |
-%   |                                                          |
-%   |                       Upscaling:                         |
-%   |                         Scale: [None] [2x] [4x]         |
-%   |                                                          |
-%   |                       ☐ Scratch Removal                  |
-%   |                       ☐ Colorisation                     |
-%   |                                                          |
-%   |                    [Restore]                             |
-%   |                                                          |
-%   |  +-------------+    +-------------+                      |
-%   |  | Original    |    | Restored    |                      |
-%   |  |             |    |             |                       |
-%   |  +-------------+    +-------------+                      |
-%   |                     [Download]                           |
-%   +----------------------------------------------------------+
 
 \begin{figure}[H]
     \centering
@@ -1910,40 +1761,1005 @@ The Restoration page offers a checkbox-based interface for selecting restoration
 % 6. IMPLEMENTATION
 % ============================================================
 \section{Implementation}
+\label{sec:implementation}
+
+This section presents the implementation of DiffusionDesk, covering the backend services that perform AI-powered image processing (Section~\ref{sec:backend}) and the frontend application that provides the user interface (Section~\ref{sec:frontend}).
 
 \subsection{Backend Development}
+\label{sec:backend}
+
+The backend is built with FastAPI, a modern Python web framework chosen for its automatic request validation via Pydantic, built-in OpenAPI documentation, and native \texttt{async} support. The backend is designed to run on GPU-equipped machines (Google Colab, cloud instances, or local workstations).
 
 \subsubsection{Project Structure}
-% TODO: Describe backend project structure
+\label{sec:backend_structure}
+
+The backend follows a layered architecture that separates routing, validation, and inference concerns. API requests flow through three layers: \textbf{routers} handle HTTP endpoints and delegate to \textbf{services}, which contain the ML inference logic; \textbf{schemas} define Pydantic models for request validation and response serialisation. Each service is implemented as a singleton to ensure that expensive GPU models are loaded only once and reused across requests.
+
+\begin{lstlisting}[language={}, caption={Backend directory structure}, label={lst:backend_tree}]
+backend/
+  app/
+    main.py                  # FastAPI app, CORS, router mounting
+    routers/
+      inpainting.py          # POST /api/inpainting/
+      style_transfer.py      # POST /api/style/
+      restoration.py         # POST /api/restoration/
+    services/
+      diffusion.py           # DiffusionService (inpainting + style)
+      restoration.py         # RestorationService (faces + upscale)
+    schemas/
+      image.py               # Pydantic request/response models
+  requirements.txt
+\end{lstlisting}
+
+Listing~\ref{lst:main_py} shows the application entry point. The \texttt{lifespan} context manager handles startup and shutdown events. CORS middleware is configured to allow all origins, which is necessary when the frontend is served from a different domain (e.g., Vercel) while the backend runs on a Colab instance exposed via ngrok. The three feature routers are mounted under \texttt{/api/} prefixes, and a health-check endpoint reports GPU availability and loaded pipelines.
+
+\begin{lstlisting}[language=Python, caption={Application entry point (\texttt{main.py})}, label={lst:main_py}]
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from app.routers import inpainting, style_transfer, restoration
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up Diffusion Image Editor API...")
+    yield
+    print("Shutting down...")
+
+app = FastAPI(
+    title="Diffusion Image Editor API",
+    description="API for intelligent image editing "
+                "using diffusion models",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(inpainting.router,
+    prefix="/api/inpainting", tags=["Inpainting"])
+app.include_router(style_transfer.router,
+    prefix="/api/style", tags=["Style Transfer"])
+app.include_router(restoration.router,
+    prefix="/api/restoration", tags=["Restoration"])
+
+@app.get("/api/health")
+async def health_check():
+    from app.services.diffusion import get_diffusion_service
+    service = get_diffusion_service()
+    gpu_info = service.get_gpu_info()
+    return {
+        "status": "healthy",
+        "gpu": gpu_info,
+        "loaded_pipelines": list(
+            service._pipelines.keys()),
+    }
+\end{lstlisting}
 
 \subsubsection{API Design}
-% TODO: Describe FastAPI endpoints and design decisions
+\label{sec:api_design}
+
+The API uses JSON request bodies with base64-encoded images rather than multipart form uploads. This design simplifies the frontend integration---the React client can construct the entire request as a single \texttt{JSON.stringify()} call---and allows Pydantic to validate all fields (including numeric constraints) in one pass. Every endpoint returns a uniform \texttt{ImageResponse} containing a success flag, the result image (base64), the model used, and the processing time.
+
+Listing~\ref{lst:schemas_response} shows the response model and the inpainting request schema. Pydantic \texttt{Field} constraints enforce value ranges at the API boundary: \texttt{guidance\_scale} is clamped between 1.0 and 20.0, \texttt{num\_inference\_steps} between 10 and 100, and \texttt{seed} between 0 and $2^{31}-1$. The \texttt{InpaintingModel} enum restricts model selection to known-valid keys, preventing typos from reaching the service layer.
+
+\begin{lstlisting}[language=Python, caption={Response model and inpainting request schema (\texttt{schemas/image.py})}, label={lst:schemas_response}]
+class ImageResponse(BaseModel):
+    success: bool
+    image: Optional[str] = Field(
+        None, description="Base64 encoded result image")
+    error: Optional[str] = None
+    model_used: Optional[str] = None
+    processing_time: Optional[float] = None
+
+class InpaintingModel(str, Enum):
+    SD_INPAINTING = "sd-inpainting"
+    KANDINSKY = "kandinsky-inpainting"
+    SDXL_INPAINTING = "sdxl-inpainting"
+    SDXL_INPAINTING_8BIT = "sdxl-inpainting-8bit"
+    SDXL_INPAINTING_4BIT = "sdxl-inpainting-4bit"
+    FLUX_FILL = "flux-fill"
+    FLUX_FILL_8BIT = "flux-fill-8bit"
+    FLUX_FILL_4BIT = "flux-fill-4bit"
+    FLUX_FILL_NF4 = "flux-fill-nf4"
+
+class InpaintingRequest(BaseModel):
+    image: str = Field(...,
+        description="Base64 encoded input image")
+    mask: str = Field(...,
+        description="Base64 mask (white=inpaint)")
+    prompt: str = Field(...,
+        description="What to generate in masked area")
+    negative_prompt: str = Field(
+        default="blurry, low quality, distorted",
+        description="What to avoid in generation")
+    model: InpaintingModel = Field(
+        default=InpaintingModel.SD_INPAINTING)
+    guidance_scale: float = Field(
+        default=7.5, ge=1.0, le=20.0)
+    num_inference_steps: int = Field(
+        default=30, ge=10, le=100)
+    seed: Optional[int] = Field(
+        default=None, ge=0, le=2147483647)
+    strength: float = Field(
+        default=1.0, ge=0.0, le=1.0)
+\end{lstlisting}
+
+Listing~\ref{lst:schemas_restoration} shows the restoration request schema and its supporting enums. The \texttt{FaceModel} enum selects between CodeFormer and GFPGAN, while \texttt{UpscaleOption} controls the Real-ESRGAN scale factor. Boolean flags enable or disable individual pipeline stages.
+
+\begin{lstlisting}[language=Python, caption={Restoration request schema and enums (\texttt{schemas/image.py})}, label={lst:schemas_restoration}]
+class FaceModel(str, Enum):
+    CODEFORMER = "codeformer"
+    GFPGAN = "gfpgan"
+
+class UpscaleOption(str, Enum):
+    NONE = "none"
+    UPSCALE_2X = "2x"
+    UPSCALE_4X = "4x"
+
+class RestorationRequest(BaseModel):
+    image: str = Field(...,
+        description="Base64 encoded input image")
+    enable_face_enhance: bool = Field(
+        default=True, description="Enable face "
+        "enhancement (CodeFormer/GFPGAN)")
+    face_model: FaceModel = Field(
+        default=FaceModel.CODEFORMER)
+    fidelity: float = Field(
+        default=0.5, ge=0.0, le=1.0,
+        description="CodeFormer fidelity "
+        "(0=quality, 1=fidelity)")
+    upscale: UpscaleOption = Field(
+        default=UpscaleOption.UPSCALE_2X)
+    enable_scratch_removal: bool = Field(
+        default=False)
+    enable_colorize: bool = Field(
+        default=False)
+\end{lstlisting}
+
+Table~\ref{tab:api_endpoints} summarises the complete API surface.
+
+\begin{table}[H]
+\centering
+\caption{API endpoint summary}
+\label{tab:api_endpoints}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Endpoint} & \textbf{Method} & \textbf{Description} \\
+\midrule
+\texttt{/api/inpainting/} & POST & Inpaint masked region with a text prompt \\
+\texttt{/api/inpainting/models} & GET & List available inpainting models and VRAM requirements \\
+\texttt{/api/style/} & POST & Apply style transfer with a preset or custom prompt \\
+\texttt{/api/style/presets} & GET & List available style presets \\
+\texttt{/api/restoration/} & POST & Run restoration pipeline (face, upscale, scratch, colour) \\
+\texttt{/api/restoration/models} & GET & List available restoration models \\
+\texttt{/api/health} & GET & Health check with GPU info and loaded pipelines \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsubsection{Inpainting Service}
-% TODO: Describe inpainting service implementation
+\label{sec:inpainting_service}
+
+The inpainting feature supports four model families---Stable Diffusion 1.5, SDXL, Kandinsky~2.2, and FLUX.1 Fill---each available in multiple quantisation variants. Rather than hard-coding pipeline parameters, the service uses a declarative configuration dictionary (Listing~\ref{lst:inpainting_models}) where each entry specifies the Hugging Face model~ID, pipeline class name, data type, and optional quantisation or CPU-offload flags. This design makes adding new models a one-line dictionary entry rather than a code change.
+
+\begin{lstlisting}[language=Python, caption={Declarative model configuration dictionary (excerpt from \texttt{diffusion.py})}, label={lst:inpainting_models}]
+INPAINTING_MODELS = {
+    "sd-inpainting": {
+        "model_id": "runwayml/"
+                    "stable-diffusion-inpainting",
+        "pipeline": "StableDiffusionInpaintPipeline",
+        "torch_dtype": "float16",
+    },
+    "sdxl-inpainting": {
+        "model_id": "diffusers/stable-diffusion-"
+                    "xl-1.0-inpainting-0.1",
+        "pipeline":
+            "StableDiffusionXLInpaintPipeline",
+        "torch_dtype": "float16",
+    },
+    "sdxl-inpainting-4bit": {
+        "model_id": "diffusers/stable-diffusion-"
+                    "xl-1.0-inpainting-0.1",
+        "pipeline":
+            "StableDiffusionXLInpaintPipeline",
+        "torch_dtype": "float16",
+        "quantization": "4bit",  # ~4 GB VRAM
+    },
+    "kandinsky-inpainting": {
+        "model_id": "kandinsky-community/"
+                    "kandinsky-2-2-decoder-inpaint",
+        "pipeline": "AutoPipelineForInpainting",
+        "torch_dtype": "float16",
+    },
+    "flux-fill-nf4": {
+        "model_id": "black-forest-labs/"
+                    "FLUX.1-Fill-dev",
+        "pipeline": "FluxFillPipeline",
+        "torch_dtype": "float16",
+        "quantization": "nf4",  # ~10 GB VRAM
+    },
+    # ... additional variants omitted
+}
+\end{lstlisting}
+
+The \texttt{inpaint()} method (Listing~\ref{lst:inpaint_method}) implements the full request flow. It decodes the base64 image and mask, records the original dimensions, resizes inputs to the model's optimal resolution (512$\times$512 for SD~1.5, 1024$\times$1024 for SDXL and FLUX), loads the pipeline via the caching mechanism described in Section~\ref{sec:vram_optimization}, and runs inference under \texttt{torch.inference\_mode()} to disable gradient tracking. The result is resized back to the original dimensions and returned as a base64 string. All parameters---guidance scale, inference steps, seed, strength, and padding mask crop---are forwarded from the validated request schema.
+
+\begin{lstlisting}[language=Python, caption={Inpainting inference method (\texttt{diffusion.py})}, label={lst:inpaint_method}]
+def inpaint(self, image_b64, mask_b64, prompt,
+            model_key="sd-inpainting", **kwargs):
+    start_time = time.time()
+    try:
+        config = INPAINTING_MODELS[model_key]
+        image, fmt = self.base64_to_image(image_b64)
+        mask = self.base64_to_mask(mask_b64)
+        original_size = image.size
+
+        # Resize to model-optimal dimensions
+        if "sdxl" in model_key \
+                or "flux" in model_key:
+            target_size = (1024, 1024)
+        else:
+            target_size = (512, 512)
+        image = image.resize(target_size,
+            Image.Resampling.LANCZOS)
+        mask = mask.resize(target_size,
+            Image.Resampling.LANCZOS)
+
+        pipe = self._load_pipeline(
+            model_key, config)
+
+        pipe_kwargs = {
+            "prompt": prompt,
+            "image": image,
+            "mask_image": mask,
+            "guidance_scale":
+                kwargs.get("guidance_scale", 7.5),
+            "num_inference_steps":
+                kwargs.get("num_inference_steps", 30),
+            "strength":
+                kwargs.get("strength", 1.0),
+        }
+
+        seed = kwargs.get("seed")
+        if seed is not None:
+            pipe_kwargs["generator"] = \
+                torch.Generator(
+                    device=self.device
+                ).manual_seed(seed)
+
+        with torch.inference_mode():
+            result = pipe(**pipe_kwargs).images[0]
+
+        if result.size != original_size:
+            result = result.resize(original_size,
+                Image.Resampling.LANCZOS)
+
+        result_b64 = self.image_to_base64(
+            result, fmt)
+        return result_b64, None, \
+            time.time() - start_time
+    except Exception as e:
+        return None, str(e), \
+            time.time() - start_time
+\end{lstlisting}
+
+Listing~\ref{lst:inpainting_router} shows the router endpoint that connects the HTTP layer to the service. The router obtains the singleton \texttt{DiffusionService}, unpacks the validated request fields, and wraps the result in a uniform \texttt{ImageResponse}.
+
+\begin{lstlisting}[language=Python, caption={Inpainting router endpoint (\texttt{routers/inpainting.py})}, label={lst:inpainting_router}]
+from fastapi import APIRouter
+from app.schemas.image import (
+    InpaintingRequest, ImageResponse)
+from app.services.diffusion import (
+    get_diffusion_service)
+
+router = APIRouter()
+
+@router.post("/", response_model=ImageResponse)
+async def inpaint_image(
+    request: InpaintingRequest,
+) -> ImageResponse:
+    service = get_diffusion_service()
+    result_b64, error, processing_time = \
+        service.inpaint(
+            image_b64=request.image,
+            mask_b64=request.mask,
+            prompt=request.prompt,
+            model_key=request.model.value,
+            negative_prompt=request.negative_prompt,
+            guidance_scale=request.guidance_scale,
+            num_inference_steps=
+                request.num_inference_steps,
+            seed=request.seed,
+            strength=request.strength,
+            padding_mask_crop=
+                request.padding_mask_crop,
+        )
+    if error:
+        return ImageResponse(success=False,
+            error=error,
+            model_used=request.model.value,
+            processing_time=processing_time)
+    return ImageResponse(success=True,
+        image=result_b64,
+        model_used=request.model.value,
+        processing_time=processing_time)
+\end{lstlisting}
 
 \subsubsection{Style Transfer Service}
-% TODO: Describe style transfer service implementation
+\label{sec:style_transfer_service}
+
+Style transfer is implemented using diffusion-based image-to-image (img2img) generation rather than traditional neural style transfer \citep{gatys2016style}. This approach leverages the same Stable Diffusion and SDXL models used for inpainting, but in img2img mode: the input image is partially noised according to a \texttt{strength} parameter and then denoised with a style-describing prompt. Higher strength values produce more stylised output at the cost of reduced fidelity to the original image.
+
+The system provides nine predefined style presets (Listing~\ref{lst:style_config}), each mapping a user-friendly name to an optimised prompt string. The \texttt{STYLE\_PROMPTS} dictionary serves as the preset library, while \texttt{STYLE\_MODELS} mirrors the structure of \texttt{INPAINTING\_MODELS} for img2img pipelines. Users may also supply a custom text prompt via the ``custom'' preset option.
+
+\begin{lstlisting}[language=Python, caption={Style presets and model configuration (\texttt{diffusion.py})}, label={lst:style_config}]
+STYLE_PROMPTS = {
+    "oil_painting": "oil painting style, thick "
+        "brushstrokes, vibrant colors, masterpiece",
+    "watercolor": "watercolor painting style, "
+        "soft edges, flowing colors, delicate",
+    "anime": "anime style, cel shading, vibrant "
+        "colors, japanese animation, detailed",
+    "sketch": "pencil sketch, black and white, "
+        "detailed linework, hand drawn",
+    "cyberpunk": "cyberpunk style, neon lights, "
+        "futuristic, dark atmosphere, sci-fi",
+    "ghibli": "studio ghibli style, soft colors, "
+        "whimsical, animated, magical",
+    "pixel_art": "pixel art style, 8-bit, retro "
+        "video game aesthetic, nostalgic",
+    "pop_art": "pop art style, bold colors, comic "
+        "book, andy warhol inspired",
+    "impressionist": "impressionist painting, monet "
+        "style, soft brushstrokes, light and color",
+}
+
+STYLE_MODELS = {
+    "sdxl-img2img": {
+        "model_id": "stabilityai/"
+            "stable-diffusion-xl-base-1.0",
+        "pipeline":
+            "StableDiffusionXLImg2ImgPipeline",
+        "torch_dtype": "float16",
+    },
+    "sdxl-img2img-4bit": {
+        "model_id": "stabilityai/"
+            "stable-diffusion-xl-base-1.0",
+        "pipeline":
+            "StableDiffusionXLImg2ImgPipeline",
+        "torch_dtype": "float16",
+        "quantization": "4bit",
+    },
+    "sd-img2img": {
+        "model_id": "runwayml/"
+            "stable-diffusion-v1-5",
+        "pipeline":
+            "StableDiffusionImg2ImgPipeline",
+        "torch_dtype": "float16",
+    },
+}
+\end{lstlisting}
+
+The \texttt{style\_transfer()} method (Listing~\ref{lst:style_transfer_method}) follows the same pattern as inpainting: decode, resize, load pipeline, build keyword arguments, run inference, resize back, and encode. The key difference is that it looks up the style prompt from \texttt{STYLE\_PROMPTS} (falling back to the raw string for custom styles) and passes \texttt{strength} as the denoising strength.
+
+\begin{lstlisting}[language=Python, caption={Style transfer inference method (\texttt{diffusion.py})}, label={lst:style_transfer_method}]
+def style_transfer(self, image_b64, style,
+        model_key="sdxl-img2img", strength=0.6,
+        **kwargs):
+    start_time = time.time()
+    try:
+        image, fmt = self.base64_to_image(
+            image_b64)
+        original_size = image.size
+
+        if "sdxl" in model_key:
+            target_size = (1024, 1024)
+        else:
+            target_size = (512, 512)
+        image = image.resize(target_size,
+            Image.Resampling.LANCZOS)
+
+        # Resolve style preset or use custom text
+        style_prompt = STYLE_PROMPTS.get(
+            style, style)
+
+        config = STYLE_MODELS[model_key]
+        pipe = self._load_pipeline(
+            f"style-{model_key}", config)
+
+        pipe_kwargs = {
+            "prompt": style_prompt,
+            "image": image,
+            "strength": strength,
+            "guidance_scale":
+                kwargs.get("guidance_scale", 7.5),
+            "num_inference_steps":
+                kwargs.get("num_inference_steps",
+                           30),
+        }
+
+        with torch.inference_mode():
+            result = pipe(**pipe_kwargs).images[0]
+
+        if result.size != original_size:
+            result = result.resize(original_size,
+                Image.Resampling.LANCZOS)
+
+        return self.image_to_base64(result, fmt),\
+            None, time.time() - start_time
+    except Exception as e:
+        return None, str(e), \
+            time.time() - start_time
+\end{lstlisting}
 
 \subsubsection{Restoration Service}
-% TODO: Describe restoration service implementation (CodeFormer, GFPGAN, Real-ESRGAN)
+\label{sec:restoration_service}
+
+The restoration feature uses specialised computer vision models rather than diffusion models. It supports four operations that can be combined in a single request: scratch removal, face enhancement (Code\-Former or GFPGAN), colourisation, and super-resolution upscaling (Real-ESRGAN). The pipeline ordering is deliberate: scratches are removed first to give face detection a cleaner input, faces are enhanced next, colourisation follows (operating on the enhanced image), and upscaling is applied last to avoid processing unnecessarily large images in earlier stages.
+
+Listing~\ref{lst:restore_pipeline} shows the main \texttt{restore()} method that orchestrates this pipeline. Each stage is gated by a boolean flag from the request, and the intermediate result is passed through sequentially.
+
+\begin{lstlisting}[language=Python, caption={Restoration pipeline orchestration (\texttt{restoration.py})}, label={lst:restore_pipeline}]
+def restore(self, image_b64,
+        enable_face_enhance=True,
+        face_model="codeformer",
+        fidelity=0.5, upscale="2x",
+        enable_scratch_removal=False,
+        enable_colorize=False):
+    start_time = time.time()
+    try:
+        image, fmt = self.base64_to_image(
+            image_b64)
+        result = image
+
+        # 1. Scratch removal (clean first)
+        if enable_scratch_removal:
+            result = self.remove_scratches(result)
+
+        # 2. Face enhancement
+        if enable_face_enhance:
+            if face_model == "codeformer":
+                result = \
+                    self.enhance_faces_codeformer(
+                        result, fidelity)
+            else:
+                result = \
+                    self.enhance_faces_gfpgan(result)
+
+        # 3. Colourisation
+        if enable_colorize:
+            result = self.colorize(result)
+
+        # 4. Upscaling (last to preserve quality)
+        if upscale != "none":
+            scale = 4 if upscale == "4x" else 2
+            result = self.upscale(result, scale)
+
+        result_b64 = self.image_to_base64(
+            result, fmt)
+        return result_b64, None, \
+            time.time() - start_time
+    except Exception as e:
+        return None, str(e), \
+            time.time() - start_time
+\end{lstlisting}
+
+Listing~\ref{lst:codeformer_method} shows the CodeFormer face enhancement implementation. The method uses a \texttt{FaceRestoreHelper} utility to detect faces via RetinaFace, align and warp each face to a canonical 512$\times$512 crop, process it through the CodeFormer transformer model with the fidelity parameter \texttt{w}, and then paste the restored face back into the original image using an inverse affine transform. The \texttt{fidelity} parameter controls the trade-off between enhancement quality (\texttt{w}$=$0) and faithfulness to the original face (\texttt{w}$=$1).
+
+\begin{lstlisting}[language=Python, caption={CodeFormer face enhancement (\texttt{restoration.py})}, label={lst:codeformer_method}]
+def enhance_faces_codeformer(self, image, fidelity=0.5):
+    import torch
+    codeformer = self._load_codeformer(fidelity)
+    model = codeformer['model']
+    face_helper = codeformer['face_helper']
+    img2tensor = codeformer['img2tensor']
+    tensor2img = codeformer['tensor2img']
+
+    img = self.pil_to_cv2(image)
+    face_helper.clean_all()
+    face_helper.read_image(img)
+    face_helper.get_face_landmarks_5(
+        only_center_face=False)
+    face_helper.align_warp_face()
+
+    for idx, cropped_face in enumerate(
+            face_helper.cropped_faces):
+        cropped_face_t = img2tensor(
+            cropped_face / 255.,
+            bgr2rgb=True, float32=True)
+        cropped_face_t = cropped_face_t \
+            .unsqueeze(0).to(self.device)
+        try:
+            with torch.no_grad():
+                output = model(cropped_face_t,
+                    w=fidelity, adain=True)[0]
+                restored_face = tensor2img(
+                    output.squeeze(0),
+                    rgb2bgr=True,
+                    min_max=(-1, 1))
+            del output
+        except RuntimeError:
+            restored_face = cropped_face
+        restored_face = \
+            restored_face.astype('uint8')
+        face_helper.add_restored_face(
+            restored_face)
+
+    face_helper.get_inverse_affine(None)
+    restored_img = \
+        face_helper.paste_faces_to_input_image()
+    return self.cv2_to_pil(restored_img)
+\end{lstlisting}
 
 \subsubsection{Model Management and VRAM Optimization}
-% TODO: Describe model loading, quantization (4-bit, 8-bit), CPU offloading
+\label{sec:vram_optimization}
+
+Running multiple large diffusion models on consumer GPUs (8--16~GB VRAM) requires careful memory management. The backend employs several strategies:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Lazy loading with caching.} Models are loaded into GPU memory only on first use and cached in a \texttt{\_pipelines} dictionary. Subsequent requests for the same model reuse the cached pipeline, avoiding repeated downloads and weight loading.
+
+    \item \textbf{Quantisation.} For SDXL and FLUX models, the system supports 8-bit and 4-bit quantisation via BitsAndBytes \citep{Dettmers2022}. This reduces VRAM usage significantly: SDXL drops from 10--12~GB to approximately 4~GB at 4-bit precision, and FLUX.1~Fill drops from 22--24~GB to approximately 10~GB at NF4 precision.
+
+    \item \textbf{Attention slicing.} All pipelines enable attention slicing via \texttt{enable\_\-attention\_\-slicing()}, which computes attention in sequential chunks rather than all at once, trading speed for lower peak memory.
+
+    \item \textbf{CPU offloading.} For FLUX.1~Fill at full precision, the service uses \texttt{enable\_\-model\_\-cpu\_\-offload()}, which keeps model weights on the CPU and transfers them to the GPU only during the forward pass of each component.
+
+    \item \textbf{Inference mode.} All inference runs under \texttt{torch.inference\_mode()}, which disables gradient computation and autograd bookkeeping, reducing memory overhead.
+\end{enumerate}
+
+Listing~\ref{lst:flux_quantized} shows the FLUX.1~Fill quantisation loader. Because FLUX has two large components---the transformer and the T5 text encoder---both must be quantised separately using their respective BitsAndBytesConfig classes (from \texttt{diffusers} and \texttt{transformers}). The quantised components are then passed to \texttt{FluxFillPipeline.from\_pretrained()} with \texttt{device\_map="auto"} for automatic device placement.
+
+\begin{lstlisting}[language=Python, caption={FLUX.1 Fill quantised loading (\texttt{diffusion.py})}, label={lst:flux_quantized}]
+def _load_flux_fill_quantized(self, config,
+        quantization, torch_dtype):
+    from diffusers import FluxFillPipeline, AutoModel
+    from diffusers import BitsAndBytesConfig \
+        as DiffusersBnBConfig
+    from transformers import T5EncoderModel
+    from transformers import BitsAndBytesConfig \
+        as TransformersBnBConfig
+
+    model_id = config["model_id"]
+
+    if quantization == "8bit":
+        diff_qc = DiffusersBnBConfig(
+            load_in_8bit=True)
+        trans_qc = TransformersBnBConfig(
+            load_in_8bit=True)
+    else:  # 4bit or nf4
+        quant_type = "nf4" \
+            if quantization == "nf4" else "fp4"
+        diff_qc = DiffusersBnBConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type=quant_type,
+            bnb_4bit_compute_dtype=torch_dtype)
+        trans_qc = TransformersBnBConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type=quant_type,
+            bnb_4bit_compute_dtype=torch_dtype)
+
+    transformer = AutoModel.from_pretrained(
+        model_id, subfolder="transformer",
+        quantization_config=diff_qc,
+        torch_dtype=torch_dtype)
+
+    text_encoder_2 = T5EncoderModel.from_pretrained(
+        model_id, subfolder="text_encoder_2",
+        quantization_config=trans_qc,
+        torch_dtype=torch_dtype)
+
+    pipe = FluxFillPipeline.from_pretrained(
+        model_id, transformer=transformer,
+        text_encoder_2=text_encoder_2,
+        torch_dtype=torch_dtype,
+        device_map="auto")
+    return pipe
+\end{lstlisting}
+
+Listing~\ref{lst:load_pipeline} shows the general pipeline loader, which handles three cases: FLUX quantisation (delegated to the method above), SD/SDXL quantisation via \texttt{Pipeline\-Quantization\-Config} (which automatically targets the UNet component), and standard full-precision loading. For non-quantised large models, CPU offloading is enabled when the configuration flag is set.
+
+\begin{lstlisting}[language=Python, caption={General pipeline loading with caching (\texttt{diffusion.py})}, label={lst:load_pipeline}]
+def _load_pipeline(self, pipeline_key, config):
+    if pipeline_key in self._pipelines:
+        return self._pipelines[pipeline_key]
+
+    torch_dtype = self._get_torch_dtype(
+        config["torch_dtype"])
+    quantization = config.get("quantization")
+    use_cpu_offload = config.get(
+        "use_cpu_offload", False)
+
+    if quantization and \
+            config["pipeline"] == "FluxFillPipeline":
+        pipe = self._load_flux_fill_quantized(
+            config, quantization, torch_dtype)
+    elif quantization:
+        # SD/SDXL: PipelineQuantizationConfig
+        from diffusers.quantizers import \
+            PipelineQuantizationConfig
+        pipeline_quant_config = \
+            PipelineQuantizationConfig(
+                quant_backend=
+                    f"bitsandbytes_{quantization}",
+                quant_kwargs={
+                    f"load_in_{quantization}": True},
+                components_to_quantize=["unet"])
+        pipe = pipeline_class.from_pretrained(
+            config["model_id"],
+            torch_dtype=torch_dtype,
+            quantization_config=
+                pipeline_quant_config)
+        pipe = pipe.to(self.device)
+    else:
+        pipe = pipeline_class.from_pretrained(
+            config["model_id"],
+            torch_dtype=torch_dtype)
+        if use_cpu_offload:
+            pipe.enable_model_cpu_offload()
+        else:
+            pipe = pipe.to(self.device)
+
+    if hasattr(pipe, "enable_attention_slicing"):
+        pipe.enable_attention_slicing()
+
+    self._pipelines[pipeline_key] = pipe
+    return pipe
+\end{lstlisting}
+
+Table~\ref{tab:vram_requirements} summarises the VRAM requirements for each model at different precision levels.
+
+\begin{table}[H]
+\centering
+\caption{VRAM requirements by model and precision}
+\label{tab:vram_requirements}
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Model} & \textbf{FP16/BF16} & \textbf{8-bit} & \textbf{4-bit} \\
+\midrule
+SD 1.5 Inpainting & 5--7 GB & --- & --- \\
+SDXL Inpainting & 10--12 GB & $\sim$6 GB & $\sim$4 GB \\
+Kandinsky 2.2 & 6--8 GB & --- & --- \\
+FLUX.1 Fill & 22--24 GB & $\sim$16 GB & $\sim$10 GB \\
+SDXL img2img & 10--12 GB & $\sim$6 GB & $\sim$4 GB \\
+SD 1.5 img2img & 5--7 GB & --- & --- \\
+CodeFormer & 2--4 GB & --- & --- \\
+GFPGAN & 2--4 GB & --- & --- \\
+Real-ESRGAN & 2--6 GB & --- & --- \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Frontend Development}
+\label{sec:frontend}
+
+The frontend is a single-page application (SPA) built with React~19, TypeScript, and Tailwind CSS, bundled by Vite. It communicates with the backend entirely through JSON REST calls.
 
 \subsubsection{Project Structure}
-% TODO: Describe frontend project structure
+\label{sec:frontend_structure}
+
+\begin{lstlisting}[language={}, caption={Frontend directory structure}, label={lst:frontend_tree}]
+frontend/
+  src/
+    api/
+      config.ts            # API URL, base64 utils
+      imageApi.ts          # API client functions
+      index.ts             # Barrel exports
+    components/
+      HomeTab.tsx           # Landing page
+      InpaintingTab.tsx     # Inpainting workflow
+      StyleTransferTab.tsx  # Style transfer workflow
+      RestorationTab.tsx    # Restoration workflow
+      MaskCanvas.tsx        # Canvas mask drawing
+    App.tsx                 # Tab navigation shell
+    main.tsx                # React entry point
+  .env.example              # VITE_API_URL template
+  package.json
+  tailwind.config.js
+  vite.config.ts
+\end{lstlisting}
+
+Table~\ref{tab:frontend_deps} lists the key frontend dependencies.
+
+\begin{table}[H]
+\centering
+\caption{Key frontend dependencies}
+\label{tab:frontend_deps}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Package} & \textbf{Version} & \textbf{Purpose} \\
+\midrule
+React & 19.0 & UI component library \\
+TypeScript & 5.6 & Static type checking \\
+Vite & 6.0 & Build tool and dev server \\
+Tailwind CSS & 4.0 & Utility-first CSS framework \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsubsection{User Interface Design}
-% TODO: Describe React components, tab navigation, Tailwind CSS styling
+\label{sec:ui_design}
+
+The application uses a tab-based navigation pattern with a shared header. The dark theme (Tailwind \texttt{slate-900} background with \texttt{indigo-600} accent) provides comfortable viewing during extended editing sessions and reduces visual distraction from the images being edited. Each feature tab follows a consistent three-step workflow: upload an image, configure parameters, and generate a result. Common UI patterns---error banners, loading spinners, before/after comparison, and download buttons---are repeated across all tabs for consistency.
+
+Listing~\ref{lst:app_tsx} shows the complete \texttt{App.tsx} component. The tab configuration is stored as a typed array, making it straightforward to add new tabs. Active tab state is managed with React's \texttt{useState} hook, and conditional rendering displays the appropriate feature component. The wireframes in Section~\ref{sec:wireframes} illustrate the layout of each tab.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={Main application shell (\texttt{App.tsx})}, label={lst:app_tsx}, morekeywords={import,from,export,default,function,const,useState,return,type}]
+import { useState } from 'react'
+import HomeTab from './components/HomeTab'
+import InpaintingTab
+  from './components/InpaintingTab'
+import StyleTransferTab
+  from './components/StyleTransferTab'
+import RestorationTab
+  from './components/RestorationTab'
+
+type Tab = 'home' | 'inpainting'
+  | 'style-transfer' | 'restoration'
+
+function App() {
+  const [activeTab, setActiveTab] =
+    useState<Tab>('home')
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'home', label: 'Home' },
+    { id: 'inpainting', label: 'Inpainting' },
+    { id: 'style-transfer',
+      label: 'Style Transfer' },
+    { id: 'restoration',
+      label: 'Restoration' },
+  ]
+
+  return (
+    <div className="min-h-screen bg-slate-900">
+      <header className="border-b
+          border-slate-700 p-6">
+        <h1 className="text-3xl font-bold
+            text-center">DiffusionDesk</h1>
+      </header>
+      <nav className="border-b border-slate-700">
+        <div className="flex gap-1 p-2
+            max-w-4xl mx-auto">
+          {tabs.map((tab) => (
+            <button key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={activeTab === tab.id
+                ? 'bg-indigo-600 text-white'
+                : 'text-slate-400'}>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+      <main className="p-6 max-w-4xl mx-auto">
+        {activeTab === 'home'
+          && <HomeTab />}
+        {activeTab === 'inpainting'
+          && <InpaintingTab />}
+        {activeTab === 'style-transfer'
+          && <StyleTransferTab />}
+        {activeTab === 'restoration'
+          && <RestorationTab />}
+      </main>
+    </div>
+  )
+}
+\end{lstlisting}
 
 \subsubsection{Canvas and Mask Drawing}
-% TODO: Describe inpainting mask drawing implementation
+\label{sec:canvas_mask}
+
+The inpainting feature requires users to paint a mask over the regions they want to edit. The \texttt{MaskCanvas} component implements this using a dual-element architecture: an \texttt{<img>} element displays the source image, and a \texttt{<canvas>} element is positioned absolutely on top as a transparent overlay. This separation ensures that the mask drawing does not modify the original image data.
+
+A key challenge is coordinate scaling: the canvas has pixel dimensions matching the original image (e.g., 1920$\times$1080), but is displayed at the container's CSS width (e.g., 800 pixels wide). The \texttt{canvasScale} factor (container width $/$ image width) maps mouse/touch coordinates from display space to canvas space. This scale is recalculated on window resize.
+
+Listing~\ref{lst:draw_fn} shows the \texttt{draw()} function. The brush tool uses \texttt{source-over} compositing to paint semi-transparent red strokes; the eraser uses \texttt{destination-out} compositing, which removes pixels from the canvas (effectively erasing previously painted mask regions). Lines are drawn between consecutive positions to produce smooth strokes.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={Canvas drawing function (\texttt{MaskCanvas.tsx})}, label={lst:draw_fn}, morekeywords={const,if,else,return,function,useCallback}]
+const draw = useCallback((x: number, y: number) => {
+  const canvas = canvasRef.current
+  const ctx = canvas?.getContext('2d')
+  if (!ctx) return
+
+  ctx.beginPath()
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.lineWidth = brushSize
+
+  if (tool === 'brush') {
+    ctx.globalCompositeOperation = 'source-over'
+    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'
+  } else {
+    // Eraser: remove pixels
+    ctx.globalCompositeOperation =
+      'destination-out'
+    ctx.strokeStyle = 'rgba(0,0,0,1)'
+  }
+
+  if (lastPosRef.current) {
+    ctx.moveTo(lastPosRef.current.x,
+      lastPosRef.current.y)
+    ctx.lineTo(x, y)
+    ctx.stroke()
+  } else {
+    ctx.arc(x, y, brushSize / 2,
+      0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  lastPosRef.current = { x, y }
+}, [tool, brushSize])
+\end{lstlisting}
+
+When the user finishes drawing, the mask must be exported as a black-and-white PNG for the backend (white pixels indicate regions to inpaint). Listing~\ref{lst:export_mask} shows the \texttt{exportMask()} function, which creates a temporary canvas, fills it with black, reads the alpha channel of the drawing canvas, and sets any pixel with alpha $> 0$ to white. The result is exported as a data URL.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={Mask export function (\texttt{MaskCanvas.tsx})}, label={lst:export_mask}, morekeywords={const,if,return,for,let,function,useCallback,null}]
+const exportMask = useCallback(() => {
+  const canvas = canvasRef.current
+  if (!canvas) return null
+
+  const maskCanvas =
+    document.createElement('canvas')
+  maskCanvas.width = canvas.width
+  maskCanvas.height = canvas.height
+  const maskCtx = maskCanvas.getContext('2d')
+  if (!maskCtx) return null
+
+  // Black background (areas to keep)
+  maskCtx.fillStyle = 'black'
+  maskCtx.fillRect(0, 0,
+    maskCanvas.width, maskCanvas.height)
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+
+  const imageData = ctx.getImageData(
+    0, 0, canvas.width, canvas.height)
+  const maskData = maskCtx.getImageData(
+    0, 0, maskCanvas.width, maskCanvas.height)
+
+  // Alpha > 0 becomes white (inpaint region)
+  for (let i = 0;
+      i < imageData.data.length; i += 4) {
+    if (imageData.data[i + 3] > 0) {
+      maskData.data[i] = 255     // R
+      maskData.data[i + 1] = 255 // G
+      maskData.data[i + 2] = 255 // B
+      maskData.data[i + 3] = 255 // A
+    }
+  }
+
+  maskCtx.putImageData(maskData, 0, 0)
+  return maskCanvas.toDataURL('image/png')
+}, [])
+\end{lstlisting}
 
 \subsubsection{API Integration}
-% TODO: Describe frontend-backend communication
+\label{sec:api_integration}
+
+The frontend communicates with the backend through a thin API client layer in \texttt{src/api/}. Listing~\ref{lst:config_ts} shows the configuration module, which reads the backend URL from an environment variable (\texttt{VITE\_API\_URL}) set at build time by Vite. This allows the same codebase to target a local development server or a remote Colab instance by changing a single \texttt{.env} file. The module also provides utility functions for converting between \texttt{File} objects and base64 strings.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={API configuration (\texttt{config.ts})}, label={lst:config_ts}, morekeywords={export,const,import,async,function,return,new,Promise,resolve,reject,if,as}]
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL
+  || 'http://localhost:8000';
+
+export async function fileToBase64(
+    file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+export function base64ToDataUrl(
+    base64: string,
+    mimeType: string = 'image/png'): string {
+  if (base64.startsWith('data:'))
+    return base64;
+  return `data:${mimeType};base64,${base64}`;
+}
+\end{lstlisting}
+
+Listing~\ref{lst:inpaint_api} shows the \texttt{inpaintImage()} API function. It converts the uploaded \texttt{File} to base64, constructs a JSON body with snake\_case keys (matching the Pydantic schema), sends a POST request, and converts the response image from base64 to a data URL for display in an \texttt{<img>} tag.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={Inpainting API client function (\texttt{imageApi.ts})}, label={lst:inpaint_api}, morekeywords={export,async,function,const,await,if,return,throw,new}]
+export async function inpaintImage(
+    params: InpaintingParams
+  ): Promise<ImageResponse> {
+  const imageBase64 =
+    await fileToBase64(params.image);
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/inpainting/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      image: imageBase64,
+      mask: params.mask,
+      prompt: params.prompt,
+      negative_prompt: params.negativePrompt,
+      model: params.model || 'sd-inpainting',
+      guidance_scale:
+        params.guidanceScale ?? 7.5,
+      num_inference_steps:
+        params.numInferenceSteps ?? 30,
+      seed: params.seed ?? null,
+      strength: params.strength ?? 1.0,
+      padding_mask_crop:
+        params.paddingMaskCrop ?? null,
+    }),
+  });
+
+  if (!response.ok)
+    throw new Error(
+      `Inpainting failed: ${response.statusText}`
+    );
+
+  const data: ImageResponse =
+    await response.json();
+  if (data.success && data.image)
+    data.image = base64ToDataUrl(data.image);
+  return data;
+}
+\end{lstlisting}
+
+Listing~\ref{lst:ts_interfaces} shows the TypeScript interfaces that mirror the backend Pydantic schemas. The frontend uses camelCase naming conventions (e.g., \texttt{negativePrompt}), which are mapped to the backend's snake\_case keys (e.g., \texttt{negative\_prompt}) in the \texttt{JSON.stringify()} call.
+
+\begin{lstlisting}[language={[LaTeX]TeX}, caption={TypeScript API interfaces (\texttt{imageApi.ts})}, label={lst:ts_interfaces}, morekeywords={export,interface,string,number,boolean,null}]
+export interface ImageResponse {
+  success: boolean;
+  image?: string;
+  error?: string;
+  model_used?: string;
+  processing_time?: number;
+}
+
+export interface InpaintingParams {
+  image: File;
+  mask: string;  // base64 data URL
+  prompt: string;
+  negativePrompt?: string;
+  model?: string;
+  guidanceScale?: number;
+  numInferenceSteps?: number;
+  seed?: number | null;
+  strength?: number;
+  paddingMaskCrop?: number | null;
+}
+
+export interface StyleTransferParams {
+  image: File;
+  style: string;
+  model?: string;
+  strength?: number;
+  negativePrompt?: string;
+  guidanceScale?: number;
+  numInferenceSteps?: number;
+  seed?: number | null;
+}
+
+export interface RestorationParams {
+  image: File;
+  enableFaceEnhance?: boolean;
+  faceModel?: 'codeformer' | 'gfpgan';
+  fidelity?: number;
+  upscale?: 'none' | '2x' | '4x';
+  enableScratchRemoval?: boolean;
+  enableColorize?: boolean;
+}
+\end{lstlisting}
 
 \newpage
 
@@ -1953,10 +2769,62 @@ The Restoration page offers a checkbox-based interface for selecting restoration
 \section{Project Difficulties and Learning Outcomes}
 
 \subsection{Project Difficulties}
-% TODO: Describe challenges encountered
+
+Several significant challenges were encountered during the development of DiffusionDesk. This subsection documents the key difficulties and the approaches taken to address them.
+
+\subsubsection{GPU Memory Constraints}
+
+The most persistent challenge throughout the project was managing GPU memory (VRAM). Diffusion models are inherently memory-intensive: Stable Diffusion XL requires 10--12\,GB in FP16 precision, while FLUX.1 Fill demands 22--24\,GB at full precision---exceeding the capacity of most consumer GPUs and the free-tier Google Colab environment (typically 15\,GB with a T4 GPU).
+
+Addressing this required implementing multiple optimisation strategies simultaneously. BitsAndBytes quantisation was adopted to reduce VRAM usage: 8-bit and 4-bit (NF4) quantisation for FLUX.1 Fill reduced requirements from 22--24\,GB to approximately 16\,GB and 10\,GB respectively. For SDXL models, \texttt{Pipeline\-Quantization\-Config} was used to selectively quantise the UNet component. Additionally, \texttt{enable\_\-attention\_\-slicing()} and \texttt{enable\_\-model\_\-cpu\_\-offload()} were applied to further reduce peak memory consumption. Balancing output quality against memory usage required extensive experimentation, as aggressive quantisation can introduce visible artefacts.
+
+\subsubsection{Model Loading Latency}
+
+Diffusion models have large file sizes (several gigabytes each), and loading them from disk into GPU memory is slow. The first inference request for a given model could take 30--60 seconds as the model weights are loaded, quantised, and transferred to the GPU. This created a poor user experience, particularly when switching between models.
+
+The solution was a lazy-loading strategy with an in-memory cache: once a model pipeline is loaded, it is stored in a dictionary keyed by model name and quantisation level. Subsequent requests for the same model return the cached pipeline immediately. While this approach trades memory for speed, it significantly improves the experience for repeated use of the same model.
+
+\subsubsection{Canvas Coordinate Scaling}
+
+The mask drawing feature required careful handling of coordinate systems. The HTML \texttt{<canvas>} element maintains pixel dimensions matching the original uploaded image (e.g., $1920 \times 1080$), but is displayed at a smaller CSS size to fit the browser viewport. Mouse and touch coordinates are reported in CSS pixels, not canvas pixels, creating a mismatch that causes the drawn mask to appear offset from the cursor.
+
+Solving this required computing a \texttt{canvasScale} factor (the ratio of the canvas's internal width to its displayed CSS width) and multiplying all pointer coordinates by this factor before drawing. The scale must be recalculated whenever the window is resized, which was handled using a \texttt{ResizeObserver} callback.
+
+\subsubsection{Base64 Image Encoding}
+
+Transmitting images between the frontend and backend required choosing a serialisation format. Multipart form data is the conventional approach for file uploads, but it complicates the API design when additional parameters (prompt, model, guidance scale, etc.) must accompany each image. Instead, base64-encoded strings embedded in JSON request bodies were used, allowing all parameters to be sent in a single, structured payload.
+
+This approach simplifies the API contract and makes requests self-contained, but increases payload size by approximately 33\% due to base64 encoding overhead. For the image sizes processed by this application (typically under 5\,MB), this trade-off was acceptable. However, the frontend required utility functions to convert between \texttt{File} objects, base64 strings, and data URLs, adding implementation complexity.
+
+\subsubsection{Cross-Origin Deployment}
+
+When deploying the backend on Google Colab with ngrok tunnelling, the frontend (hosted on \texttt{localhost} or Vercel) and backend (served through an ngrok URL) run on different origins. This triggers browser CORS (Cross-Origin Resource Sharing) restrictions, blocking API requests by default.
+
+Configuring FastAPI's \texttt{CORSMiddleware} with \texttt{allow\_origins=["*"]} resolved this for development, but required understanding the interaction between CORS preflight requests, the ngrok proxy layer, and the browser's same-origin policy. Debugging CORS errors was time-consuming, as the browser's error messages are often generic and do not clearly indicate which header or configuration is missing.
 
 \subsection{Learning Outcomes}
-% TODO: Describe what was learned
+
+This project provided substantial learning across multiple domains of software engineering and machine learning. The key learning outcomes are summarised below.
+
+\subsubsection{Diffusion Model Inference}
+
+Working directly with diffusion model pipelines through the Hugging Face Diffusers library provided practical understanding of how these models operate at inference time. Key concepts learned include the denoising process, the role of schedulers (e.g., DDIM, Euler) in controlling the number of inference steps, the effect of guidance scale on prompt adherence, and how conditioning inputs (text prompts, mask images) guide the generation process. Understanding the distinction between latent-space diffusion (Stable Diffusion, SDXL) and pixel-space models, as well as the architectural differences between UNet-based and Transformer-based (DiT) diffusion models, deepened theoretical knowledge of the field.
+
+\subsubsection{Model Quantisation and Memory Optimisation}
+
+Implementing quantisation strategies provided hands-on experience with techniques that are increasingly important as model sizes grow. Learning to apply BitsAndBytes 4-bit (NF4) and 8-bit quantisation, understanding the difference between quantising individual model components (e.g., the UNet only) versus entire pipelines, and measuring the quality--memory trade-offs were valuable skills. This experience is directly applicable to deploying large models in resource-constrained environments.
+
+\subsubsection{Full-Stack Web Development}
+
+Building both the FastAPI backend and the React frontend provided end-to-end experience with modern web development. On the backend, this included designing RESTful APIs, defining Pydantic schemas for request validation, implementing service layers with singleton patterns, and managing asynchronous request handling. On the frontend, this involved working with React hooks (\texttt{useState}, \texttt{useCallback}, \texttt{useRef}), TypeScript interfaces, the HTML Canvas API for interactive drawing, and environment-based configuration for flexible deployment.
+
+\subsubsection{Image Processing Pipelines}
+
+The restoration feature required understanding how multiple image processing operations can be composed into a pipeline. Learning to coordinate face detection, alignment, enhancement (CodeFormer/GFPGAN), scratch removal, colourisation, and upscaling (Real-ESRGAN)---and understanding why the ordering of these operations matters for output quality---provided insight into practical computer vision system design.
+
+\subsubsection{Cloud GPU Deployment}
+
+Deploying the backend on Google Colab and exposing it via ngrok provided experience with cloud-based GPU computing, including environment setup, dependency management, and network tunnelling. Understanding the constraints of ephemeral cloud environments (session timeouts, limited disk space, variable GPU availability) and designing the application to work within these constraints was a practical lesson in deployment engineering.
 
 \newpage
 
@@ -1964,7 +2832,38 @@ The Restoration page offers a checkbox-based interface for selecting restoration
 % 8. FUTURE IMPLEMENTATION
 % ============================================================
 \section{Future Implementation}
-% TODO: Describe future work and enhancements
+
+This section outlines planned enhancements and extensions that could improve DiffusionDesk beyond the current implementation. These are organised by priority and feasibility.
+
+\subsection{Text-to-Image Generation}
+
+The current application focuses on editing existing images (inpainting, style transfer, restoration). Adding a text-to-image generation tab would allow users to create images from scratch using text prompts. The backend infrastructure already supports diffusion model inference, so this extension would primarily require a new router endpoint, a frontend tab with prompt input fields, and integration with text-to-image pipelines such as Stable Diffusion XL or FLUX.1. This is a natural extension of the existing architecture and would significantly broaden the application's utility.
+
+\subsection{ControlNet Integration}
+
+ControlNet enables spatially-conditioned image generation by providing additional control signals such as edge maps, depth maps, or pose skeletons. Integrating ControlNet with the existing inpainting and style transfer features would give users finer control over the generated output---for example, preserving the structural composition of the original image while applying a style transfer. The Diffusers library provides pre-built ControlNet adapters that could be integrated with the existing pipeline loading infrastructure.
+
+\subsection{Batch Processing}
+
+The current system processes one image per request. Adding batch processing support would allow users to apply the same editing operation to multiple images simultaneously. This would be particularly useful for style transfer (applying a consistent style across a series of photographs) and restoration (enhancing a collection of old photographs). Implementation would require a queue-based backend architecture and a frontend interface for managing multiple uploads and tracking progress.
+
+\subsection{User Authentication and History}
+
+Adding user authentication would enable session persistence and editing history. Users could save their editing configurations, revisit previous results, and build on earlier work. This would require integrating an authentication provider (e.g., OAuth), adding a database layer for storing user data and processing history, and extending the frontend with login and history views.
+
+\subsection{Additional Model Support}
+
+The diffusion model ecosystem evolves rapidly, with new and improved models released frequently. The application's modular architecture---where model configurations are defined in dictionary structures and pipelines are loaded dynamically---facilitates adding new models. Potential additions include:
+
+\begin{itemize}
+    \item \textbf{SDXL Turbo / SD Turbo} -- Distilled models that generate results in 1--4 inference steps, enabling near-real-time editing.
+    \item \textbf{Stable Diffusion 3} -- The latest generation of Stable Diffusion with improved text rendering and image quality.
+    \item \textbf{IP-Adapter} -- Image prompt adapters that allow using a reference image (rather than text) to guide style transfer, enabling more intuitive style selection.
+\end{itemize}
+
+\subsection{Persistent Deployment}
+
+The current deployment relies on ephemeral cloud environments (Google Colab) that require re-setup for each session. A persistent deployment on a dedicated GPU server or a cloud GPU service (e.g., AWS EC2 with GPU instances, RunPod, or Vast.ai) would provide a stable, always-available service. This would also enable features that require persistent storage, such as user accounts, editing history, and model caching across sessions.
 
 \newpage
 

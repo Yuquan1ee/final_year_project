@@ -1,6 +1,6 @@
 # Figures and Screenshots Needed for FYP Report
 
-Status: 6 of 7 high-priority figures completed. See checklist at the bottom.
+Status: 6 of 7 high-priority figures completed. Section 6 uses code listings (`\lstlisting`) and tables only -- no image figures needed. See checklist at the bottom.
 
 ---
 
@@ -58,55 +58,16 @@ Status: 6 of 7 high-priority figures completed. See checklist at the bottom.
 
 ---
 
-## Section 6: Implementation (future - not yet written)
+## Section 6: Implementation (WRITTEN)
 
-These figures will likely be needed when Section 6 is written:
+Section 6 uses **20 code listings** (`\lstlisting`) and **3 tables** -- no image figures. Demo screenshots (items 10-13) are deferred to a Results section if needed.
 
-### 8. Backend Project Structure (Directory Tree)
-
-- **File:** `images/backend_structure.png` (or use a `\lstlisting` code block instead)
-- **Location:** Section 6.1.1
-- **Description:** Directory tree of `backend/app/` showing routers/, services/, schemas/ structure.
-
-### 9. Code Snippets / Listings
-
-- Not image files -- use `\lstlisting` blocks for key code excerpts (API endpoint definitions, diffusion pipeline loading, quantisation logic, mask canvas implementation).
-
-### 10. Inpainting Demo Screenshots
-
-- **File:** `images/demo_inpainting.png`
-- **Location:** Section 6.1.3 or a Results subsection
-- **Description:** Screenshot of the app performing inpainting: show original image with mask drawn, and the AI-generated result side-by-side.
-
-### 11. Style Transfer Demo Screenshots
-
-- **File:** `images/demo_style_transfer.png`
-- **Location:** Section 6.1.4 or a Results subsection
-- **Description:** Screenshot showing original image and stylised output (e.g., anime or oil painting style).
-
-### 12. Restoration Demo Screenshots
-
-- **File:** `images/demo_restoration.png`
-- **Location:** Section 6.1.5 or a Results subsection
-- **Description:** Screenshot showing before/after face enhancement or upscaling.
-
-### 13. Frontend UI Screenshots (actual, not wireframes)
-
-- **File:** `images/ui_home.png`, `images/ui_inpainting.png`, `images/ui_style.png`, `images/ui_restoration.png`
-- **Location:** Section 6.2.2
-- **Description:** Actual screenshots of the running application for each tab. These complement the wireframes from Section 5.
-
-### 14. Google Colab Deployment Screenshot
-
-- **File:** `images/colab_deployment.png`
-- **Location:** Section 6 (deployment subsection)
-- **Description:** Screenshot of the Colab notebook running the backend with ngrok URL visible.
-
-### 15. API Documentation Screenshot
-
-- **File:** `images/api_docs.png`
-- **Location:** Section 6.1.2
-- **Description:** Screenshot of the FastAPI auto-generated Swagger UI at `/docs`.
+### 8. Backend Directory Tree -- DONE (Listing 1, `\lstlisting`)
+### 9. Code Snippets / Listings -- DONE (Listings 1-20 in Section 6)
+### 10-12. Demo Screenshots -- NOT NEEDED for Section 6 (defer to Results)
+### 13. UI Screenshots -- NOT NEEDED (wireframes in Section 5.3 are sufficient)
+### 14. Colab Deployment Screenshot -- LOW PRIORITY (optional for future sections)
+### 15. API Docs (Swagger) -- LOW PRIORITY (optional)
 
 ---
 
@@ -121,13 +82,13 @@ These figures will likely be needed when Section 6 is written:
 | 5   | Wireframe: Inpainting     | `wireframe_inpainting.png`  | 5.3     | DONE                     |
 | 6   | Wireframe: Style Transfer | `wireframe_style.png`       | 5.3     | DONE                     |
 | 7   | Wireframe: Restoration    | `wireframe_restoration.png` | 5.3     | DONE                     |
-| 8   | Backend Directory Tree    | code listing or image       | 6.1.1   | MEDIUM - when writing S6 |
-| 9   | Code Snippets             | `\lstlisting` blocks        | 6.x     | MEDIUM - when writing S6 |
-| 10  | Demo: Inpainting          | `demo_inpainting.png`       | 6.x     | MEDIUM - when writing S6 |
-| 11  | Demo: Style Transfer      | `demo_style_transfer.png`   | 6.x     | MEDIUM - when writing S6 |
-| 12  | Demo: Restoration         | `demo_restoration.png`      | 6.x     | MEDIUM - when writing S6 |
-| 13  | UI Screenshots (x4)       | `ui_*.png`                  | 6.2.2   | MEDIUM - when writing S6 |
-| 14  | Colab Deployment          | `colab_deployment.png`      | 6.x     | LOW - when writing S6    |
-| 15  | API Docs (Swagger)        | `api_docs.png`              | 6.1.2   | LOW - when writing S6    |
+| 8   | Backend Directory Tree    | `\lstlisting` block         | 6.1.1   | DONE (Listing 1)         |
+| 9   | Code Snippets (x20)      | `\lstlisting` blocks        | 6.x     | DONE (Listings 1-20)     |
+| 10  | Demo: Inpainting          | `demo_inpainting.png`       | Results | DEFERRED                 |
+| 11  | Demo: Style Transfer      | `demo_style_transfer.png`   | Results | DEFERRED                 |
+| 12  | Demo: Restoration         | `demo_restoration.png`      | Results | DEFERRED                 |
+| 13  | UI Screenshots (x4)       | `ui_*.png`                  | ---     | NOT NEEDED               |
+| 14  | Colab Deployment          | `colab_deployment.png`      | ---     | LOW                      |
+| 15  | API Docs (Swagger)        | `api_docs.png`              | ---     | LOW                      |
 
 **Remaining action:** Create figures 2-3 (iterative methodology diagram, system architecture diagram) and place them in `report/images/`. Then update the `\includegraphics` lines and remove the `\fbox` placeholder lines in the LaTeX source.
