@@ -480,23 +480,28 @@ class DiffusionService:
             # Load pipeline
             pipe = self._load_pipeline(model_key, config)
 
+            is_flux = "flux" in model_key
+
             # Build inference kwargs
             pipe_kwargs: Dict[str, Any] = {
                 "prompt": prompt,
-                "negative_prompt": negative_prompt,
                 "image": image,
                 "mask_image": mask,
                 "guidance_scale": guidance_scale,
                 "num_inference_steps": num_inference_steps,
-                "strength": strength,
             }
+
+            # FluxFillPipeline does not support negative_prompt or strength
+            if not is_flux:
+                pipe_kwargs["negative_prompt"] = negative_prompt
+                pipe_kwargs["strength"] = strength
 
             # Set seed via generator if provided
             if seed is not None:
                 pipe_kwargs["generator"] = torch.Generator(device=self.device).manual_seed(seed)
 
             # padding_mask_crop is supported by SD/SDXL pipelines, not FLUX/Kandinsky
-            if padding_mask_crop is not None and "flux" not in model_key and "kandinsky" not in model_key:
+            if padding_mask_crop is not None and not is_flux and "kandinsky" not in model_key:
                 pipe_kwargs["padding_mask_crop"] = padding_mask_crop
 
             # Run inference

@@ -97,6 +97,8 @@ function InpaintingTab() {
     setMaskDataUrl(newMaskDataUrl)
   }
 
+  const isFluxModel = selectedModel.startsWith('flux-')
+
   const canGenerate = sourceImageUrl && maskDataUrl && prompt.trim().length > 0
 
   const handleGenerate = async () => {
@@ -214,22 +216,30 @@ function InpaintingTab() {
               />
             </div>
 
-            {/* Negative prompt input */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Negative Prompt <span className="text-slate-500">(optional)</span>
-              </label>
-              <textarea
-                value={negativePrompt}
-                onChange={(e) => setNegativePrompt(e.target.value)}
-                placeholder="What to avoid... (e.g., 'blurry, low quality, distorted')"
-                rows={2}
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg
-                           text-slate-200 placeholder-slate-500 focus:outline-none
-                           focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                           resize-none"
-              />
-            </div>
+            {/* Negative prompt input — not supported by FLUX.1 Fill */}
+            {isFluxModel ? (
+              <div className="p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
+                <p className="text-xs text-slate-500">
+                  Negative prompt is not supported by FLUX.1 Fill models.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Negative Prompt <span className="text-slate-500">(optional)</span>
+                </label>
+                <textarea
+                  value={negativePrompt}
+                  onChange={(e) => setNegativePrompt(e.target.value)}
+                  placeholder="What to avoid... (e.g., 'blurry, low quality, distorted')"
+                  rows={2}
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg
+                             text-slate-200 placeholder-slate-500 focus:outline-none
+                             focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                             resize-none"
+                />
+              </div>
+            )}
 
             {/* Model selection */}
             <div>
@@ -315,27 +325,34 @@ function InpaintingTab() {
                     </div>
                   </div>
 
-                  {/* Strength */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-sm font-medium text-slate-300">Strength</label>
-                      <span className="text-sm text-slate-400">{Math.round(strength * 100)}%</span>
+                  {/* Strength — not supported by FLUX.1 Fill */}
+                  {isFluxModel ? (
+                    <div className="p-3 bg-slate-800/80 border border-slate-700 rounded-lg">
+                      <p className="text-sm font-medium text-slate-500">Strength</p>
+                      <p className="text-xs text-slate-600 mt-1">Not supported by FLUX.1 Fill models.</p>
                     </div>
-                    <p className="text-xs text-slate-500 mb-2">Controls how much the masked region changes. Lower values preserve more of the original image; higher values allow full regeneration.</p>
-                    <input
-                      type="range"
-                      min={0.0}
-                      max={1.0}
-                      step={0.05}
-                      value={strength}
-                      onChange={(e) => setStrength(parseFloat(e.target.value))}
-                      className="w-full accent-indigo-500"
-                    />
-                    <div className="flex justify-between text-xs text-slate-500 mt-0.5">
-                      <span>Preserve Original</span>
-                      <span>Fully Regenerate</span>
+                  ) : (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-sm font-medium text-slate-300">Strength</label>
+                        <span className="text-sm text-slate-400">{Math.round(strength * 100)}%</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mb-2">Controls how much the masked region changes. Lower values preserve more of the original image; higher values allow full regeneration.</p>
+                      <input
+                        type="range"
+                        min={0.0}
+                        max={1.0}
+                        step={0.05}
+                        value={strength}
+                        onChange={(e) => setStrength(parseFloat(e.target.value))}
+                        className="w-full accent-indigo-500"
+                      />
+                      <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                        <span>Preserve Original</span>
+                        <span>Fully Regenerate</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Seed */}
                   <div>
@@ -366,40 +383,47 @@ function InpaintingTab() {
                     <p className="text-xs text-slate-500 mt-1">Leave empty for random seed</p>
                   </div>
 
-                  {/* Padding Mask Crop */}
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-1">
-                      <input
-                        type="checkbox"
-                        checked={paddingMaskCrop !== null}
-                        onChange={(e) => setPaddingMaskCrop(e.target.checked ? 32 : null)}
-                        className="rounded border-slate-600 bg-slate-800 accent-indigo-500"
-                      />
-                      Crop around mask region
-                    </label>
-                    {paddingMaskCrop !== null && (
-                      <div className="mt-2">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs text-slate-400">Padding</span>
-                          <span className="text-sm text-slate-400">{paddingMaskCrop}px</span>
-                        </div>
+                  {/* Padding Mask Crop — SD/SDXL only */}
+                  {isFluxModel || selectedModel === 'kandinsky-inpainting' ? (
+                    <div className="p-3 bg-slate-800/80 border border-slate-700 rounded-lg">
+                      <p className="text-sm font-medium text-slate-500">Crop around mask region</p>
+                      <p className="text-xs text-slate-600 mt-1">Only supported by SD and SDXL models.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-1">
                         <input
-                          type="range"
-                          min={8}
-                          max={256}
-                          step={8}
-                          value={paddingMaskCrop}
-                          onChange={(e) => setPaddingMaskCrop(parseInt(e.target.value))}
-                          className="w-full accent-indigo-500"
+                          type="checkbox"
+                          checked={paddingMaskCrop !== null}
+                          onChange={(e) => setPaddingMaskCrop(e.target.checked ? 32 : null)}
+                          className="rounded border-slate-600 bg-slate-800 accent-indigo-500"
                         />
-                        <div className="flex justify-between text-xs text-slate-500 mt-0.5">
-                          <span>8px</span>
-                          <span>256px</span>
+                        Crop around mask region
+                      </label>
+                      {paddingMaskCrop !== null && (
+                        <div className="mt-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs text-slate-400">Padding</span>
+                            <span className="text-sm text-slate-400">{paddingMaskCrop}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={8}
+                            max={256}
+                            step={8}
+                            value={paddingMaskCrop}
+                            onChange={(e) => setPaddingMaskCrop(parseInt(e.target.value))}
+                            className="w-full accent-indigo-500"
+                          />
+                          <div className="flex justify-between text-xs text-slate-500 mt-0.5">
+                            <span>8px</span>
+                            <span>256px</span>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-slate-500 mt-1">Crops around the mask and runs inpainting at full resolution on just that region, then blends back. Improves quality for small masks. Padding adds context around the crop for smoother blending. SD/SDXL only.</p>
-                  </div>
+                      )}
+                      <p className="text-xs text-slate-500 mt-1">Crops around the mask and runs inpainting at full resolution on just that region, then blends back. Improves quality for small masks. Padding adds context around the crop for smoother blending.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
