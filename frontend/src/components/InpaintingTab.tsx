@@ -214,6 +214,10 @@ function InpaintingTab() {
                            focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
                            resize-none"
               />
+              <p className="text-xs text-slate-500 mt-2">
+                <span className="text-amber-400 font-medium">Tip:</span> Describe what you want to <span className="text-slate-400">see</span>, not what you want to remove.
+                Instead of <span className="italic">"remove the shadow"</span>, try <span className="italic">"smooth concrete floor with even lighting"</span>.
+              </p>
             </div>
 
             {/* Negative prompt input — not supported by FLUX.1 Fill */}
