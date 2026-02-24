@@ -253,16 +253,22 @@ function StyleTransferTab() {
               </div>
 
               {useCustomPrompt && (
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Describe the style you want... (e.g., 'van gogh starry night style, swirling brushstrokes')"
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg
-                             text-slate-200 placeholder-slate-500 focus:outline-none
-                             focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
-                             resize-none"
-                />
+                <>
+                  <textarea
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    placeholder="Describe the style you want... (e.g., 'van gogh starry night style, swirling brushstrokes')"
+                    rows={3}
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg
+                               text-slate-200 placeholder-slate-500 focus:outline-none
+                               focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+                               resize-none"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    <span className="text-amber-400 font-medium">Tip:</span> Describe the visual qualities of the style, not an action.
+                    Instead of <span className="italic">"make it look like a painting"</span>, try <span className="italic">"oil painting, thick impasto brushstrokes, warm earthy tones"</span>.
+                  </p>
+                </>
               )}
             </div>
 
