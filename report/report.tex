@@ -153,7 +153,7 @@ Over the course of two semesters working on this final year project, I would lik
 
 I would like to extend my sincere gratitude to my supervisor, Prof Zhang Hanwang, for granting me the freedom to steer the direction of this project. His trust and openness allowed me to explore a wide variety of diffusion models and techniques in the field of image generation, which greatly enriched both the project and my learning experience.
 
-Lastly, I would like to thank my examiner, Prof (placeholder), for taking the time to review and evaluate this final year project.
+Lastly, I would like to thank my examiner, A/P Lin Guosheng, for taking the time to review and evaluate this final year project.
 
 \vspace{1cm}
 \noindent Lee Yu Quan\\
@@ -1552,14 +1552,12 @@ This section presents the planning and design decisions made during the developm
 
 The software development methodology adopted for DiffusionDesk is the \textbf{Iterative and Incremental Development} methodology. This approach was chosen because the project involves integrating multiple AI models with varying hardware requirements, where each feature (inpainting, style transfer, restoration) can be developed and tested as an independent increment. The iterative nature allows for continuous refinement based on testing feedback, which is particularly important when working with diffusion models where output quality depends heavily on parameter tuning and model selection.
 
-% TODO: Create Agile/Iterative methodology diagram in draw.io and export to images/iterative_methodology.png
+% Iterative methodology diagram created in draw.io
 % Diagram should show the iterative cycle: Requirements → Design → Implement → Test → Evaluate → (repeat)
 
 \begin{figure}[H]
     \centering
-    % Uncomment the line below once the diagram image is created:
-    % \includegraphics[width=0.7\textwidth]{iterative_methodology.png}
-    \fbox{\parbox{0.7\textwidth}{\centering\vspace{3cm}\textit{Iterative development methodology diagram to be inserted.}\vspace{3cm}}}
+    \includegraphics[width=0.7\textwidth]{iterative_methodology.png}
     \caption{Iterative and Incremental Development Methodology}
     \label{fig:iterative_methodology}
 \end{figure}
@@ -1582,53 +1580,11 @@ At the end of each iteration, the working software was reviewed and evaluated ag
 
 DiffusionDesk adopts a \textbf{client-server architecture} with a clear separation between the frontend application and the backend API server. The frontend is a single-page application (SPA) built with React that communicates with the backend via RESTful HTTP requests. The backend is a FastAPI server that handles API routing, request validation, and delegates ML inference to dedicated service modules. Figure~\ref{fig:system_architecture} illustrates the overall system architecture.
 
-% TODO: Create system architecture diagram in draw.io and export to images/system_architecture.png
-% Diagram Layout:
-%
-%   +------------------+         HTTP/JSON         +---------------------------+
-%   |   Frontend       | -----------------------> |   Backend (FastAPI)        |
-%   |   (React SPA)    | <----------------------- |                           |
-%   |                  |    Base64 Images +        |   +---------------------+ |
-%   | +-------------+  |    JSON Params            |   | Routers             | |
-%   | | InpaintingTab| |                           |   |  /api/inpainting/   | |
-%   | | StyleTransfer| |                           |   |  /api/style/        | |
-%   | | RestorationTab||                           |   |  /api/restoration/  | |
-%   | +-------------+  |                           |   |  /api/health        | |
-%   | | MaskCanvas   |  |                           |   +---------------------+ |
-%   | | ImageUpload  |  |                           |            |              |
-%   | +-------------+  |                           |            v              |
-%   | | API Client   |  |                           |   +---------------------+ |
-%   | | (imageApi.ts)|  |                           |   | Schemas (Pydantic)  | |
-%   | +-------------+  |                           |   | InpaintingRequest   | |
-%   +------------------+                           |   | StyleTransferRequest| |
-%         |                                        |   | RestorationRequest  | |
-%         | Hosted on                              |   | ImageResponse       | |
-%         | Vercel/Netlify                         |   +---------------------+ |
-%         | or localhost:5173                       |            |              |
-%                                                  |            v              |
-%                                                  |   +---------------------+ |
-%                                                  |   | Services            | |
-%                                                  |   |  DiffusionService   | |
-%                                                  |   |  RestorationService | |
-%                                                  |   +---------------------+ |
-%                                                  |            |              |
-%                                                  |            v              |
-%                                                  |   +---------------------+ |
-%                                                  |   | GPU (CUDA)          | |
-%                                                  |   | PyTorch + Diffusers | |
-%                                                  |   | Model Cache         | |
-%                                                  |   +---------------------+ |
-%                                                  +---------------------------+
-%                                                        |
-%                                                        | Hosted on
-%                                                        | Colab + ngrok
-%                                                        | or localhost:8000
+% System architecture diagram created in draw.io
 
 \begin{figure}[H]
     \centering
-    % Uncomment the line below once the diagram image is created:
-    % \includegraphics[width=0.9\textwidth]{system_architecture.png}
-    \fbox{\parbox{0.9\textwidth}{\centering\vspace{5cm}\textit{System architecture diagram to be inserted.\\See comments in source for diagram specification.}\vspace{5cm}}}
+    \includegraphics[width=0.9\textwidth]{system_architecture.png}
     \caption{System Architecture of DiffusionDesk}
     \label{fig:system_architecture}
 \end{figure}
@@ -1775,152 +1731,16 @@ The backend is built with FastAPI, a modern Python web framework chosen for its 
 
 The backend follows a layered architecture that separates routing, validation, and inference concerns. API requests flow through three layers: \textbf{routers} handle HTTP endpoints and delegate to \textbf{services}, which contain the ML inference logic; \textbf{schemas} define Pydantic models for request validation and response serialisation. Each service is implemented as a singleton to ensure that expensive GPU models are loaded only once and reused across requests.
 
-\begin{lstlisting}[language={}, caption={Backend directory structure}, label={lst:backend_tree}]
-backend/
-  app/
-    main.py                  # FastAPI app, CORS, router mounting
-    routers/
-      inpainting.py          # POST /api/inpainting/
-      style_transfer.py      # POST /api/style/
-      restoration.py         # POST /api/restoration/
-    services/
-      diffusion.py           # DiffusionService (inpainting + style)
-      restoration.py         # RestorationService (faces + upscale)
-    schemas/
-      image.py               # Pydantic request/response models
-  requirements.txt
-\end{lstlisting}
+The backend directory follows a flat, three-folder layout under \texttt{app/}: \texttt{routers/} contains one module per feature (\texttt{inpainting.py}, \texttt{style\_transfer.py}, \texttt{restoration.py}), \texttt{services/} contains \texttt{diffusion.py} (for inpainting and style transfer) and \texttt{restoration.py} (for face and upscaling models), and \texttt{schemas/image.py} defines Pydantic request/response models shared across all endpoints.
 
-Listing~\ref{lst:main_py} shows the application entry point. The \texttt{lifespan} context manager handles startup and shutdown events. CORS middleware is configured to allow all origins, which is necessary when the frontend is served from a different domain (e.g., Vercel) while the backend runs on a Colab instance exposed via ngrok. The three feature routers are mounted under \texttt{/api/} prefixes, and a health-check endpoint reports GPU availability and loaded pipelines.
-
-\begin{lstlisting}[language=Python, caption={Application entry point (\texttt{main.py})}, label={lst:main_py}]
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-from app.routers import inpainting, style_transfer, restoration
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Starting up Diffusion Image Editor API...")
-    yield
-    print("Shutting down...")
-
-app = FastAPI(
-    title="Diffusion Image Editor API",
-    description="API for intelligent image editing "
-                "using diffusion models",
-    version="0.1.0",
-    lifespan=lifespan,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(inpainting.router,
-    prefix="/api/inpainting", tags=["Inpainting"])
-app.include_router(style_transfer.router,
-    prefix="/api/style", tags=["Style Transfer"])
-app.include_router(restoration.router,
-    prefix="/api/restoration", tags=["Restoration"])
-
-@app.get("/api/health")
-async def health_check():
-    from app.services.diffusion import get_diffusion_service
-    service = get_diffusion_service()
-    gpu_info = service.get_gpu_info()
-    return {
-        "status": "healthy",
-        "gpu": gpu_info,
-        "loaded_pipelines": list(
-            service._pipelines.keys()),
-    }
-\end{lstlisting}
+The application entry point (\texttt{main.py}) initialises a FastAPI instance with a \texttt{lifespan} context manager for startup/shutdown events, configures CORS middleware with \texttt{allow\_origins=["*"]} to permit cross-origin requests from the frontend (necessary when the frontend runs on a different domain, e.g., Vercel, while the backend runs on Colab via ngrok), mounts the three feature routers under \texttt{/api/} prefixes, and exposes a \texttt{/api/health} endpoint that reports GPU availability and currently loaded pipelines.
 
 \subsubsection{API Design}
 \label{sec:api_design}
 
 The API uses JSON request bodies with base64-encoded images rather than multipart form uploads. This design simplifies the frontend integration---the React client can construct the entire request as a single \texttt{JSON.stringify()} call---and allows Pydantic to validate all fields (including numeric constraints) in one pass. Every endpoint returns a uniform \texttt{ImageResponse} containing a success flag, the result image (base64), the model used, and the processing time.
 
-Listing~\ref{lst:schemas_response} shows the response model and the inpainting request schema. Pydantic \texttt{Field} constraints enforce value ranges at the API boundary: \texttt{guidance\_scale} is clamped between 1.0 and 20.0, \texttt{num\_inference\_steps} between 10 and 100, and \texttt{seed} between 0 and $2^{31}-1$. The \texttt{InpaintingModel} enum restricts model selection to known-valid keys, preventing typos from reaching the service layer.
-
-\begin{lstlisting}[language=Python, caption={Response model and inpainting request schema (\texttt{schemas/image.py})}, label={lst:schemas_response}]
-class ImageResponse(BaseModel):
-    success: bool
-    image: Optional[str] = Field(
-        None, description="Base64 encoded result image")
-    error: Optional[str] = None
-    model_used: Optional[str] = None
-    processing_time: Optional[float] = None
-
-class InpaintingModel(str, Enum):
-    SD_INPAINTING = "sd-inpainting"
-    KANDINSKY = "kandinsky-inpainting"
-    SDXL_INPAINTING = "sdxl-inpainting"
-    SDXL_INPAINTING_8BIT = "sdxl-inpainting-8bit"
-    SDXL_INPAINTING_4BIT = "sdxl-inpainting-4bit"
-    FLUX_FILL = "flux-fill"
-    FLUX_FILL_8BIT = "flux-fill-8bit"
-    FLUX_FILL_4BIT = "flux-fill-4bit"
-    FLUX_FILL_NF4 = "flux-fill-nf4"
-
-class InpaintingRequest(BaseModel):
-    image: str = Field(...,
-        description="Base64 encoded input image")
-    mask: str = Field(...,
-        description="Base64 mask (white=inpaint)")
-    prompt: str = Field(...,
-        description="What to generate in masked area")
-    negative_prompt: str = Field(
-        default="blurry, low quality, distorted",
-        description="What to avoid in generation")
-    model: InpaintingModel = Field(
-        default=InpaintingModel.SD_INPAINTING)
-    guidance_scale: float = Field(
-        default=7.5, ge=1.0, le=20.0)
-    num_inference_steps: int = Field(
-        default=30, ge=10, le=100)
-    seed: Optional[int] = Field(
-        default=None, ge=0, le=2147483647)
-    strength: float = Field(
-        default=1.0, ge=0.0, le=1.0)
-\end{lstlisting}
-
-Listing~\ref{lst:schemas_restoration} shows the restoration request schema and its supporting enums. The \texttt{FaceModel} enum selects between CodeFormer and GFPGAN, while \texttt{UpscaleOption} controls the Real-ESRGAN scale factor. Boolean flags enable or disable individual pipeline stages.
-
-\begin{lstlisting}[language=Python, caption={Restoration request schema and enums (\texttt{schemas/image.py})}, label={lst:schemas_restoration}]
-class FaceModel(str, Enum):
-    CODEFORMER = "codeformer"
-    GFPGAN = "gfpgan"
-
-class UpscaleOption(str, Enum):
-    NONE = "none"
-    UPSCALE_2X = "2x"
-    UPSCALE_4X = "4x"
-
-class RestorationRequest(BaseModel):
-    image: str = Field(...,
-        description="Base64 encoded input image")
-    enable_face_enhance: bool = Field(
-        default=True, description="Enable face "
-        "enhancement (CodeFormer/GFPGAN)")
-    face_model: FaceModel = Field(
-        default=FaceModel.CODEFORMER)
-    fidelity: float = Field(
-        default=0.5, ge=0.0, le=1.0,
-        description="CodeFormer fidelity "
-        "(0=quality, 1=fidelity)")
-    upscale: UpscaleOption = Field(
-        default=UpscaleOption.UPSCALE_2X)
-    enable_scratch_removal: bool = Field(
-        default=False)
-    enable_colorize: bool = Field(
-        default=False)
-\end{lstlisting}
+The schema layer (\texttt{schemas/image.py}) defines Pydantic models for each request type. Pydantic \texttt{Field} constraints enforce value ranges at the API boundary---for example, \texttt{guidance\_scale} is clamped between 1.0 and 20.0, \texttt{num\_inference\_steps} between 10 and 100, and \texttt{seed} between 0 and $2^{31}-1$. String enums (\texttt{InpaintingModel}, \texttt{FaceModel}, \texttt{UpscaleOption}) restrict model and option selection to known-valid keys, preventing invalid values from reaching the service layer. All endpoints return a uniform \texttt{ImageResponse} model containing a success flag, the result image (base64), the model used, and the processing time.
 
 Table~\ref{tab:api_endpoints} summarises the complete API surface.
 
@@ -2049,47 +1869,7 @@ def inpaint(self, image_b64, mask_b64, prompt,
             time.time() - start_time
 \end{lstlisting}
 
-Listing~\ref{lst:inpainting_router} shows the router endpoint that connects the HTTP layer to the service. The router obtains the singleton \texttt{DiffusionService}, unpacks the validated request fields, and wraps the result in a uniform \texttt{ImageResponse}.
-
-\begin{lstlisting}[language=Python, caption={Inpainting router endpoint (\texttt{routers/inpainting.py})}, label={lst:inpainting_router}]
-from fastapi import APIRouter
-from app.schemas.image import (
-    InpaintingRequest, ImageResponse)
-from app.services.diffusion import (
-    get_diffusion_service)
-
-router = APIRouter()
-
-@router.post("/", response_model=ImageResponse)
-async def inpaint_image(
-    request: InpaintingRequest,
-) -> ImageResponse:
-    service = get_diffusion_service()
-    result_b64, error, processing_time = \
-        service.inpaint(
-            image_b64=request.image,
-            mask_b64=request.mask,
-            prompt=request.prompt,
-            model_key=request.model.value,
-            negative_prompt=request.negative_prompt,
-            guidance_scale=request.guidance_scale,
-            num_inference_steps=
-                request.num_inference_steps,
-            seed=request.seed,
-            strength=request.strength,
-            padding_mask_crop=
-                request.padding_mask_crop,
-        )
-    if error:
-        return ImageResponse(success=False,
-            error=error,
-            model_used=request.model.value,
-            processing_time=processing_time)
-    return ImageResponse(success=True,
-        image=result_b64,
-        model_used=request.model.value,
-        processing_time=processing_time)
-\end{lstlisting}
+Each router endpoint follows the same pattern: obtain the singleton service instance, unpack the validated request fields, delegate to the corresponding service method, and wrap the result in an \texttt{ImageResponse}. This uniform structure is repeated across all three routers (\texttt{inpainting.py}, \texttt{style\_transfer.py}, \texttt{restoration.py}).
 
 \subsubsection{Style Transfer Service}
 \label{sec:style_transfer_service}
@@ -2444,26 +2224,7 @@ The frontend is a single-page application (SPA) built with React~19, TypeScript,
 \subsubsection{Project Structure}
 \label{sec:frontend_structure}
 
-\begin{lstlisting}[language={}, caption={Frontend directory structure}, label={lst:frontend_tree}]
-frontend/
-  src/
-    api/
-      config.ts            # API URL, base64 utils
-      imageApi.ts          # API client functions
-      index.ts             # Barrel exports
-    components/
-      HomeTab.tsx           # Landing page
-      InpaintingTab.tsx     # Inpainting workflow
-      StyleTransferTab.tsx  # Style transfer workflow
-      RestorationTab.tsx    # Restoration workflow
-      MaskCanvas.tsx        # Canvas mask drawing
-    App.tsx                 # Tab navigation shell
-    main.tsx                # React entry point
-  .env.example              # VITE_API_URL template
-  package.json
-  tailwind.config.js
-  vite.config.ts
-\end{lstlisting}
+The frontend source code is organised under \texttt{src/} with two main directories: \texttt{api/} contains the API configuration (\texttt{config.ts}), client functions (\texttt{imageApi.ts}), and barrel exports; \texttt{components/} contains the four tab components (\texttt{HomeTab}, \texttt{InpaintingTab}, \texttt{StyleTransferTab}, \texttt{RestorationTab}) and the shared \texttt{MaskCanvas} drawing component. The root \texttt{App.tsx} manages tab navigation, and \texttt{main.tsx} serves as the React entry point.
 
 Table~\ref{tab:frontend_deps} lists the key frontend dependencies.
 
@@ -2488,69 +2249,7 @@ Tailwind CSS & 4.0 & Utility-first CSS framework \\
 
 The application uses a tab-based navigation pattern with a shared header. The dark theme (Tailwind \texttt{slate-900} background with \texttt{indigo-600} accent) provides comfortable viewing during extended editing sessions and reduces visual distraction from the images being edited. Each feature tab follows a consistent three-step workflow: upload an image, configure parameters, and generate a result. Common UI patterns---error banners, loading spinners, before/after comparison, and download buttons---are repeated across all tabs for consistency.
 
-Listing~\ref{lst:app_tsx} shows the complete \texttt{App.tsx} component. The tab configuration is stored as a typed array, making it straightforward to add new tabs. Active tab state is managed with React's \texttt{useState} hook, and conditional rendering displays the appropriate feature component. The wireframes in Section~\ref{sec:wireframes} illustrate the layout of each tab.
-
-\begin{lstlisting}[language={[LaTeX]TeX}, caption={Main application shell (\texttt{App.tsx})}, label={lst:app_tsx}, morekeywords={import,from,export,default,function,const,useState,return,type}]
-import { useState } from 'react'
-import HomeTab from './components/HomeTab'
-import InpaintingTab
-  from './components/InpaintingTab'
-import StyleTransferTab
-  from './components/StyleTransferTab'
-import RestorationTab
-  from './components/RestorationTab'
-
-type Tab = 'home' | 'inpainting'
-  | 'style-transfer' | 'restoration'
-
-function App() {
-  const [activeTab, setActiveTab] =
-    useState<Tab>('home')
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'home', label: 'Home' },
-    { id: 'inpainting', label: 'Inpainting' },
-    { id: 'style-transfer',
-      label: 'Style Transfer' },
-    { id: 'restoration',
-      label: 'Restoration' },
-  ]
-
-  return (
-    <div className="min-h-screen bg-slate-900">
-      <header className="border-b
-          border-slate-700 p-6">
-        <h1 className="text-3xl font-bold
-            text-center">DiffusionDesk</h1>
-      </header>
-      <nav className="border-b border-slate-700">
-        <div className="flex gap-1 p-2
-            max-w-4xl mx-auto">
-          {tabs.map((tab) => (
-            <button key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={activeTab === tab.id
-                ? 'bg-indigo-600 text-white'
-                : 'text-slate-400'}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-      <main className="p-6 max-w-4xl mx-auto">
-        {activeTab === 'home'
-          && <HomeTab />}
-        {activeTab === 'inpainting'
-          && <InpaintingTab />}
-        {activeTab === 'style-transfer'
-          && <StyleTransferTab />}
-        {activeTab === 'restoration'
-          && <RestorationTab />}
-      </main>
-    </div>
-  )
-}
-\end{lstlisting}
+The root \texttt{App.tsx} component manages tab navigation using React's \texttt{useState} hook. Tab definitions are stored as a typed array of \texttt{\{id, label\}} objects, and the active tab is rendered via conditional rendering. The dark theme uses Tailwind's \texttt{slate-900} background with \texttt{indigo-600} accents. Each tab is self-contained, managing its own local state for image data, generation parameters, and UI state. The wireframes in Section~\ref{sec:wireframes} illustrate the layout of each tab.
 
 \subsubsection{Canvas and Mask Drawing}
 \label{sec:canvas_mask}
@@ -2643,35 +2342,9 @@ const exportMask = useCallback(() => {
 \subsubsection{API Integration}
 \label{sec:api_integration}
 
-The frontend communicates with the backend through a thin API client layer in \texttt{src/api/}. Listing~\ref{lst:config_ts} shows the configuration module, which reads the backend URL from an environment variable (\texttt{VITE\_API\_URL}) set at build time by Vite. This allows the same codebase to target a local development server or a remote Colab instance by changing a single \texttt{.env} file. The module also provides utility functions for converting between \texttt{File} objects and base64 strings.
+The frontend communicates with the backend through a thin API client layer in \texttt{src/api/}. The configuration module (\texttt{config.ts}) reads the backend URL from the \texttt{VITE\_API\_URL} environment variable set at build time by Vite, defaulting to \texttt{http://localhost:8000}. This allows the same codebase to target a local development server or a remote Colab instance by changing a single \texttt{.env} file. The module also provides utility functions for converting between \texttt{File} objects and base64 strings using the \texttt{FileReader} API.
 
-\begin{lstlisting}[language={[LaTeX]TeX}, caption={API configuration (\texttt{config.ts})}, label={lst:config_ts}, morekeywords={export,const,import,async,function,return,new,Promise,resolve,reject,if,as}]
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL
-  || 'http://localhost:8000';
-
-export async function fileToBase64(
-    file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result as string);
-    };
-    reader.onerror = (error) => reject(error);
-  });
-}
-
-export function base64ToDataUrl(
-    base64: string,
-    mimeType: string = 'image/png'): string {
-  if (base64.startsWith('data:'))
-    return base64;
-  return `data:${mimeType};base64,${base64}`;
-}
-\end{lstlisting}
-
-Listing~\ref{lst:inpaint_api} shows the \texttt{inpaintImage()} API function. It converts the uploaded \texttt{File} to base64, constructs a JSON body with snake\_case keys (matching the Pydantic schema), sends a POST request, and converts the response image from base64 to a data URL for display in an \texttt{<img>} tag.
+Listing~\ref{lst:inpaint_api} shows the \texttt{inpaintImage()} API function as a representative example of the API client pattern. It converts the uploaded \texttt{File} to base64, constructs a JSON body with snake\_case keys (matching the Pydantic schema), sends a POST request, and converts the response image from base64 to a data URL for display in an \texttt{<img>} tag.
 
 \begin{lstlisting}[language={[LaTeX]TeX}, caption={Inpainting API client function (\texttt{imageApi.ts})}, label={lst:inpaint_api}, morekeywords={export,async,function,const,await,if,return,throw,new}]
 export async function inpaintImage(
@@ -2715,51 +2388,7 @@ export async function inpaintImage(
 }
 \end{lstlisting}
 
-Listing~\ref{lst:ts_interfaces} shows the TypeScript interfaces that mirror the backend Pydantic schemas. The frontend uses camelCase naming conventions (e.g., \texttt{negativePrompt}), which are mapped to the backend's snake\_case keys (e.g., \texttt{negative\_prompt}) in the \texttt{JSON.stringify()} call.
-
-\begin{lstlisting}[language={[LaTeX]TeX}, caption={TypeScript API interfaces (\texttt{imageApi.ts})}, label={lst:ts_interfaces}, morekeywords={export,interface,string,number,boolean,null}]
-export interface ImageResponse {
-  success: boolean;
-  image?: string;
-  error?: string;
-  model_used?: string;
-  processing_time?: number;
-}
-
-export interface InpaintingParams {
-  image: File;
-  mask: string;  // base64 data URL
-  prompt: string;
-  negativePrompt?: string;
-  model?: string;
-  guidanceScale?: number;
-  numInferenceSteps?: number;
-  seed?: number | null;
-  strength?: number;
-  paddingMaskCrop?: number | null;
-}
-
-export interface StyleTransferParams {
-  image: File;
-  style: string;
-  model?: string;
-  strength?: number;
-  negativePrompt?: string;
-  guidanceScale?: number;
-  numInferenceSteps?: number;
-  seed?: number | null;
-}
-
-export interface RestorationParams {
-  image: File;
-  enableFaceEnhance?: boolean;
-  faceModel?: 'codeformer' | 'gfpgan';
-  fidelity?: number;
-  upscale?: 'none' | '2x' | '4x';
-  enableScratchRemoval?: boolean;
-  enableColorize?: boolean;
-}
-\end{lstlisting}
+TypeScript interfaces (\texttt{InpaintingParams}, \texttt{StyleTransferParams}, \texttt{RestorationParams}, \texttt{ImageResponse}) mirror the backend Pydantic schemas, providing compile-time type safety for API calls. The frontend uses camelCase naming conventions (e.g., \texttt{negativePrompt}), which are mapped to the backend's snake\_case keys (e.g., \texttt{negative\_prompt}) in the \texttt{JSON.stringify()} call. The style transfer and restoration API functions follow the same pattern as \texttt{inpaintImage()}.
 
 \newpage
 
