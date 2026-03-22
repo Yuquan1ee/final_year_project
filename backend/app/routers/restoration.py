@@ -59,9 +59,6 @@ async def restore_image(request: RestorationRequest) -> ImageResponse:
             models_used.append(f"real-esrgan-{request.upscale.value}")
         if request.enable_scratch_removal:
             models_used.append("denoising")
-        if request.enable_colorize:
-            models_used.append("colorization")
-
         return ImageResponse(
             success=True,
             image=result_b64,

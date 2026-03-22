@@ -5,7 +5,6 @@ Handles:
 - Face enhancement (CodeFormer, GFPGAN)
 - Image upscaling (Real-ESRGAN)
 - Scratch removal
-- Colorization
 
 These models are separate from diffusers and have their own dependencies.
 """
@@ -134,14 +133,13 @@ class RestorationService:
     # Model Loading
     # =========================================================================
 
-    def _load_codeformer(self, fidelity: float = 0.5):
+    def _load_codeformer(self):
         """Load CodeFormer model."""
         if self._codeformer is not None:
             return self._codeformer
 
         print("Loading CodeFormer...")
         try:
-            from codeformer.facelib.utils.face_restoration_helper import FaceRestoreHelper
             from codeformer.basicsr.utils import img2tensor, tensor2img
             from codeformer.basicsr.archs.codeformer_arch import CodeFormer
             import torch
@@ -169,19 +167,8 @@ class RestorationService:
             model.load_state_dict(checkpoint)
             model.eval()
 
-            # Initialize face helper
-            face_helper = FaceRestoreHelper(
-                upscale_factor=1,
-                face_size=512,
-                crop_ratio=(1, 1),
-                det_model='retinaface_resnet50',
-                save_ext='png',
-                device=self.device
-            )
-
             self._codeformer = {
                 'model': model,
-                'face_helper': face_helper,
                 'img2tensor': img2tensor,
                 'tensor2img': tensor2img,
             }
@@ -264,41 +251,72 @@ class RestorationService:
         return self._realesrgan
 
     # =========================================================================
+    # Helper: create a fresh FaceRestoreHelper per call
+    # =========================================================================
+
+    @staticmethod
+    def _create_face_helper(upscale_factor: int, device: str, bg_upsampler=None):
+        """Create a new FaceRestoreHelper (one per inference call)."""
+        from codeformer.facelib.utils.face_restoration_helper import FaceRestoreHelper
+        return FaceRestoreHelper(
+            upscale_factor=upscale_factor,
+            face_size=512,
+            crop_ratio=(1, 1),
+            det_model='retinaface_resnet50',
+            save_ext='png',
+            use_parse=True,
+            device=device,
+        )
+
+    # =========================================================================
     # Restoration Methods
     # =========================================================================
 
     def enhance_faces_codeformer(
-        self, image: Image.Image, fidelity: float = 0.5
+        self, image: Image.Image, fidelity: float = 0.5,
+        bg_upsampler=None, upscale_factor: int = 1,
     ) -> Image.Image:
         """
         Enhance faces using CodeFormer.
 
+        Uses the official CodeFormer pipeline: detect → align → enhance →
+        paste back, with optional Real-ESRGAN background upsampling for
+        higher quality results.
+
         Args:
             image: Input PIL Image
             fidelity: Balance between quality (0) and fidelity (1)
+            bg_upsampler: Optional Real-ESRGAN upsampler for background
+            upscale_factor: Upscale factor for face_helper (must match bg_upsampler)
 
         Returns:
             Enhanced PIL Image
         """
         import torch
+        from torchvision.transforms.functional import normalize
 
-        codeformer = self._load_codeformer(fidelity)
+        codeformer = self._load_codeformer()
         model = codeformer['model']
-        face_helper = codeformer['face_helper']
         img2tensor = codeformer['img2tensor']
         tensor2img = codeformer['tensor2img']
+
+        # Create a fresh face_helper each call with the correct upscale_factor
+        face_helper = self._create_face_helper(upscale_factor, self.device)
 
         # Convert to cv2 format
         img = self.pil_to_cv2(image)
 
         face_helper.clean_all()
         face_helper.read_image(img)
-        face_helper.get_face_landmarks_5(only_center_face=False)
+        num_det_faces = face_helper.get_face_landmarks_5(only_center_face=False)
+        print(f"  Detected {num_det_faces} face(s)")
         face_helper.align_warp_face()
 
         # Process each detected face
         for idx, cropped_face in enumerate(face_helper.cropped_faces):
             cropped_face_t = img2tensor(cropped_face / 255., bgr2rgb=True, float32=True)
+            # Normalize to [-1, 1] — required by CodeFormer (trained on normalized inputs)
+            normalize(cropped_face_t, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=True)
             cropped_face_t = cropped_face_t.unsqueeze(0).to(self.device)
 
             try:
@@ -307,28 +325,41 @@ class RestorationService:
                     restored_face = tensor2img(output.squeeze(0), rgb2bgr=True, min_max=(-1, 1))
                 del output
             except RuntimeError as e:
-                print(f'CodeFormer failed on face {idx}: {e}')
+                print(f'  CodeFormer failed on face {idx}: {e}')
                 restored_face = cropped_face
 
             restored_face = restored_face.astype('uint8')
-            face_helper.add_restored_face(restored_face)
+            face_helper.add_restored_face(restored_face, cropped_face)
 
+        # Paste faces back — use bg_upsampler for high-quality background
         face_helper.get_inverse_affine(None)
-        restored_img = face_helper.paste_faces_to_input_image()
+        restored_img = face_helper.paste_faces_to_input_image(
+            upsample_img=bg_upsampler.enhance(img, outscale=upscale_factor)[0]
+            if bg_upsampler is not None else None
+        )
 
         return self.cv2_to_pil(restored_img)
 
-    def enhance_faces_gfpgan(self, image: Image.Image) -> Image.Image:
+    def enhance_faces_gfpgan(
+        self, image: Image.Image,
+        bg_upsampler=None, upscale_factor: int = 1,
+    ) -> Image.Image:
         """
-        Enhance faces using GFPGAN.
+        Enhance faces using GFPGAN with optional background upsampling.
 
         Args:
             image: Input PIL Image
+            bg_upsampler: Optional Real-ESRGAN upsampler for background
+            upscale_factor: Upscale factor (passed to GFPGAN internally)
 
         Returns:
             Enhanced PIL Image
         """
         gfpgan = self._load_gfpgan()
+
+        # Temporarily set the upscale factor and bg_upsampler
+        gfpgan.upscale = upscale_factor
+        gfpgan.bg_upsampler = bg_upsampler
 
         # Convert to cv2 format
         img = self.pil_to_cv2(image)
@@ -338,14 +369,14 @@ class RestorationService:
             img,
             has_aligned=False,
             only_center_face=False,
-            paste_back=True
+            paste_back=True,
         )
 
         return self.cv2_to_pil(restored_img)
 
     def upscale(self, image: Image.Image, scale: int = 2) -> Image.Image:
         """
-        Upscale image using Real-ESRGAN.
+        Upscale image using Real-ESRGAN (standalone, no face enhancement).
 
         Args:
             image: Input PIL Image
@@ -366,10 +397,10 @@ class RestorationService:
 
     def remove_scratches(self, image: Image.Image) -> Image.Image:
         """
-        Remove scratches and artifacts.
+        Remove scratches, noise, and compression artifacts.
 
-        This uses a simple denoising approach. For better results,
-        consider using a dedicated model like Bringing-Old-Photos-Back-to-Life.
+        Uses a two-pass approach: bilateral filter for edge-preserving
+        smoothing, followed by non-local means denoising for fine noise.
 
         Args:
             image: Input PIL Image
@@ -377,31 +408,15 @@ class RestorationService:
         Returns:
             Processed PIL Image
         """
-        # Convert to cv2 format
         img = self.pil_to_cv2(image)
 
-        # Apply non-local means denoising
-        # This helps with minor scratches and noise
-        denoised = cv2.fastNlMeansDenoisingColored(img, None, 10, 10, 7, 21)
+        # Pass 1: bilateral filter — smooths noise while preserving edges
+        filtered = cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)
+
+        # Pass 2: non-local means denoising for remaining fine noise
+        denoised = cv2.fastNlMeansDenoisingColored(filtered, None, 8, 8, 7, 21)
 
         return self.cv2_to_pil(denoised)
-
-    def colorize(self, image: Image.Image) -> Image.Image:
-        """
-        Colorize a black and white image.
-
-        TODO: Implement proper colorization using DeOldify or similar.
-        Currently returns the original image.
-
-        Args:
-            image: Input PIL Image (grayscale or color)
-
-        Returns:
-            Colorized PIL Image
-        """
-        # Placeholder - proper implementation would use DeOldify
-        print("Colorization not yet implemented - returning original image")
-        return image
 
     # =========================================================================
     # Main Restoration Pipeline
@@ -420,17 +435,15 @@ class RestorationService:
         """
         Full restoration pipeline.
 
-        Args:
-            image_b64: Base64 encoded input image
-            enable_face_enhance: Enable face enhancement
-            face_model: 'codeformer' or 'gfpgan'
-            fidelity: CodeFormer fidelity (0-1)
-            upscale: 'none', '2x', or '4x'
-            enable_scratch_removal: Enable scratch removal
-            enable_colorize: Enable colorization
+        When both face enhancement and upscaling are enabled, Real-ESRGAN
+        is used as the background upsampler during face paste-back (the
+        official approach).  This avoids upscaling already-enhanced faces
+        and produces much sharper results.
 
-        Returns:
-            Tuple of (result_b64, error_message, processing_time)
+        Pipeline order:
+          1. Scratch/artifact removal  (clean the image first)
+          2. Face enhancement + upscaling  (integrated via bg_upsampler)
+             — OR standalone upscaling if face enhancement is disabled
         """
         start_time = time.time()
 
@@ -439,27 +452,43 @@ class RestorationService:
             image, original_format = self.base64_to_image(image_b64)
             result = image
 
-            # Step 1: Scratch/Artifact Removal (do first to clean image)
+            # Step 1: Scratch/Artifact Removal (clean image before enhancement)
             if enable_scratch_removal:
                 print("Removing scratches...")
                 result = self.remove_scratches(result)
 
-            # Step 2: Face Enhancement
+            # Determine upscale factor
+            want_upscale = upscale != "none"
+            scale_factor = 4 if upscale == "4x" else 2
+
+            # Step 2: Face Enhancement (with integrated upscaling)
             if enable_face_enhance:
+                # If upscaling is also requested, load Real-ESRGAN as the
+                # background upsampler so faces are pasted onto the upscaled
+                # background — this is how CodeFormer/GFPGAN are meant to work.
+                bg_upsampler = None
+                up_factor = 1
+                if want_upscale:
+                    print(f"Loading Real-ESRGAN ({scale_factor}x) as background upsampler...")
+                    bg_upsampler = self._load_realesrgan(scale_factor)
+                    up_factor = scale_factor
+
                 print(f"Enhancing faces with {face_model}...")
                 if face_model == "codeformer":
-                    result = self.enhance_faces_codeformer(result, fidelity)
+                    result = self.enhance_faces_codeformer(
+                        result, fidelity,
+                        bg_upsampler=bg_upsampler,
+                        upscale_factor=up_factor,
+                    )
                 else:  # gfpgan
-                    result = self.enhance_faces_gfpgan(result)
+                    result = self.enhance_faces_gfpgan(
+                        result,
+                        bg_upsampler=bg_upsampler,
+                        upscale_factor=up_factor,
+                    )
 
-            # Step 3: Colorization
-            if enable_colorize:
-                print("Colorizing...")
-                result = self.colorize(result)
-
-            # Step 4: Upscaling (do last to preserve quality)
-            if upscale != "none":
-                scale_factor = 4 if upscale == "4x" else 2
+            elif want_upscale:
+                # Standalone upscaling (no face enhancement)
                 print(f"Upscaling {scale_factor}x...")
                 result = self.upscale(result, scale_factor)
 

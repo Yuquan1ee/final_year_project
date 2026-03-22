@@ -19,7 +19,6 @@
  * - Upscaling (Real-ESRGAN 2x/4x)
  * - Scratch/Artifact Removal
  * - Denoising
- * - Colorization (for B&W photos)
  *
  * TODO:
  * - [x] Image upload component
@@ -27,7 +26,6 @@
  *   - [x] Face enhancement toggle
  *   - [x] Upscale factor selector (None, 2x, 4x)
  *   - [x] Scratch removal toggle
- *   - [x] Colorize toggle (for B&W)
  * - [x] Fidelity slider for CodeFormer (0.0-1.0)
  * - [x] Restore button
  * - [x] Result display with before/after comparison
@@ -69,7 +67,6 @@ function RestorationTab() {
   const [fidelity, setFidelity] = useState(0.5)
   const [upscale, setUpscale] = useState<UpscaleId>('2x')
   const [enableScratchRemoval, setEnableScratchRemoval] = useState(false)
-  const [enableColorize, setEnableColorize] = useState(false)
 
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false)
@@ -90,7 +87,7 @@ function RestorationTab() {
     setError(null)
   }
 
-  const hasAnyOption = enableFaceEnhance || upscale !== 'none' || enableScratchRemoval || enableColorize
+  const hasAnyOption = enableFaceEnhance || upscale !== 'none' || enableScratchRemoval
   const canGenerate = sourceImageUrl && hasAnyOption
 
   const handleGenerate = async () => {
@@ -108,7 +105,7 @@ function RestorationTab() {
         fidelity,
         upscale,
         enableScratchRemoval,
-        enableColorize,
+        enableColorize: false,
       })
 
       if (response.success && response.image) {
@@ -313,25 +310,6 @@ function RestorationTab() {
                 </p>
               </div>
 
-              {/* Colorization */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="colorize"
-                    checked={enableColorize}
-                    onChange={(e) => setEnableColorize(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-600 bg-slate-700
-                               text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <label htmlFor="colorize" className="text-sm font-medium text-slate-300">
-                    Colorize (for B&W photos)
-                  </label>
-                </div>
-                <p className="ml-7 text-xs text-slate-500">
-                  Adds colour to black-and-white or grayscale photos. Currently experimental.
-                </p>
-              </div>
             </div>
 
             {/* Generate button */}
