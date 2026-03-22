@@ -3,6 +3,21 @@ FastAPI backend for Diffusion Models Image Editing application.
 Provides REST API endpoints for inpainting, image editing, and style transfer.
 """
 
+# ---------------------------------------------------------------------------
+# Compatibility patch: basicsr / gfpgan / codeformer-pip import a removed
+# torchvision module (torchvision.transforms.functional_tensor).  The module
+# was deprecated in torchvision 0.15 and removed in 0.17.  This shim must
+# run before ANY of those packages are imported (even transitively).
+# ---------------------------------------------------------------------------
+try:
+    import torchvision.transforms.functional_tensor  # noqa: F401
+except ModuleNotFoundError:
+    import types, sys
+    import torchvision.transforms.functional as _F
+    _shim = types.ModuleType("torchvision.transforms.functional_tensor")
+    _shim.rgb_to_grayscale = _F.rgb_to_grayscale
+    sys.modules["torchvision.transforms.functional_tensor"] = _shim
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager

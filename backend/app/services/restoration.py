@@ -19,6 +19,9 @@ import numpy as np
 from typing import Optional, Tuple
 from PIL import Image
 
+# Note: torchvision.transforms.functional_tensor compatibility patch
+# is applied in app/main.py before any service imports.
+
 # Lazy imports - these will be loaded only when needed
 # to avoid import errors if dependencies aren't installed
 
