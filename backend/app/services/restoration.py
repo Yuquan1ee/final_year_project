@@ -19,8 +19,22 @@ import numpy as np
 from typing import Optional, Tuple
 from PIL import Image
 
-# Note: torchvision.transforms.functional_tensor compatibility patch
-# is applied in app/main.py before any service imports.
+# ---------------------------------------------------------------------------
+# Compatibility patch: basicsr / gfpgan / realesrgan import a removed
+# torchvision module (torchvision.transforms.functional_tensor).  The module
+# was deprecated in torchvision 0.15 and removed in 0.17.  We patch it here
+# (in addition to main.py) to guarantee the shim is in sys.modules before
+# any lazy model-loading import triggers basicsr.
+# ---------------------------------------------------------------------------
+import sys as _sys, types as _types
+if "torchvision.transforms.functional_tensor" not in _sys.modules:
+    try:
+        import torchvision.transforms.functional_tensor  # noqa: F401
+    except ModuleNotFoundError:
+        import torchvision.transforms.functional as _F
+        _shim = _types.ModuleType("torchvision.transforms.functional_tensor")
+        _shim.rgb_to_grayscale = _F.rgb_to_grayscale
+        _sys.modules["torchvision.transforms.functional_tensor"] = _shim
 
 # Lazy imports - these will be loaded only when needed
 # to avoid import errors if dependencies aren't installed
