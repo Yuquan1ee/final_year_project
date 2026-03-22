@@ -210,31 +210,41 @@ function RestorationTab() {
                   </div>
                   <span className="text-xs text-slate-500">Recommended</span>
                 </div>
+                <p className="ml-7 text-xs text-slate-500">
+                  Detects and enhances faces using AI models to restore facial details, fix distortions, and improve clarity.
+                </p>
 
                 {enableFaceEnhance && (
                   <div className="ml-7 space-y-3">
                     {/* Face model selection */}
-                    <div className="flex gap-2">
-                      {FACE_MODELS.map((model) => (
-                        <button
-                          key={model.id}
-                          onClick={() => setFaceModel(model.id)}
-                          className={`px-3 py-1.5 rounded-lg text-sm transition-colors
-                                      ${faceModel === model.id
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                                      }`}
-                        >
-                          {model.name}
-                        </button>
-                      ))}
+                    <div>
+                      <div className="flex gap-2">
+                        {FACE_MODELS.map((model) => (
+                          <button
+                            key={model.id}
+                            onClick={() => setFaceModel(model.id)}
+                            className={`px-3 py-1.5 rounded-lg text-sm transition-colors
+                                        ${faceModel === model.id
+                                          ? 'bg-indigo-600 text-white'
+                                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        }`}
+                          >
+                            {model.name}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1.5">
+                        {faceModel === 'codeformer'
+                          ? 'Uses a codebook of facial priors for high-quality restoration with adjustable fidelity.'
+                          : 'Generative model that hallucinates realistic facial details. Fast with consistent results.'}
+                      </p>
                     </div>
 
                     {/* Fidelity slider (CodeFormer only) */}
                     {faceModel === 'codeformer' && (
                       <div>
                         <div className="flex justify-between items-center mb-1">
-                          <label className="text-xs text-slate-400">Fidelity</label>
+                          <label className="text-xs text-slate-400">Quality–Fidelity Balance</label>
                           <span className="text-xs text-slate-500">{fidelity.toFixed(1)}</span>
                         </div>
                         <input
@@ -247,9 +257,13 @@ function RestorationTab() {
                           className="w-full accent-indigo-500"
                         />
                         <div className="flex justify-between text-xs text-slate-500 mt-1">
-                          <span>Quality</span>
-                          <span>Fidelity</span>
+                          <span>Max Enhancement</span>
+                          <span>Preserve Original</span>
                         </div>
+                        <p className="text-xs text-slate-500 mt-1.5">
+                          Lower values produce sharper, more enhanced faces but may alter identity.
+                          Higher values preserve the original appearance with less enhancement.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -274,36 +288,49 @@ function RestorationTab() {
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-slate-500">
+                  Increases image resolution using Real-ESRGAN. 2x doubles dimensions; 4x quadruples them. Applied last to preserve quality from other steps.
+                </p>
               </div>
 
               {/* Scratch/Artifact Removal */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="scratchRemoval"
-                  checked={enableScratchRemoval}
-                  onChange={(e) => setEnableScratchRemoval(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-700
-                             text-indigo-600 focus:ring-indigo-500"
-                />
-                <label htmlFor="scratchRemoval" className="text-sm font-medium text-slate-300">
-                  Scratch & Artifact Removal
-                </label>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="scratchRemoval"
+                    checked={enableScratchRemoval}
+                    onChange={(e) => setEnableScratchRemoval(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-600 bg-slate-700
+                               text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label htmlFor="scratchRemoval" className="text-sm font-medium text-slate-300">
+                    Scratch & Artifact Removal
+                  </label>
+                </div>
+                <p className="ml-7 text-xs text-slate-500">
+                  Removes scratches, noise, and compression artifacts from damaged photos using denoising.
+                </p>
               </div>
 
               {/* Colorization */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="colorize"
-                  checked={enableColorize}
-                  onChange={(e) => setEnableColorize(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-700
-                             text-indigo-600 focus:ring-indigo-500"
-                />
-                <label htmlFor="colorize" className="text-sm font-medium text-slate-300">
-                  Colorize (for B&W photos)
-                </label>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="colorize"
+                    checked={enableColorize}
+                    onChange={(e) => setEnableColorize(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-600 bg-slate-700
+                               text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <label htmlFor="colorize" className="text-sm font-medium text-slate-300">
+                    Colorize (for B&W photos)
+                  </label>
+                </div>
+                <p className="ml-7 text-xs text-slate-500">
+                  Adds colour to black-and-white or grayscale photos. Currently experimental.
+                </p>
               </div>
             </div>
 
