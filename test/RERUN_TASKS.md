@@ -11,7 +11,7 @@ Re-run experiments with the **correct model** for each test case. Save results t
 | 1 | `beach.jpg` | `beach_mask.png` | "empty sandy beach" | **SD Inpainting** | `beach_result.png` |
 | 2 | `old_vintage_car.jpg` | `old_vintage_car_mask.png` | "empty cobblestone road" | **SDXL Inpainting** | `old_vintage_car_result.png` |
 | 3 | `mountain_lake.jpg` | `mountain_mask.png` | "clear blue sky with clouds" | **FLUX.1 Fill (NF4)** | `mountain_result.png` |
-| 4 | `coastal.jpg` | `coastal_mask.png` | "calm ocean water" | **Kandinsky 2.2** | `coastal_result.png` |
+| 4 | `coastal.jpg` | `coastal_mask.png` | "calm ocean water by the beach" | **Kandinsky 2.2** | `coastal_result.png` |
 
 **Settings for all:** guidance scale 7.5, inference steps 30, strength 1.0, negative prompt "blurry, low quality, distorted"
 
