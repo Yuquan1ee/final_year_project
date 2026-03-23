@@ -2409,7 +2409,7 @@ Inpainting was tested across four scenarios using all four supported models: Sta
 
 \subsubsection{Object Removal: Beach Scene}
 
-Figure~\ref{fig:inpaint_beach} demonstrates large-area object removal on a crowded beach photograph. A group of beachgoers was masked and the prompt ``empty sandy beach'' was used with SD Inpainting. The model successfully removed the people and generated a plausible continuation of the sand and shoreline. The colour tone and lighting of the generated region blend naturally with the surrounding unmasked areas.
+Figure~\ref{fig:inpaint_beach} demonstrates large-area object removal on a crowded beach photograph. A group of beachgoers was masked and the prompt ``empty sandy beach'' was used with SD Inpainting. The model successfully removed the people and generated a plausible continuation of the sand and shoreline. The colour tone and lighting of the generated region blend well with the surrounding unmasked areas, though some minor texture artefacts are visible on the sand surface where the model filled the large masked region.
 
 \begin{figure}[htbp]
     \centering
@@ -2436,7 +2436,7 @@ Figure~\ref{fig:inpaint_beach} demonstrates large-area object removal on a crowd
 
 \subsubsection{Object Removal: Vehicle}
 
-Figure~\ref{fig:inpaint_car} shows the removal of a large foreground object---a vintage car occupying the majority of the frame. Using SDXL Inpainting with the prompt ``empty cobblestone road,'' the model replaced the car with a coherent road surface and building fa\c{c}ade. The generated cobblestone texture and perspective are consistent with the surrounding scene, demonstrating SDXL's ability to handle large masked regions that require significant content generation.
+Figure~\ref{fig:inpaint_car} shows the removal of a large foreground object---a vintage car occupying the majority of the frame. Using SDXL Inpainting with the prompt ``empty cobblestone road,'' the model replaced the car with a detailed cobblestone road surface and extended the row of building fa\c{c}ades with varied colours and architectural details. The generated perspective and texture are consistent with the surrounding scene, demonstrating SDXL's ability to synthesise complex content for large masked regions.
 
 \begin{figure}[htbp]
     \centering
@@ -2600,11 +2600,11 @@ The style transfer results show that prompt-guided img2img with SDXL produces hi
 
 \subsection{Image Restoration Results}
 
-Image restoration was evaluated using degraded face photographs from the GFPGAN test dataset. The primary model tested was CodeFormer with fidelity 0.5 (balanced mode) and Real-ESRGAN 2x upscaling integrated as the background upsampler.
+Image restoration was evaluated using five degraded face photographs from the GFPGAN test dataset. Tests covered both CodeFormer (fidelity 0.5) and GFPGAN, with Real-ESRGAN integrated as the background upsampler.
 
 \subsubsection{Face Enhancement: CodeFormer}
 
-Figure~\ref{fig:restore_face} shows a low-quality, compressed child face photograph restored using CodeFormer. The model sharpens facial features, smooths compression artefacts, reduces noise, and produces a cleaner, more detailed output. Skin texture, eye detail, and hair strands are all visibly improved. The Real-ESRGAN background upsampler simultaneously enhances the non-face regions, producing a cohesive high-quality result.
+Figure~\ref{fig:restore_face01} shows a low-quality cropped child face restored using CodeFormer with 2x upscaling. The model sharpens facial features---eyes, teeth, and skin texture are visibly improved---while reducing compression artefacts and noise. The overall clarity is noticeably enhanced compared to the degraded input.
 
 \begin{figure}[htbp]
     \centering
@@ -2616,22 +2616,85 @@ Figure~\ref{fig:restore_face} shows a low-quality, compressed child face photogr
     \hfill
     \begin{minipage}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{images/restore_face01_result.png}
+        \includegraphics[width=\textwidth]{images/restored_face_01.png}
         \subcaption{Restored (CodeFormer, fidelity 0.5, 2x)}
     \end{minipage}
-    \caption{Face restoration: CodeFormer with Real-ESRGAN 2x background upsampling.}
-    \label{fig:restore_face}
+    \caption{Face restoration: cropped child face enhanced with CodeFormer and Real-ESRGAN 2x.}
+    \label{fig:restore_face01}
+\end{figure}
+
+\subsubsection{Multi-Face Enhancement: Full Scene}
+
+Figure~\ref{fig:restore_face02} shows CodeFormer applied to a full-scene photograph containing two children. The model detects and enhances both faces independently while Real-ESRGAN upscales the background. The facial details of both subjects---hair clips, clothing texture, and facial expressions---are preserved and sharpened without introducing noticeable artefacts in the non-face regions.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face02_original.jpg}
+        \subcaption{Degraded input}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.38\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restored_face_02.png}
+        \subcaption{Restored (CodeFormer, fidelity 0.5, 2x)}
+    \end{minipage}
+    \caption{Face restoration: full-scene photograph with two faces enhanced using CodeFormer.}
+    \label{fig:restore_face02}
+\end{figure}
+
+\subsubsection{Face Enhancement: GFPGAN}
+
+Figure~\ref{fig:restore_face03} compares GFPGAN restoration on a grayscale child face. GFPGAN sharpens the facial features and reduces noise effectively, producing clearer eyes and smoother skin. However, as GFPGAN does not include a colourisation component, the output remains in grayscale. The enhancement is subtle but consistent, with the model preserving the subject's identity well.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face03_original.png}
+        \subcaption{Degraded input (B\&W)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restored_face_03.png}
+        \subcaption{Restored (GFPGAN, 2x)}
+    \end{minipage}
+    \caption{Face restoration: grayscale child face enhanced with GFPGAN and Real-ESRGAN 2x.}
+    \label{fig:restore_face03}
+\end{figure}
+
+\subsubsection{Multi-Face Enhancement: GFPGAN on Composite Image}
+
+Figure~\ref{fig:restore_face05} shows GFPGAN applied to a side-by-side composite image containing a child photograph and an adult photograph. The model successfully detects and enhances both faces despite the different image qualities and scales. The child's face is sharpened with improved detail, while the adult's face---which was already higher quality---receives a more subtle enhancement that smooths minor imperfections without over-processing.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face05_original.jpg}
+        \subcaption{Degraded input (composite)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restored_face_05.png}
+        \subcaption{Restored (GFPGAN, 2x)}
+    \end{minipage}
+    \caption{Face restoration: side-by-side child/adult composite enhanced with GFPGAN.}
+    \label{fig:restore_face05}
 \end{figure}
 
 \subsubsection{Restoration Discussion}
 
-The restoration pipeline produces noticeable improvements in facial clarity and image resolution. Key observations:
+The restoration pipeline produces visible improvements in facial clarity and image resolution across all five test cases. Key observations:
 
 \begin{itemize}
-    \item \textbf{CodeFormer} at fidelity 0.5 provides a good balance between enhancement and identity preservation. Lower fidelity values (0.0--0.3) produce sharper but potentially identity-altered results; higher values (0.7--1.0) make minimal changes.
-    \item \textbf{Integrated upscaling} via Real-ESRGAN as the background upsampler (the official CodeFormer pipeline) produces significantly better results than applying upscaling as a separate post-processing step, as the enhanced faces are pasted onto the upscaled background at the correct resolution.
-    \item \textbf{Face detection} is a prerequisite for enhancement---images where faces are too small, heavily occluded, or at extreme angles may not benefit from face-specific restoration.
-    \item \textbf{Limitations}: the restoration models are trained primarily on photographic faces and may produce unnatural results on artistic or heavily stylised portraits. Colourisation for black-and-white photographs is not yet implemented.
+    \item \textbf{CodeFormer} at fidelity 0.5 provides a good balance between enhancement and identity preservation. It excels at sharpening eyes, teeth, and skin texture while maintaining natural-looking results. It also handles multi-face scenes well, enhancing each detected face independently.
+    \item \textbf{GFPGAN} produces consistent, natural-looking enhancements and is particularly effective at smoothing noise and compression artefacts. It handles faces of varying quality within the same image gracefully, applying stronger enhancement to more degraded faces.
+    \item \textbf{Integrated upscaling} via Real-ESRGAN as the background upsampler (the official CodeFormer/GFPGAN pipeline) produces cohesive results where both face and non-face regions are enhanced together, avoiding resolution mismatches.
+    \item \textbf{Limitations}: neither model colourises black-and-white photographs---grayscale inputs remain grayscale after restoration. Face detection is a prerequisite; images where faces are too small or heavily occluded may not benefit from face-specific enhancement.
 \end{itemize}
 
 \subsection{Performance Benchmarks}
