@@ -2405,7 +2405,7 @@ This section presents the results of DiffusionDesk's three core features---inpai
 
 \subsection{Inpainting Results}
 
-Inpainting was tested across four scenarios using Stable Diffusion Inpainting (SD~1.5) and SDXL Inpainting. Each test involved masking a region of the source image and providing a text prompt describing the desired replacement content. Default parameters were used: guidance scale 7.5, 30 inference steps, and strength 1.0.
+Inpainting was tested across four scenarios using all four supported models: Stable Diffusion Inpainting (SD~1.5), SDXL Inpainting, Kandinsky 2.2 Inpainting, and FLUX.1 Fill (NF4). Each test involved masking a region of the source image and providing a text prompt describing the desired replacement content. Default parameters were used: guidance scale 7.5, 30 inference steps, and strength 1.0.
 
 \subsubsection{Object Removal: Beach Scene}
 
@@ -2482,6 +2482,27 @@ Figure~\ref{fig:inpaint_mountain} illustrates scene modification on a mountain l
     \label{fig:inpaint_mountain}
 \end{figure}
 
+\subsubsection{Scene Modification: Coastal Landscape}
+
+Figure~\ref{fig:inpaint_coastal} demonstrates inpainting on a coastal cliffside scene using Kandinsky 2.2 Inpainting. The cliff and rock formations were masked with the prompt ``calm ocean water.'' Kandinsky 2.2 uses a distinct architecture based on image priors (CLIP image embeddings) rather than text-only conditioning, which gives it a different generation characteristic compared to the Stable Diffusion family.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_coastal_original.jpg}
+        \subcaption{Original}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_coastal_result.png}
+        \subcaption{Result (Kandinsky 2.2 Inpainting)}
+    \end{minipage}
+    \caption{Inpainting result: replacing coastal cliffs with calm ocean water (Kandinsky 2.2).}
+    \label{fig:inpaint_coastal}
+\end{figure}
+
 \subsubsection{Inpainting Discussion}
 
 Across all test cases, the inpainting results demonstrate strong prompt adherence and natural boundary blending. The key observations are:
@@ -2489,6 +2510,7 @@ Across all test cases, the inpainting results demonstrate strong prompt adherenc
 \begin{itemize}
     \item \textbf{SD Inpainting} performs well for moderate-sized masks and produces results with good colour consistency, though fine details can appear slightly soft.
     \item \textbf{SDXL Inpainting} generates sharper, higher-resolution details and handles large masked regions more convincingly, at the cost of higher VRAM usage (approximately 6\,GB with 4-bit quantisation vs 5\,GB for SD~1.5).
+    \item \textbf{Kandinsky 2.2 Inpainting} produces distinct results owing to its CLIP image prior architecture. It handles colour blending well but can sometimes generate less structurally precise details compared to SD and SDXL.
     \item \textbf{FLUX.1 Fill (NF4)} produces the most natural mask-boundary transitions and demonstrates superior understanding of spatial context, but requires approximately 10\,GB VRAM even with NF4 quantisation.
     \item Mask precision directly impacts output quality---cleanly drawn masks that follow object contours yield more natural results than rough selections.
 \end{itemize}
@@ -2626,6 +2648,7 @@ Table~\ref{tab:performance} summarises the inference times and VRAM usage measur
 \hline
 Inpainting & SD 1.5 Inpainting & 8--12 & $\sim$5 \\
 Inpainting & SDXL Inpainting (4-bit) & 15--25 & $\sim$6 \\
+Inpainting & Kandinsky 2.2 Inpainting & 10--15 & $\sim$7 \\
 Inpainting & FLUX.1 Fill (NF4) & 30--50 & $\sim$10 \\
 Style Transfer & SDXL img2img (4-bit) & 12--20 & $\sim$6 \\
 Restoration & CodeFormer + ESRGAN 2x & 5--10 & $\sim$4 \\

@@ -12,7 +12,7 @@ This document defines the test images, prompts, and configurations for evaluatin
 | 2   | `old_vintage_car.jpg` | Vintage car on a street      | Mask the car                | "empty cobblestone road"             | SDXL Inpainting   |
 | 3   | `mountain_lake.jpg`   | Snowy mountain range         | Mask a mountain peak        | "clear blue sky with clouds"         | FLUX.1 Fill (NF4) |
 | 4   | `beach.jpg`           | Crowded beach with people    | Mask a group of people      | "empty sandy beach"                  | SD Inpainting     |
-| 5   | `coastal.jpg`         | Coastal cliffside with ocean | Mask the cliff/rocks        | "calm ocean water"                   | SDXL Inpainting   |
+| 5   | `coastal.jpg`         | Coastal cliffside with ocean | Mask the cliff/rocks        | "calm ocean water"                   | Kandinsky 2.2     |
 
 ### Inpainting Parameters
 
