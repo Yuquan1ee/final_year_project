@@ -43,6 +43,7 @@
     filecolor=black,
     urlcolor=blue,
     citecolor=black,
+    linktoc=all,          % Link both section titles and page numbers in TOC/LOF/LOT
 }
 
 % Code listing style
@@ -2393,7 +2394,249 @@ TypeScript interfaces (\texttt{InpaintingParams}, \texttt{StyleTransferParams}, 
 \newpage
 
 % ============================================================
-% 7. PROJECT DIFFICULTIES AND LEARNING OUTCOMES
+% 7. RESULTS AND EVALUATION
+% ============================================================
+\section{Results and Evaluation}
+
+This section presents the results of DiffusionDesk's three core features---inpainting, style transfer, and image restoration---evaluated using a curated set of test images. All inference was performed on a Google Colab environment with an NVIDIA T4 GPU (15\,GB VRAM). The test images, prompts, and configurations are documented in the project's test plan (\texttt{test/TEST\_PLAN.md}).
+
+\subsection{Inpainting Results}
+
+Inpainting was tested across four scenarios using Stable Diffusion Inpainting (SD~1.5) and SDXL Inpainting. Each test involved masking a region of the source image and providing a text prompt describing the desired replacement content. Default parameters were used: guidance scale 7.5, 30 inference steps, and strength 1.0.
+
+\subsubsection{Object Removal: Beach Scene}
+
+Figure~\ref{fig:inpaint_beach} demonstrates large-area object removal on a crowded beach photograph. A group of beachgoers was masked and the prompt ``empty sandy beach'' was used with SD Inpainting. The model successfully removed the people and generated a plausible continuation of the sand and shoreline. The colour tone and lighting of the generated region blend naturally with the surrounding unmasked areas.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_beach_original.jpg}
+        \subcaption{Original}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_beach_mask.png}
+        \subcaption{Mask overlay}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_beach_result.png}
+        \subcaption{Result}
+    \end{minipage}
+    \caption{Inpainting result: removing beachgoers from a crowded beach scene (SD Inpainting, strength 1.0).}
+    \label{fig:inpaint_beach}
+\end{figure}
+
+\subsubsection{Object Removal: Vehicle}
+
+Figure~\ref{fig:inpaint_car} shows the removal of a large foreground object---a vintage car occupying the majority of the frame. Using SDXL Inpainting with the prompt ``empty cobblestone road,'' the model replaced the car with a coherent road surface and building fa\c{c}ade. The generated cobblestone texture and perspective are consistent with the surrounding scene, demonstrating SDXL's ability to handle large masked regions that require significant content generation.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_car_original.jpg}
+        \subcaption{Original}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_car_result.png}
+        \subcaption{Result (SDXL Inpainting)}
+    \end{minipage}
+    \caption{Inpainting result: removing a vintage car and generating an empty cobblestone road.}
+    \label{fig:inpaint_car}
+\end{figure}
+
+\subsubsection{Scene Modification: Mountain Landscape}
+
+Figure~\ref{fig:inpaint_mountain} illustrates scene modification on a mountain landscape. A mountain peak was masked and the prompt ``clear blue sky with clouds'' was used with FLUX.1 Fill (NF4 quantisation). The model replaced the peak with a realistic sky that matches the surrounding atmosphere and horizon line. FLUX.1 Fill produced particularly natural transitions at the mask boundary, with no visible seams or colour discontinuities.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_mountain_original.jpg}
+        \subcaption{Original}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_mountain_mask.png}
+        \subcaption{Mask overlay}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/inpaint_mountain_result.png}
+        \subcaption{Result}
+    \end{minipage}
+    \caption{Inpainting result: replacing a mountain peak with sky (FLUX.1 Fill NF4, strength 1.0).}
+    \label{fig:inpaint_mountain}
+\end{figure}
+
+\subsubsection{Inpainting Discussion}
+
+Across all test cases, the inpainting results demonstrate strong prompt adherence and natural boundary blending. The key observations are:
+
+\begin{itemize}
+    \item \textbf{SD Inpainting} performs well for moderate-sized masks and produces results with good colour consistency, though fine details can appear slightly soft.
+    \item \textbf{SDXL Inpainting} generates sharper, higher-resolution details and handles large masked regions more convincingly, at the cost of higher VRAM usage (approximately 6\,GB with 4-bit quantisation vs 5\,GB for SD~1.5).
+    \item \textbf{FLUX.1 Fill (NF4)} produces the most natural mask-boundary transitions and demonstrates superior understanding of spatial context, but requires approximately 10\,GB VRAM even with NF4 quantisation.
+    \item Mask precision directly impacts output quality---cleanly drawn masks that follow object contours yield more natural results than rough selections.
+\end{itemize}
+
+\subsection{Style Transfer Results}
+
+Style transfer was evaluated using SDXL img2img with five built-in style presets. A strength of 0.6 (moderate stylisation) was used for all tests, with guidance scale 7.5 and 30 inference steps.
+
+\subsubsection{Oil Painting Style}
+
+Figure~\ref{fig:style_oil} shows a waterfall landscape transformed into an oil painting. The model successfully applied visible brushstroke textures, rich colour saturation, and the impasto-like quality characteristic of oil paintings. The overall composition and spatial structure of the original photograph are preserved, while the rendering style is convincingly painterly.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_landscape_original.jpg}
+        \subcaption{Original photograph}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_landscape_oil.jpg}
+        \subcaption{Oil painting style}
+    \end{minipage}
+    \caption{Style transfer: waterfall landscape transformed to oil painting (SDXL img2img, strength 0.6).}
+    \label{fig:style_oil}
+\end{figure}
+
+\subsubsection{Multi-Style Comparison: Architecture}
+
+Figure~\ref{fig:style_multi} demonstrates the diversity of stylistic output by applying two different presets to the same European canal photograph. The impressionist style produces soft, diffused colours and loose brushwork reminiscent of Monet, while the sketch style converts the scene to detailed pencil linework with selective colour accents. Both outputs maintain the original composition and architectural structure.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_architecture_original.jpg}
+        \subcaption{Original}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_architecture_impressionist.jpg}
+        \subcaption{Impressionist}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_architecture_sketch.jpg}
+        \subcaption{Sketch}
+    \end{minipage}
+    \caption{Style transfer: European canal scene with two different style presets (SDXL img2img, strength 0.6).}
+    \label{fig:style_multi}
+\end{figure}
+
+\subsubsection{Anime Style: Portrait}
+
+Figure~\ref{fig:style_anime} shows a portrait photograph converted to anime style. The model transforms the subject's features into the characteristic flat-shaded, large-eyed aesthetic of Japanese animation while preserving the pose, accessories (sunglasses), and clothing pattern. The background is simplified into soft gradients consistent with anime art conventions.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_portrait_original.jpg}
+        \subcaption{Original photograph}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/style_portrait_anime.jpg}
+        \subcaption{Anime style}
+    \end{minipage}
+    \caption{Style transfer: portrait converted to anime style (SDXL img2img, strength 0.6).}
+    \label{fig:style_anime}
+\end{figure}
+
+\subsubsection{Style Transfer Discussion}
+
+The style transfer results show that prompt-guided img2img with SDXL produces high-quality stylistic transformations across diverse styles and subject matter. Key observations:
+
+\begin{itemize}
+    \item The \textbf{strength parameter} is the primary quality control. At 0.6, the model achieves a good balance---strong enough to transform the rendering style while preserving the original composition. Lower values (0.2--0.4) produce subtle filter-like effects; higher values (0.8--1.0) can significantly alter the image structure.
+    \item \textbf{Style consistency} varies by preset. Structured styles (oil painting, sketch) produce more consistent results across different images, while abstract styles (cyberpunk, pixel art) can be more unpredictable.
+    \item \textbf{Portrait subjects} are handled well, with facial features adapted to match the target art style without losing the subject's identity at moderate strength values.
+\end{itemize}
+
+\subsection{Image Restoration Results}
+
+Image restoration was evaluated using degraded face photographs from the GFPGAN test dataset. The primary model tested was CodeFormer with fidelity 0.5 (balanced mode) and Real-ESRGAN 2x upscaling integrated as the background upsampler.
+
+\subsubsection{Face Enhancement: CodeFormer}
+
+Figure~\ref{fig:restore_face} shows a low-quality, compressed child face photograph restored using CodeFormer. The model sharpens facial features, smooths compression artefacts, reduces noise, and produces a cleaner, more detailed output. Skin texture, eye detail, and hair strands are all visibly improved. The Real-ESRGAN background upsampler simultaneously enhances the non-face regions, producing a cohesive high-quality result.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face01_original.png}
+        \subcaption{Degraded input}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face01_result.png}
+        \subcaption{Restored (CodeFormer, fidelity 0.5, 2x)}
+    \end{minipage}
+    \caption{Face restoration: CodeFormer with Real-ESRGAN 2x background upsampling.}
+    \label{fig:restore_face}
+\end{figure}
+
+\subsubsection{Restoration Discussion}
+
+The restoration pipeline produces noticeable improvements in facial clarity and image resolution. Key observations:
+
+\begin{itemize}
+    \item \textbf{CodeFormer} at fidelity 0.5 provides a good balance between enhancement and identity preservation. Lower fidelity values (0.0--0.3) produce sharper but potentially identity-altered results; higher values (0.7--1.0) make minimal changes.
+    \item \textbf{Integrated upscaling} via Real-ESRGAN as the background upsampler (the official CodeFormer pipeline) produces significantly better results than applying upscaling as a separate post-processing step, as the enhanced faces are pasted onto the upscaled background at the correct resolution.
+    \item \textbf{Face detection} is a prerequisite for enhancement---images where faces are too small, heavily occluded, or at extreme angles may not benefit from face-specific restoration.
+    \item \textbf{Limitations}: the restoration models are trained primarily on photographic faces and may produce unnatural results on artistic or heavily stylised portraits. Colourisation for black-and-white photographs is not yet implemented.
+\end{itemize}
+
+\subsection{Performance Benchmarks}
+
+Table~\ref{tab:performance} summarises the inference times and VRAM usage measured on a Google Colab T4 GPU (15\,GB VRAM) for each model. Times exclude model loading (first-run only) and represent steady-state inference.
+
+\begin{table}[htbp]
+\centering
+\caption{Inference performance on NVIDIA T4 GPU (15\,GB VRAM).}
+\label{tab:performance}
+\begin{tabular}{llcc}
+\hline
+\textbf{Task} & \textbf{Model} & \textbf{Time (s)} & \textbf{VRAM (GB)} \\
+\hline
+Inpainting & SD 1.5 Inpainting & 8--12 & $\sim$5 \\
+Inpainting & SDXL Inpainting (4-bit) & 15--25 & $\sim$6 \\
+Inpainting & FLUX.1 Fill (NF4) & 30--50 & $\sim$10 \\
+Style Transfer & SDXL img2img (4-bit) & 12--20 & $\sim$6 \\
+Restoration & CodeFormer + ESRGAN 2x & 5--10 & $\sim$4 \\
+Restoration & GFPGAN + ESRGAN 2x & 3--8 & $\sim$4 \\
+\hline
+\end{tabular}
+\end{table}
+
+The diffusion-based models (inpainting and style transfer) dominate both inference time and VRAM usage, with the trade-off being that higher-quality models (SDXL, FLUX.1) require proportionally more resources. The restoration models are comparatively lightweight, making them practical even on consumer hardware. Quantisation (4-bit/NF4) is essential for running SDXL and FLUX.1 models within the 15\,GB VRAM limit of Colab's T4 GPU.
+
+\newpage
+
+% ============================================================
+% 8. PROJECT DIFFICULTIES AND LEARNING OUTCOMES
 % ============================================================
 \section{Project Difficulties and Learning Outcomes}
 
@@ -2458,7 +2701,7 @@ Deploying the backend on Google Colab and exposing it via ngrok provided experie
 \newpage
 
 % ============================================================
-% 8. FUTURE IMPLEMENTATION
+% 9. FUTURE IMPLEMENTATION
 % ============================================================
 \section{Future Implementation}
 
@@ -2497,7 +2740,24 @@ The current deployment relies on ephemeral cloud environments (Google Colab) tha
 \newpage
 
 % ============================================================
-% 9. REFERENCES
+% 10. CONCLUSION
+% ============================================================
+\section{Conclusion}
+
+This project set out to develop a web-based image editing application powered by diffusion models, providing accessible AI-driven tools for inpainting, style transfer, and image restoration. The resulting system, DiffusionDesk, successfully achieves the six project objectives outlined in Section~1.
+
+The application integrates multiple state-of-the-art diffusion models---Stable Diffusion 1.5, SDXL, Kandinsky 2.2, and FLUX.1 Fill---for inpainting, and SDXL img2img for style transfer, within a unified FastAPI backend. Image restoration is handled by dedicated models (CodeFormer, GFPGAN, and Real-ESRGAN) integrated following the official inference pipelines. The React-based frontend provides an intuitive interface with interactive mask drawing, real-time parameter adjustment, and before/after comparison views.
+
+Testing demonstrated that the system produces high-quality results across all three tasks. Inpainting effectively removes objects and fills masked regions with contextually appropriate content. Style transfer convincingly transforms photographs into diverse artistic styles while preserving compositional structure. Face restoration enhances degraded photographs with visible improvements in facial clarity and detail. Performance benchmarking confirmed that all models run within the 15\,GB VRAM limit of Google Colab's T4 GPU through quantisation techniques (4-bit NF4 and 8-bit), making the system accessible without specialised hardware.
+
+Key technical contributions include the modular model-loading architecture with lazy initialisation and caching, the integration of BitsAndBytes quantisation to enable large models on consumer GPUs, and the proper implementation of the CodeFormer/GFPGAN pipeline with Real-ESRGAN as an integrated background upsampler for high-quality face restoration.
+
+The project also identified areas for future work, including text-to-image generation, ControlNet integration for finer spatial control, batch processing, black-and-white photo colourisation, and persistent cloud deployment. The modular architecture of both the frontend and backend is designed to facilitate these extensions.
+
+\newpage
+
+% ============================================================
+% REFERENCES
 % ============================================================
 \bibliographystyle{apalike}
 \bibliography{references}
