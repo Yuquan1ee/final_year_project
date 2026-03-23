@@ -2484,7 +2484,7 @@ Figure~\ref{fig:inpaint_mountain} illustrates scene modification on a mountain l
 
 \subsubsection{Scene Modification: Coastal Landscape}
 
-Figure~\ref{fig:inpaint_coastal} demonstrates inpainting on a coastal scene using Kandinsky 2.2 Inpainting. The foreground grasses were masked with the prompt ``calm ocean water by the beach.'' Kandinsky 2.2 uses a distinct architecture based on image priors (CLIP image embeddings) rather than text-only conditioning, which gives it a different generation characteristic compared to the Stable Diffusion family.
+Figure~\ref{fig:inpaint_coastal} demonstrates inpainting on a coastal scene using Kandinsky 2.2 Inpainting. The foreground grasses were masked with the prompt ``calm ocean water by the beach.'' While the model correctly generates ocean water in the masked region, the lighting and colour tone of the generated content does not blend seamlessly with the surrounding unmasked area---the inpainted water appears noticeably different from the existing ocean in the background. This highlights a limitation of Kandinsky 2.2's image-prior architecture (based on CLIP image embeddings): although it understands the semantic content to generate, it does not condition as strongly on the surrounding pixel context as the Stable Diffusion family, leading to visible colour discontinuities at mask boundaries.
 
 \begin{figure}[htbp]
     \centering
@@ -2510,7 +2510,7 @@ Across all test cases, the inpainting results demonstrate strong prompt adherenc
 \begin{itemize}
     \item \textbf{SD Inpainting} performs well for moderate-sized masks and produces results with good colour consistency, though fine details can appear slightly soft.
     \item \textbf{SDXL Inpainting} generates sharper, higher-resolution details and handles large masked regions more convincingly, at the cost of higher VRAM usage (approximately 6\,GB with 4-bit quantisation vs 5\,GB for SD~1.5).
-    \item \textbf{Kandinsky 2.2 Inpainting} produces distinct results owing to its CLIP image prior architecture. It handles colour blending well but can sometimes generate less structurally precise details compared to SD and SDXL.
+    \item \textbf{Kandinsky 2.2 Inpainting} generates semantically correct content but can exhibit colour and lighting mismatches at mask boundaries. Its CLIP image-prior architecture prioritises semantic understanding over pixel-level coherence with the surrounding region, making it less suitable for tasks requiring seamless blending.
     \item \textbf{FLUX.1 Fill (NF4)} produces the most natural mask-boundary transitions and demonstrates superior understanding of spatial context, but requires approximately 10\,GB VRAM even with NF4 quantisation.
     \item Mask precision directly impacts output quality---cleanly drawn masks that follow object contours yield more natural results than rough selections.
 \end{itemize}
