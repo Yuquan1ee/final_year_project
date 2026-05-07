@@ -127,10 +127,6 @@ class RestorationService:
     @staticmethod
     def cv2_to_pil(cv2_image: np.ndarray) -> Image.Image:
         """Convert OpenCV image (BGR) to PIL Image."""
-        if cv2_image.dtype == np.uint16:
-            cv2_image = (cv2_image / 257).round().astype(np.uint8)
-        elif cv2_image.dtype != np.uint8:
-            cv2_image = np.clip(cv2_image, 0, 255).astype(np.uint8)
         return Image.fromarray(cv2.cvtColor(cv2_image, cv2.COLOR_BGR2RGB))
 
     # =========================================================================
