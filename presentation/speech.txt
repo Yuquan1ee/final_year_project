@@ -1,0 +1,95 @@
+DiffusionDesk — FYP Oral Presentation Speech
+Target: ~18 minutes (≈13 min narration + 5 min live demo)
+======================================================================
+
+--- Slide 1: Title — DiffusionDesk ---
+Good morning, Professors. I'm Yu Quan, and I'll be presenting on my Final Year Project,
+
+DiffusionDesk: Diffusion Models for Intelligent Image Editing.
+
+--- Slide 2: Agenda (1/2) ---
+I'll cover the problem and motivation, the literature behind diffusion-based
+
+editing, how I designed and built the system, then run a demonstration around the
+
+midpoint, before closing with results, learnings, and future work.
+
+--- Slide 3: Agenda (2/2) ---
+(no speech — visual only)
+
+--- Slide 4: Section: Background & Motivation ---
+Starting off with background and motivation.
+
+--- Slide 5: Background & Motivation ---
+The AI image generation market is growing 17.7% per year, but accessible unified tooling has not caught up. Existing solutions have four key issues. First, they use non-diffusion-based models to fill edited regions, which leads to poor results due to weak spatial and structural understanding of the image. Second, different applications are required for different editing tasks. Third, the learning curve is steep for first-time users. Fourth, the hardware requirement is another barrier — most tools rely on a local GPU and a Python or CLI setup, so they are not browser-accessible.
+
+--- Slide 6: Section: Project Objectives ---
+With that in mind, I present the project objectives.
+
+--- Slide 7: Project Objectives ---
+The goal of this project is to create a unified web-based application that mainly provides 3 image editing features — image inpainting, style transfer, and restoration. To address the 4 gaps highlighted earlier, I have set six concrete objectives: a unified web interface, multi-model inpainting, diffusion-based style transfer, face and image restoration, a non-expert friendly UX, and performance evaluation across all configurations.
+
+--- Slide 8: Section: Literature Review ---
+Moving on to the literature review.
+
+--- Slide 9: Literature: Diffusion Foundation ---
+The diffusion models in this project rely on these three main papers. The DDPM paper introduced the idea of learning to reverse a noise process — forward, we add noise; backward, the model denoises step by step — originally with 1000 steps. Later that same year, DDIM introduced a Non-Markovian sampling scheme that cut the steps to 20–100, making the process interactive. The third paper, Latent Diffusion, reduced computation cost by moving the diffusion process into a compressed latent space, allowing larger models to run on consumer GPUs with less VRAM.
+
+--- Slide 10: Literature: Conditional Generation & Inpainting Models ---
+Moving on to the inpainting models. I am proposing the use of four inpainting models, enabled by three foundational techniques. As shown in the table, the four models range from SD Inpainting at 860 million parameters up to FLUX.1 Fill at 12 billion — giving users a quality-versus-VRAM trade-off. The three enabling techniques bridge raw diffusion to controllable image editing: classifier-free guidance, which is the guidance-scale slider users see; CLIP, which embeds text prompts into the model; and Diffusion Transformers, the new backbone behind FLUX.1.
+
+--- Slide 11: Literature: Style Transfer ---
+For style transfer, I use diffusion-based image-to-image models. The main idea, introduced by the SDEdit paper by Meng in 2022, is that we don't need a separate model for style transfer — we can reuse the same diffusion process. Instead of starting from pure noise, we encode the input image, add noise controlled by a strength parameter, then denoise with a style prompt. This allows arbitrary text-driven styles without any per-style training. I integrate two img2img variants — SDXL for higher quality at 1024 by 1024, and SD 1.5 as a lightweight fallback that runs without quantisation.
+
+--- Slide 12: Literature: Restoration ---
+For restoration, I use three non-diffusion models, chosen because they are optimised for the inverse problem — recovering existing detail rather than generating new content. CodeFormer uses a VQ codebook with a Transformer, and exposes a fidelity weight that controls the trade-off between identity preservation and output quality. GFPGAN uses a StyleGAN2 prior with facial component dictionaries — sharper output, but better suited for moderate degradation. Real-ESRGAN runs after face restoration as an optional 2x or 4x upscaling step. The three foundation papers behind these are StyleGAN2 by Karras in 2020, ESRGAN by Wang in 2018, and the original VQ-VAE codebook paper by van den Oord in 2017.
+
+--- Slide 13: Section: System Design & Implementation ---
+With the literature covered, moving onto the system design and implementation.
+
+--- Slide 14: System Architecture ---
+The system follows a standard SPA plus REST pattern. The frontend is a React 19 SPA, and the backend is FastAPI running on a Colab GPU, exposed publicly through an ngrok tunnel. The backend is split into three layers — routers handle endpoint contracts, schemas validate inputs with Pydantic, and services hold the singleton ML pipelines. To deal with the long model loading time, models are lazy-loaded on first request and cached in memory keyed by name and quantisation level — so the 30 to 60 second cold start happens once per session, and every subsequent request is nearly instant. All transport is done in JSON with base64-encoded images — a single self-contained payload that simplifies retries and keeps the API contract clean.
+
+--- Slide 15: Tech Stack — Why these choices ---
+On the tech stack, PyTorch was the obvious choice because the Diffusers library and bitsandbytes are both PyTorch-native, and every model I needed already lives on Hugging Face Hub. FastAPI was chosen over Flask or Django for its native async, automatic Pydantic validation, and auto-generated Swagger docs. On the frontend, React 19 with TypeScript and Vite gives me end-to-end type safety and fast hot-module reload. The bitsandbytes quantisation choice is the linchpin of the whole stack — without it, FLUX.1 Fill simply does not run on free Colab.
+
+--- Slide 16: Section: Live Demonstration ---
+Now moving onto the live demonstration. I will walk through the three main features — inpainting, style transfer, and restoration — using pre-loaded test images on the running web application. The Colab backend is already pre-warmed with the lighter models so we don't have to wait on cold starts.
+
+DEMO 1 — INPAINTING (Object Removal). I'm uploading a photo of a single rowboat on a calm lake at dusk. Using the brush tool, I will mask both the boat and its dark reflection in the water — masking only the boat would leave the reflection as a giveaway. With the SD Inpainting model selected and the prompt 'calm empty lake water at sunset, smooth reflection, peaceful', I click Generate. While the request runs, the React frontend sends a base64 JSON payload to FastAPI on Colab. The backend decodes it, runs a 30-step DDIM denoising loop on the masked latent, and returns the result. Here you can see the boat and its reflection have been replaced with continuous water — a clean object removal demonstrating SD Inpainting's ability to fill the masked region using surrounding context.
+
+DEMO 2 — STYLE TRANSFER (Cyberpunk). Next, I switch to the Style Transfer tab and upload a photo of a snow-capped mountain in fog. I select the Cyberpunk preset. One important adjustment here — the cyberpunk style is semantically very far from a mountain landscape, so at the default strength of 0.6 the model would reinterpret the scene too aggressively, often turning it into a cityscape. I'm lowering strength to 0.4 and guidance scale to 5.0, which keeps the mountain silhouette anchored while still injecting the cyberpunk colour palette. Click Generate. The result preserves the original mountain composition but reinterprets it with neon accents and vibrant colours — a useful illustration of how the strength parameter trades off style intensity against composition preservation.
+
+DEMO 3 — RESTORATION. Finally, I switch to the Restoration tab and upload a vintage sepia portrait of two women — with visible scratches, faded edges, and soft focus. I select CodeFormer with fidelity 0.5, and 2x upscale via Real-ESRGAN as the background upsampler. No prompt is needed — restoration uses non-diffusion models that are optimised for the inverse problem of recovering existing detail rather than generating new content. CodeFormer's face-detection step finds both faces independently, enhances each one through the VQ codebook, and pastes them back onto the Real-ESRGAN upscaled background. In a few seconds we see both faces sharpened with eyes, hair, and mouth detail recovered, while the original sepia tone and aged character of the photograph are preserved.
+
+That concludes the live demonstration. All three features ran successfully on the free Colab T4 in under a minute each. Now back to the slides for the results discussion.
+
+--- Slide 17: Section: Results & Evaluation ---
+With the demo completed, moving on to the results and evaluation section.
+
+--- Slide 18: Inpainting Results — 4 test cases ---
+Across four representative test cases, FLUX.1 Fill consistently produced the cleanest mask boundaries — the mountain peak case shows zero visible seam between the generated sky and the surrounding rock. SDXL handled the larger mask cases, such as replacing the vintage car with a cobblestone road, with sharp and perspective-consistent fills. SD 1.5 was the workhorse for the simpler removal — clearing the beachgoers from the sand. Kandinsky 2.2 surfaces a documented limitation here: its CLIP image-prior architecture prioritises semantic plausibility over pixel-level coherence with the surrounding region, so when I asked it to fill grasses with ocean water, the colours don't quite match at the boundary. I report this openly in the report rather than cherry-picking the results.
+
+--- Slide 19: Inpainting — Visual examples ---
+For visual evidence on the inpainting feature, here are the side-by-side before and after results. As mentioned, FLUX.1 Fill blends seamlessly across the mountain peak boundary even at 4-bit NF4 quantisation, while Kandinsky's colour mismatch is visible at the coastal grasses example.
+
+--- Slide 20: Style Transfer — Visual examples ---
+For style transfer, both test cases use SDXL img2img at strength 0.6. The portrait converted to anime preserves the subject's pose, sunglasses, and clothing while transforming the aesthetic — the composition stays intact. The landscape converted to oil painting shows convincing brushstrokes and impasto-like texture, but the mountains and waterfall remain in the same positions. This is the strength of img2img — composition is preserved while only the style is transformed.
+
+--- Slide 21: Restoration — Visual examples ---
+For restoration, the toddler face shows what CodeFormer paired with 4x Real-ESRGAN can do. Facial features sharpen, the resolution quadruples, and the subject is still recognisable as the same person. Fidelity 0.5 was the sweet spot here — high enough quality, with strong identity preservation.
+
+--- Slide 22: Performance Benchmarks ---
+Looking at performance, all seven configurations complete a single inference in under a minute on the free Colab T4. SD 1.5 inpainting is the fastest at 8 to 12 seconds, while FLUX.1 Fill is the slowest at 30 to 50 seconds — which is why I avoid demoing it live, but it does produce the highest quality results. The lightweight restoration models run in 3 to 10 seconds, which makes the app feel responsive for the most common use cases. The headline number here is the FLUX.1 Fill row — 10 gigabytes of VRAM after NF4 quantisation, fitting comfortably within the free 15 gigabyte tier.
+
+--- Slide 23: Section: Difficulties & Future Work ---
+Moving on to the difficulties faced and the future work.
+
+--- Slide 24: Difficulties & Learning Outcomes ---
+Three difficulties stood out and shaped the architecture. First, GPU memory constraints — the free Colab T4 only has 15 gigabytes, while FLUX.1 Fill needs 24. I solved this through layered quantisation — bitsandbytes NF4, plus attention slicing, plus CPU offload. Second, model loading latency, which takes 30 to 60 seconds — solved with an in-memory cache keyed by model name and quantisation, so users only pay that cost once per session. Third, canvas coordinate scaling — a small but stubborn UI bug solved with a canvasScale factor and a ResizeObserver. Beyond the deliverables, the most valuable thing I take away from this project is hands-on experience with practical diffusion model inference, quantisation engineering, and full-stack ML deployment.
+
+--- Slide 25: Future Work ---
+For future work, four extensions stand out. Text-to-image generation is the most natural next step since the inference infrastructure already exists. ControlNet integration would add edge, depth, or pose conditioning for finer spatial control. User authentication with editing history would unlock real-world workflows. And replacing ephemeral Colab with a persistent GPU host would make this production-deployable.
+
+--- Slide 26: Thank you ---
+That brings me to the end of my presentation. Thank you for listening — I'm happy to take any questions.
