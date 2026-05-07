@@ -195,6 +195,7 @@ March 2026
 % 1. INTRODUCTION
 % ============================================================
 \section{Introduction}
+\label{sec:introduction}
 
 \subsection{Abstract}
 
@@ -470,10 +471,11 @@ While Stable Diffusion and SDXL use U-Net architectures as their denoising backb
 \noindent\textit{Having established the theoretical foundations---from DDPM's denoising mechanism, through DDIM's accelerated sampling, to LDM's latent space operation and the enabling technologies of classifier-free guidance, CLIP conditioning, and transformer backbones---the following sections examine how these principles are instantiated in practical models for specific image editing tasks.}
 
 \subsection{Diffusion-Based Image Inpainting}
+\label{sec:diffusion_inpainting}
 
 Image inpainting is the task of filling in missing or masked regions of an image with plausible content. Traditional approaches include patch-based methods that copy similar patches from elsewhere in the image, and exemplar-based techniques that iteratively fill regions based on surrounding texture and structure. While effective for simple cases, these methods struggle with large masked regions, complex scenes, and semantically meaningful content generation---they cannot, for example, intelligently fill a masked region with a contextually appropriate object.
 
-Deep learning approaches, particularly diffusion models, have transformed inpainting by learning rich semantic priors from large datasets. Rather than relying on local texture matching, diffusion-based inpainting models understand scene context and can generate novel content that is both visually coherent and semantically meaningful. This subsection reviews four diffusion-based inpainting models implemented in DiffusionDesk, each building upon the theoretical foundations established in Section~3.1.
+Deep learning approaches, particularly diffusion models, have transformed inpainting by learning rich semantic priors from large datasets. Rather than relying on local texture matching, diffusion-based inpainting models understand scene context and can generate novel content that is both visually coherent and semantically meaningful. This subsection reviews four diffusion-based inpainting models implemented in DiffusionDesk, each building upon the theoretical foundations established in Section~\ref{sec:literature_review}.
 
 \subsubsection{Problem Definition}
 
@@ -965,7 +967,7 @@ Actor & User \\ \hline
 Description & The user uploads an image from their local device to the application for subsequent editing operations (inpainting, style transfer, or restoration). \\ \hline
 Preconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
     \item The user has navigated to one of the editing tabs (Inpainting, Style Transfer, or Restoration).
-    \item The user has an image file in a supported format (JPEG, PNG, WebP).
+    \item The user has an image file in a supported format (JPEG, PNG).
 \end{enumerate}\end{minipage} \\ \hline
 Postconditions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*,topsep=0pt,partopsep=0pt,after=\vspace{2pt}]
     \item The uploaded image is displayed as a preview in the editing canvas.
@@ -988,7 +990,7 @@ Exceptions & \begin{minipage}[t]{\linewidth}\begin{enumerate}[nosep,leftmargin=*
     \item[4b.] The file exceeds the maximum size limit: the system displays an error with the size constraint.
 \end{enumerate}\end{minipage} \\ \hline
 Includes & -- \\ \hline
-Special Requirements & Image files must not exceed 10 MB. Supported formats: JPEG, PNG, WebP. \\ \hline
+Special Requirements & Image files must not exceed 10 MB. Supported formats: JPEG, PNG. \\ \hline
 Assumptions & The user has a compatible web browser with JavaScript enabled. \\ \hline
 Notes and Issues & Large images may be resized on the backend to fit within model input constraints. \\ \hline
 \end{longtable}
@@ -1395,7 +1397,7 @@ The functional requirements are organised by use case, with each requirement ide
 \noindent\underline{\textbf{Upload Image}}
 
 \begin{enumerate}[label=\textbf{FR-\arabic*}.,start=1]
-    \item The system shall accept image uploads in JPEG, PNG, and WebP formats.
+    \item The system shall accept image uploads in JPEG and PNG formats.
     \item The system shall reject image files exceeding 10 MB and display an appropriate error message.
     \item The system shall display a preview of the uploaded image in the editing canvas.
     \item The system shall support drag-and-drop image upload in addition to the file selection dialog.
@@ -2665,6 +2667,27 @@ Figure~\ref{fig:restore_face03} compares GFPGAN restoration on a grayscale child
     \label{fig:restore_face03}
 \end{figure}
 
+\subsubsection{High-Resolution Upscaling: CodeFormer with 4x}
+
+Figure~\ref{fig:restore_face04} demonstrates CodeFormer with 4x upscaling on a low-quality cropped toddler face. The higher upscale factor quadruples the image dimensions, producing a noticeably sharper result. The model removes visible grain and noise from the original while enhancing facial details---eyes, teeth, and hair texture become significantly clearer. The 4x upscale produces a higher-resolution output than the 2x tests, making it particularly suitable for heavily degraded small photographs where both quality enhancement and resolution increase are needed.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restore_face04_original.png}
+        \subcaption{Degraded input (low-quality toddler)}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/restored_face_04.png}
+        \subcaption{Restored (CodeFormer, 4x)}
+    \end{minipage}
+    \caption{Face restoration: low-quality toddler face enhanced with CodeFormer and Real-ESRGAN 4x.}
+    \label{fig:restore_face04}
+\end{figure}
+
 \subsubsection{Multi-Face Enhancement: GFPGAN on Composite Image}
 
 Figure~\ref{fig:restore_face05} shows GFPGAN applied to a side-by-side composite image containing a child photograph and an adult photograph. The model successfully detects and enhances both faces despite the different image qualities and scales. The child's face is sharpened with improved detail, while the adult's face---which was already higher quality---receives a more subtle enhancement that smooths minor imperfections without over-processing.
@@ -2833,7 +2856,7 @@ The current deployment relies on ephemeral cloud environments (Google Colab) tha
 % ============================================================
 \section{Conclusion}
 
-This project set out to develop a web-based image editing application powered by diffusion models, providing accessible AI-driven tools for inpainting, style transfer, and image restoration. The resulting system, DiffusionDesk, successfully achieves the six project objectives outlined in Section~1.
+This project set out to develop a web-based image editing application powered by diffusion models, providing accessible AI-driven tools for inpainting, style transfer, and image restoration. The resulting system, DiffusionDesk, successfully achieves the six project objectives outlined in Section~\ref{sec:introduction}.
 
 The application integrates multiple state-of-the-art diffusion models---Stable Diffusion 1.5, SDXL, Kandinsky 2.2, and FLUX.1 Fill---for inpainting, and SDXL img2img for style transfer, within a unified FastAPI backend. Image restoration is handled by dedicated models (CodeFormer, GFPGAN, and Real-ESRGAN) integrated following the official inference pipelines. The React-based frontend provides an intuitive interface with interactive mask drawing, real-time parameter adjustment, and before/after comparison views.
 
@@ -2848,6 +2871,8 @@ The project also identified areas for future work, including text-to-image gener
 % ============================================================
 % REFERENCES
 % ============================================================
+\phantomsection
+\addcontentsline{toc}{section}{References}
 \bibliographystyle{apalike}
 \bibliography{references}
 
